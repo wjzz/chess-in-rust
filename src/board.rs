@@ -28,6 +28,20 @@ pub const PIECES: [Piece; 6] = [
     Piece::King,
 ];
 
+impl Piece {
+    pub fn to_ascii(&self) -> String {
+        match *self {
+            Piece::Pawn => "p",
+            Piece::Knight => "n",
+            Piece::Bishop => "b",
+            Piece::Rook => "r",
+            Piece::Queen => "q",
+            Piece::King => "k",
+        }
+        .to_string()
+    }
+}
+
 pub type Coord = &'static str;
 
 pub const COORDS: [Coord; FIELDS_NO] = [
@@ -38,9 +52,68 @@ pub const COORDS: [Coord; FIELDS_NO] = [
 ];
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub struct RowCol {
+    pub row: u32,
+    pub col: u32,
+}
+
+impl RowCol {
+    pub fn new(row: u32, col: u32) -> Self {
+        RowCol { row, col }
+    }
+}
+
+pub fn rowcol2index(row: u32, col: u32) -> usize {
+    (row * 8 + col) as usize
+}
+
+pub fn rowcol2coord(row: u32, col: u32) -> Coord {
+    // NOTE: we swap col and row here intentionally
+    let index = rowcol2index(col, row);
+    COORDS[index]
+}
+
+pub fn coord2rowcol(coord: Coord) -> RowCol {
+    let col = match coord.chars().nth(0).unwrap() {
+        'A' => 0,
+        'B' => 1,
+        'C' => 2,
+        'D' => 3,
+        'E' => 4,
+        'F' => 5,
+        'G' => 6,
+        'H' => 7,
+        _ => panic!("Wrong index! {}", coord),
+    };
+
+    let row = coord.chars().nth(1).unwrap().to_digit(10).unwrap() - 1;
+    assert!(row < 8);
+    RowCol { row, col }
+}
+
+pub fn coord2index(coord: Coord) -> usize {
+    let RowCol { row, col } = coord2rowcol(coord);
+    rowcol2index(row, col)
+}
+
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct PlayerPiece {
     pub player: Player,
     pub piece: Piece,
+}
+
+impl PlayerPiece {
+    pub fn new(player: Player, piece: Piece) -> Self {
+        PlayerPiece { player, piece }
+    }
+
+    pub fn to_ascii(&self) -> String {
+        let piece_ascii = self.piece.to_ascii();
+        match self.player {
+            Player::Black => piece_ascii,
+            Player::White => piece_ascii.to_ascii_uppercase(),
+        }
+    }
 }
 
 pub type Field = Option<PlayerPiece>;
@@ -82,11 +155,26 @@ impl Position {
         self.board.iter()
     }
 
+    pub fn to_ascii(&self) -> String {
+        let mut result = String::new();
+        for row in (0..8).rev() {
+            for col in 0..8 {
+                let ch = match self.board[rowcol2index(row, col)] {
+                    None => ".".to_string(),
+                    Some(player_piece) => player_piece.to_ascii(),
+                };
+                result.push_str(&ch);
+            }
+            result.push('\n');
+        }
+
+        result
+    }
+
     pub fn count_pieces_by_player(&self, player: Player) -> usize {
         self.board
             .iter()
             .filter(|f| f.is_some() && f.unwrap().player == player)
-            // .filter(|f| f.map_or(false, |pp| pp.player == player))
             .count()
     }
 }
@@ -95,24 +183,13 @@ impl Index<&str> for Position {
     type Output = Field;
 
     fn index(&self, i: &str) -> &Field {
-        let col = match i.chars().nth(0).unwrap() {
-            'A' => 0,
-            'B' => 1,
-            'C' => 2,
-            'D' => 3,
-            'E' => 4,
-            'F' => 5,
-            'G' => 6,
-            'H' => 7,
-            _ => panic!("Wrong index! {}", i),
-        };
-
-        let row = i.chars().nth(1).unwrap().to_digit(10).unwrap() - 1;
-        assert!(row < 8);
-
-        let index = col * 8 + row as usize;
-        // replace manual calc with fn
-        &self.board[index]
+        for &coord in COORDS.iter() {
+            if i == coord {
+                let index = coord2index(coord);
+                return &self.board[index];
+            }
+        }
+        panic!("Wrong coordinate: {}", i);
     }
 }
 
@@ -146,6 +223,35 @@ mod tests {
 
         for coord in COORDS.iter() {
             assert_eq!(None, pos[coord]);
+        }
+    }
+
+    #[test]
+    fn test_coord_conversion_rowcol2coord() {
+        assert_eq!("A1", rowcol2coord(0, 0));
+        assert_eq!("A8", rowcol2coord(7, 0));
+        assert_eq!("H1", rowcol2coord(0, 7));
+        assert_eq!("H8", rowcol2coord(7, 7));
+
+        assert_eq!("E4", rowcol2coord(3, 4));
+    }
+
+    #[test]
+    fn test_coord_conversion_coord2rowcol() {
+        assert_eq!(coord2rowcol("A1"), RowCol::new(0, 0));
+        assert_eq!(coord2rowcol("A8"), RowCol::new(7, 0));
+        assert_eq!(coord2rowcol("H1"), RowCol::new(0, 7));
+        assert_eq!(coord2rowcol("H8"), RowCol::new(7, 7));
+
+        assert_eq!(coord2rowcol("E4"), RowCol::new(3, 4));
+    }
+
+    #[test]
+    fn test_coord_rowcol_and_back() {
+        for &coord in COORDS.iter() {
+            let RowCol { row, col } = coord2rowcol(coord);
+            let coord2 = rowcol2coord(row, col);
+            assert_eq!(coord, coord2);
         }
     }
 }
