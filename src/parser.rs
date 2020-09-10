@@ -1,7 +1,7 @@
 #[path = "board.rs"]
 mod board;
 
-use board::{rowcol2index, Piece, Player, PlayerPiece, Position, FIELDS_NO};
+pub use board::{rowcol2index, Piece, Player, PlayerPiece, Position, FIELDS_NO};
 
 pub fn parse_fen(fen: &str) -> Position {
     let mut board = vec![None; FIELDS_NO];
@@ -25,7 +25,7 @@ pub fn parse_fen(fen: &str) -> Position {
             assert!(col < 8 && row < 8);
             if ch.is_ascii_digit() {
                 let val = ch.to_digit(10).unwrap();
-                col += val - 1;
+                col += val;
             } else {
                 let player = if ch.is_uppercase() {
                     Player::White
@@ -42,13 +42,13 @@ pub fn parse_fen(fen: &str) -> Position {
                     'k' => Piece::King,
                     _ => panic!("Wrong piece name in FEN {}", piece_str),
                 };
-                let coord = board::rowcol2coord(row as u32, col);
+                let coord = board::rowcol2coord(row as i32, col as i32);
                 println!(
                     "row {}, col {}, coord {} ==> {:?} of {:?}",
                     row, col, coord, piece, player
                 );
                 let field = Some(PlayerPiece { player, piece });
-                let index = rowcol2index(row as u32, col);
+                let index = rowcol2index(row as i32, col as i32);
                 board[index] = field;
                 col += 1;
             }
@@ -104,5 +104,14 @@ mod tests {
 
         assert_eq!(black_queen, pos["D8"].unwrap());
         assert_eq!(black_king, pos["E8"].unwrap());
+    }
+
+    #[test]
+    fn parse_lonely_king() {
+        let fen = "7K/8/8/8/8/8/8/8 w KQkq - 0 1";
+        let pos = parse_fen(fen);
+
+        let white_king = PlayerPiece::new(Player::White, Piece::King);
+        assert_eq!(white_king, pos["H8"].unwrap());
     }
 }

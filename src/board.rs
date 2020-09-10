@@ -7,6 +7,15 @@ pub enum Player {
     Black,
 }
 
+impl Player {
+    pub fn opposite(&self) -> Self {
+        match self {
+            Player::Black => Player::White,
+            Player::White => Player::Black,
+        }
+    }
+}
+
 pub const PLAYERS: [Player; 2] = [Player::White, Player::Black];
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
@@ -27,6 +36,8 @@ pub const PIECES: [Piece; 6] = [
     Piece::Queen,
     Piece::King,
 ];
+
+pub const PROMOTABLE_PIECES: [Piece; 4] = [Piece::Knight, Piece::Bishop, Piece::Rook, Piece::Queen];
 
 impl Piece {
     pub fn to_ascii(&self) -> String {
@@ -53,24 +64,31 @@ pub const COORDS: [Coord; FIELDS_NO] = [
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct RowCol {
-    pub row: u32,
-    pub col: u32,
+    pub row: i32,
+    pub col: i32,
 }
 
 impl RowCol {
-    pub fn new(row: u32, col: u32) -> Self {
+    pub fn new(row: i32, col: i32) -> Self {
         RowCol { row, col }
     }
 }
 
-pub fn rowcol2index(row: u32, col: u32) -> usize {
+pub fn rowcol2index(row: i32, col: i32) -> usize {
     (row * 8 + col) as usize
 }
 
-pub fn rowcol2coord(row: u32, col: u32) -> Coord {
+pub fn rowcol2coord(row: i32, col: i32) -> Coord {
     // NOTE: we swap col and row here intentionally
     let index = rowcol2index(col, row);
     COORDS[index]
+}
+
+pub fn rowcol2coord_safe(row: i32, col: i32) -> Option<Coord> {
+    if 0 > row || row >= 8 || 0 > col || col >= 8 {
+        return None;
+    }
+    Some(rowcol2coord(row, col))
 }
 
 pub fn coord2rowcol(coord: Coord) -> RowCol {
@@ -86,7 +104,7 @@ pub fn coord2rowcol(coord: Coord) -> RowCol {
         _ => panic!("Wrong index! {}", coord),
     };
 
-    let row = coord.chars().nth(1).unwrap().to_digit(10).unwrap() - 1;
+    let row = (coord.chars().nth(1).unwrap().to_digit(10).unwrap() - 1) as i32;
     assert!(row < 8);
     RowCol { row, col }
 }
@@ -94,6 +112,25 @@ pub fn coord2rowcol(coord: Coord) -> RowCol {
 pub fn coord2index(coord: Coord) -> usize {
     let RowCol { row, col } = coord2rowcol(coord);
     rowcol2index(row, col)
+}
+
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub struct Move {
+    src: Coord,
+    dest: Coord,
+    piece: Piece,
+    promote_to: Option<Piece>,
+}
+
+impl Move {
+    pub fn new(src: Coord, dest: Coord, piece: Piece, promote_to: Option<Piece>) -> Self {
+        Move {
+            src,
+            dest,
+            piece,
+            promote_to,
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
@@ -120,8 +157,8 @@ pub type Field = Option<PlayerPiece>;
 pub type Board = Vec<Field>;
 
 pub struct Position {
-    to_move: Player,
-    board: Board,
+    pub to_move: Player,
+    pub board: Board,
     can_castle_white: bool,
     can_castle_black: bool,
     /* what about en passant? */
@@ -176,6 +213,163 @@ impl Position {
             .iter()
             .filter(|f| f.is_some() && f.unwrap().player == player)
             .count()
+    }
+}
+
+impl Position {
+    fn line(&self, src: Coord, dx: i32, dy: i32, all_moves: &mut Vec<Move>) {
+        let RowCol { row: src_row, col: src_col } = coord2rowcol(src);
+
+        let mut dest_row = src_row + dx;
+        let mut dest_col = src_col + dy;
+
+        let PlayerPiece {
+            player: color,
+            piece,
+        } = self[src].unwrap();
+        let opp_color = color.opposite();
+
+        while let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
+            let dest_field = self[dest];
+
+            if dest_field.is_none() || dest_field.unwrap().player == opp_color {
+                all_moves.push(Move::new(src, dest, piece, None));
+
+                if dest_field.is_some() {
+                    return;
+                }
+            } else {
+                return;
+            }
+
+            dest_row += dx;
+            dest_col += dy;
+        }
+    }
+
+    fn try_add(&self, src: Coord, dest_row: i32, dest_col: i32, all_moves: &mut Vec<Move>) {
+        if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
+            let PlayerPiece {
+                player: color,
+                piece,
+            } = self[src].unwrap();
+            let opp_color = color.opposite();
+            let dest_field = self[dest];
+
+            if dest_field.is_none() || dest_field.unwrap().player == opp_color {
+                if piece != Piece::Pawn {
+                    all_moves.push(Move::new(src, dest, piece, None));
+                } else {
+                    let reaches_last_row = match color {
+                        Player::White => dest_row == 7,
+                        Player::Black => dest_row == 0,
+                    };
+
+                    if reaches_last_row {
+                        for &promo_piece in PROMOTABLE_PIECES.iter() {
+                            all_moves.push(Move::new(src, dest, piece, Some(promo_piece)));
+                        }
+                    } else {
+                        all_moves.push(Move::new(src, dest, piece, None));
+                    }
+                }
+            }
+        }
+    }
+
+    fn generate_moves_from(&self, src: Coord, piece: Piece, color: Player) -> Vec<Move> {
+        assert_eq!(PlayerPiece::new(color, piece), self[src].unwrap());
+
+        let RowCol {
+            row: src_row,
+            col: src_col,
+        } = coord2rowcol(src);
+
+        let row_delta: i32 = if color == Player::White { 1 } else { -1 };
+
+        let mut all_moves = vec![];
+
+        // TODO: implement castling
+
+        match piece {
+            Piece::Pawn => {
+                // TODO: implement en passant
+
+                let is_first_move = match color {
+                    Player::White => src_row == 1,
+                    Player::Black => src_row == 6,
+                };
+
+                self.try_add(src, src_row + row_delta, src_col, &mut all_moves);
+                if is_first_move {
+                    self.try_add(src, src_row + row_delta * 2, src_col, &mut all_moves);
+                }
+            }
+            Piece::King => {
+                for dx in -1..=1 {
+                    for dy in -1..=1 {
+                        if dx != 0 || dy != 0 {
+                            self.try_add(src, src_row + dy, src_col + dx, &mut all_moves);
+                        }
+                    }
+                }
+            },
+            Piece::Knight => {
+                for (w, d) in [(1,2), (2,1)].iter() {
+                    for s1 in [-1, 1].iter() {
+                        for s2 in [-1, 1].iter() {
+                            let dx = w * s1;
+                            let dy = d * s2;
+                            self.try_add(src, src_row + dy, src_col + dx, &mut all_moves);
+                        }
+                    }
+                }
+            },
+            Piece::Queen => {
+                self.line(src, 0, -1, &mut all_moves);
+                self.line(src, 0, 1, &mut all_moves);
+                self.line(src, -1, 0, &mut all_moves);
+                self.line(src, 1, 0, &mut all_moves);
+                self.line(src, 1, -1, &mut all_moves);
+                self.line(src, 1, 1, &mut all_moves);
+                self.line(src, -1, -1, &mut all_moves);
+                self.line(src, -1, 1, &mut all_moves);
+            },
+            Piece::Bishop => {
+                self.line(src, 1, -1, &mut all_moves);
+                self.line(src, 1, 1, &mut all_moves);
+                self.line(src, -1, -1, &mut all_moves);
+                self.line(src, -1, 1, &mut all_moves);
+            },
+            Piece::Rook => {
+                self.line(src, 0, -1, &mut all_moves);
+                self.line(src, 0, 1, &mut all_moves);
+                self.line(src, -1, 0, &mut all_moves);
+                self.line(src, 1, 0, &mut all_moves);
+            },
+        }
+
+        all_moves
+    }
+
+    pub fn moves(&self) -> Vec<Move> {
+        let current_color = self.to_move;
+
+        let mut all_moves = vec![];
+
+        for coord in COORDS.iter() {
+            if let Some(player_piece) = self[coord] {
+                if player_piece.player == current_color {
+                    all_moves.append(&mut self.generate_moves_from(
+                        coord,
+                        player_piece.piece,
+                        current_color,
+                    ));
+                }
+            }
+        }
+
+        all_moves
     }
 }
 
