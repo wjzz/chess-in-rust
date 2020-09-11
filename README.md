@@ -10,7 +10,7 @@ Priority TODOs:
 - - [ ] Castling
 - [ ] Make move
 - [ ] Unmake move
-- [ ] `check` checking
+- [x] `check` checking
 - [ ] `mate` checking
 - [ ] legal move generation
 

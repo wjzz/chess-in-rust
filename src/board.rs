@@ -405,23 +405,51 @@ impl Position {
     }
 
     pub fn moves(&self) -> Vec<Move> {
-        let current_color = self.to_move;
+        self.moves_by(self.to_move)
+    }
 
+
+    pub fn moves_by(&self, color: Player) -> Vec<Move> {
         let mut all_moves = vec![];
 
         for coord in COORDS.iter() {
             if let Some(player_piece) = self[coord] {
-                if player_piece.player == current_color {
+                if player_piece.player == color {
                     all_moves.append(&mut self.generate_moves_from(
                         coord,
                         player_piece.piece,
-                        current_color,
+                        color,
                     ));
                 }
             }
         }
 
         all_moves
+    }
+
+    fn king_location(&self, player: Player) -> Option<Coord> {
+        let king = PlayerPiece { player, piece: Piece::King };
+        for coord in COORDS.iter() {
+            if self[coord] == Some(king) {
+                return Some(coord);
+            }
+        }
+        return None;
+    }
+
+    pub fn fields_attacked_by(&self, player: Player) -> Vec<Coord> {
+        // TODO: use a set here
+        self.moves_by(player).iter().map(|mv: &Move| {
+            mv.dest
+        }).collect()
+    }
+
+    pub fn is_king_in_check(&self, player: Player) -> bool {
+        let king_coord = self.king_location(player);
+        let fields_attacked_by_opp = self.fields_attacked_by(player.opposite());
+
+        // TODO: we assume the king is on the board here
+        fields_attacked_by_opp.contains(&king_coord.unwrap())
     }
 }
 

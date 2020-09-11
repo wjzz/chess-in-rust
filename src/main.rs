@@ -1,4 +1,3 @@
-mod board;
 mod parser;
 
 fn main() {
@@ -360,6 +359,36 @@ mod test_moves {
             println!("moves = {:#?}", moves);
 
             assert_eq!(11, moves.len());
+        }
+    }
+
+    #[test]
+    fn not_in_check() {
+        let player = parser::Player::White;
+        let fens = [
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            "8/8/8/8/8/8/8/4K3 w KQkq - 0 1",
+        ];
+
+        for &fen in fens.iter() {
+            let pos = parser::parse_fen(fen);
+            assert_eq!(false, pos.is_king_in_check(player));
+        }
+    }
+
+    #[test]
+    fn in_check() {
+        let player = parser::Player::White;
+        let fens = [
+            "8/8/8/8/8/8/8/r3K3 w KQkq - 0 1",
+            "7b/8/8/8/8/8/8/K7 w KQkq - 0 1",
+            "8/8/8/8/8/8/1p6/K7 w KQkq - 0 1",
+            "8/8/8/8/8/1n6/8/K7 w KQkq - 0 1",
+        ];
+
+        for &fen in fens.iter() {
+            let pos = parser::parse_fen(fen);
+            assert_eq!(true, pos.is_king_in_check(player));
         }
     }
 
