@@ -14,6 +14,13 @@ impl Player {
             Player::White => Player::Black,
         }
     }
+
+    pub fn to_ascii(&self) -> String {
+        match self {
+            Player::Black => "b",
+            Player::White => "w",
+        }.to_string()
+    }
 }
 
 pub const PLAYERS: [Player; 2] = [Player::White, Player::Black];
@@ -205,6 +212,37 @@ impl Position {
             result.push('\n');
         }
 
+        result
+    }
+
+    pub fn to_fen(&self) -> String {
+        let mut lines = vec![];
+        for row in (0..8).rev() {
+            let mut line = String::new();
+            let mut empty_in_a_row = 0;
+
+            for col in 0..8 {
+                match self.board[rowcol2index(row, col)] {
+                    None => empty_in_a_row += 1,
+                    Some(player_piece) => {
+                        if empty_in_a_row > 0 {
+                            line.push_str(&empty_in_a_row.to_string());
+                            empty_in_a_row = 0;
+                        }
+                        line.push_str(&player_piece.to_ascii());
+                    }
+                };
+            }
+            if empty_in_a_row > 0 {
+                line.push_str(&empty_in_a_row.to_string());
+            }
+            lines.push(line);
+        }
+        let mut result = lines.join("/");
+        result.push_str(&format!(" {} ", self.to_move.to_ascii()));
+
+        // TODO: implement checking castling rights and en passant
+        result.push_str("KQkq - 0 1");
         result
     }
 

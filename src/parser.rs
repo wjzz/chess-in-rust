@@ -114,4 +114,19 @@ mod tests {
         let white_king = PlayerPiece::new(Player::White, Piece::King);
         assert_eq!(white_king, pos["H8"].unwrap());
     }
+
+
+    #[test]
+    fn parse_and_unparse() {
+        let fens = [
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b KQkq - 0 1",
+        ];
+
+        for &fen in fens.iter() {
+            let pos = parse_fen(fen);
+            assert_eq!(fen, pos.to_fen());
+        }
+    }
+
 }
