@@ -1,9 +1,9 @@
 #[path = "board.rs"]
-mod board;
+pub mod board;
 
 pub use board::{rowcol2index, Piece, Player, PlayerPiece, Position, FIELDS_NO};
 
-pub fn parse_fen(fen: &str) -> Position {
+fn parse_fen(fen: &str) -> Position {
     let mut board = vec![None; FIELDS_NO];
 
     let parts: Vec<&str> = fen.split_ascii_whitespace().collect();
@@ -56,6 +56,12 @@ pub fn parse_fen(fen: &str) -> Position {
     }
 
     Position::create(board, to_move)
+}
+
+impl Position {
+    pub fn from_fen(fen: &str) -> Self {
+        parse_fen(&fen)
+    }
 }
 
 #[cfg(test)]
