@@ -339,8 +339,22 @@ impl Position {
                 };
 
                 self.try_add(src, src_row + row_delta, src_col, &mut all_moves);
+
+                // first move by two squares
                 if is_first_move {
                     self.try_add(src, src_row + row_delta * 2, src_col, &mut all_moves);
+                }
+
+                // captures
+                for col_delta in [-1, 1].iter() {
+                    let dest_row = src_row + row_delta;
+                    let dest_col = src_col + col_delta;
+                    if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
+                        let dest_piece = self[dest];
+                        if dest_piece.is_some() && dest_piece.unwrap().player != color {
+                            self.try_add(src, src_row + row_delta, src_col + col_delta, &mut all_moves);
+                        }
+                    }
                 }
             }
             Piece::King => {

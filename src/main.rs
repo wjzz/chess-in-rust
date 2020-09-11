@@ -57,6 +57,24 @@ mod test_moves {
     }
 
     #[test]
+    fn moves_pawns_capture() {
+        let fen = "8/8/p1p5/1P6/8/8/8/8 w KQkq - 0 1";
+        let pos = parser::parse_fen(fen);
+        let moves = pos.moves();
+
+        assert_eq!(3, moves.len());
+    }
+
+    #[test]
+    fn moves_pawns_capture_and_promote() {
+        let fen = "p1p5/1P6/8/8/8/8/8/8 w KQkq - 0 1";
+        let pos = parser::parse_fen(fen);
+        let moves = pos.moves();
+
+        assert_eq!(3 * 4, moves.len());
+    }
+
+    #[test]
     fn moves_king_corners() {
         let fens = [
             "K7/8/8/8/8/8/8/8 w KQkq - 0 1",
