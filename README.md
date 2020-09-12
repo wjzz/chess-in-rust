@@ -8,7 +8,7 @@ Priority TODOs:
 - [x] Basic move generation
 - - [ ] En passant
 - - [ ] Castling
-- [ ] Make move
+- [x] Make move
 - [ ] Unmake move
 - [x] `check` checking
 - [ ] `mate` checking
