@@ -32,6 +32,10 @@ impl Position {
     }
 
     fn try_add(&self, src: Coord, dest_row: i32, dest_col: i32, all_moves: &mut Vec<Move>) {
+        self.try_add_pawn(src, dest_row, dest_col, all_moves, true);
+    }
+
+    fn try_add_pawn(&self, src: Coord, dest_row: i32, dest_col: i32, all_moves: &mut Vec<Move>, capture_ok: bool) {
         if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
             let PlayerPiece {
                 player: color,
@@ -40,7 +44,7 @@ impl Position {
             let opp_color = color.opposite();
             let dest_field = self[dest];
 
-            if dest_field.is_none() || dest_field.unwrap().player == opp_color {
+            if dest_field.is_none() || (capture_ok && dest_field.unwrap().player == opp_color) {
                 if piece != Piece::Pawn {
                     all_moves.push(Move::new(src, dest, None));
                 } else {
@@ -84,11 +88,11 @@ impl Position {
                     Player::Black => src_row == 6,
                 };
 
-                self.try_add(src, src_row + row_delta, src_col, &mut all_moves);
+                self.try_add_pawn(src, src_row + row_delta, src_col, &mut all_moves, false);
 
                 // first move by two squares
                 if is_first_move {
-                    self.try_add(src, src_row + row_delta * 2, src_col, &mut all_moves);
+                    self.try_add_pawn(src, src_row + row_delta * 2, src_col, &mut all_moves, false);
                 }
 
                 // captures
@@ -98,7 +102,7 @@ impl Position {
                     if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
                         let dest_piece = self[dest];
                         if dest_piece.is_some() && dest_piece.unwrap().player != color {
-                            self.try_add(src, src_row + row_delta, src_col + col_delta, &mut all_moves);
+                            self.try_add_pawn(src, src_row + row_delta, src_col + col_delta, &mut all_moves, true);
                         }
                     }
                 }

@@ -9,6 +9,7 @@ pub use basic_types::*;
 pub type Field = Option<PlayerPiece>;
 pub type Board = Vec<Field>;
 
+#[derive(Clone, PartialEq, Eq)]
 pub struct Position {
     pub to_move: Player,
     pub board: Board,

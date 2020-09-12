@@ -61,6 +61,15 @@ mod test_moves {
     }
 
     #[test]
+    fn moves_pawns_no_capture_forward() {
+        let fen = "8/8/1p6/1P6/8/8/8/8 w KQkq - 0 1";
+        let pos = Position::from_fen(fen);
+        let moves = pos.moves();
+
+        assert_eq!(0, moves.len());
+    }
+
+    #[test]
     fn moves_king_corners() {
         let fens = [
             "K7/8/8/8/8/8/8/8 w KQkq - 0 1",
