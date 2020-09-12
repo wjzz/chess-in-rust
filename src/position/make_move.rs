@@ -48,6 +48,10 @@ impl Position {
         let moves = pos.moves();
         let mut result = 0;
 
+        if depth == 1 {
+            return moves.len() as u32;
+        }
+
         for &mv in moves.iter() {
             let mut pos2 = pos.clone();
             pos2.make_move(mv).unwrap();

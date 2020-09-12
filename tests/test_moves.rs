@@ -287,7 +287,22 @@ mod test_moves {
         }
     }
 
+    #[test]
+    fn moves_queen_blocked() {
+        let inputs = [
+            ("Qp6/pp6/8/8/8/8/8/8 w KQkq - 0 1", 3),
+            ("rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR w KQkq - 0 1", 27),
+            ("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1", 28),
+        ];
 
+        for (fen, value) in inputs.iter() {
+            let pos = Position::from_fen(fen);
+            let moves = pos.moves();
+            println!("moves = {:#?}", moves);
+
+            assert_eq!(*value, moves.len());
+        }
+    }
 
     #[test]
     fn moves_bishop_corner() {

@@ -92,7 +92,13 @@ impl Position {
 
                 // first move by two squares
                 if is_first_move {
-                    self.try_add_pawn(src, src_row + row_delta * 2, src_col, &mut all_moves, false);
+                    // make sure the square before the pawn is empty!
+                    let passing_square = rowcol2coord_safe(src_row + row_delta, src_col);
+                    if let Some(passing) = passing_square {
+                        if self[passing] == None {
+                            self.try_add_pawn(src, src_row + row_delta * 2, src_col, &mut all_moves, false);
+                        }
+                    }
                 }
 
                 // captures
