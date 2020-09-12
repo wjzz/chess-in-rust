@@ -21,6 +21,6 @@ Later:
 - [ ] Frontend in JS
 
 Other/infra:
-- [ ] Put the repo under Travis/CI
+- [x] Put the repo under Travis/CI
 
 Wojciech Jedynak @ 2020
