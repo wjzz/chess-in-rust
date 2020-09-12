@@ -43,11 +43,11 @@ impl Position {
                         'k' => Piece::King,
                         _ => panic!("Wrong piece name in FEN {}", piece_str),
                     };
-                    let coord = board::rowcol2coord(row as i32, col as i32);
-                    println!(
-                        "row {}, col {}, coord {} ==> {:?} of {:?}",
-                        row, col, coord, piece, player
-                    );
+                    // let coord = board::rowcol2coord(row as i32, col as i32);
+                    // println!(
+                    //     "row {}, col {}, coord {} ==> {:?} of {:?}",
+                    //     row, col, coord, piece, player
+                    // );
                     let field = Some(PlayerPiece { player, piece });
                     let index = rowcol2index(row as i32, col as i32);
                     board[index] = field;
