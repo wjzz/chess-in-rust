@@ -125,16 +125,14 @@ pub fn coord2index(coord: Coord) -> usize {
 pub struct Move {
     src: Coord,
     dest: Coord,
-    piece: Piece,
     promote_to: Option<Piece>,
 }
 
 impl Move {
-    pub fn new(src: Coord, dest: Coord, piece: Piece, promote_to: Option<Piece>) -> Self {
+    pub fn new(src: Coord, dest: Coord, promote_to: Option<Piece>) -> Self {
         Move {
             src,
             dest,
-            piece,
             promote_to,
         }
     }
@@ -271,7 +269,7 @@ impl Position {
             let dest_field = self[dest];
 
             if dest_field.is_none() || dest_field.unwrap().player == opp_color {
-                all_moves.push(Move::new(src, dest, piece, None));
+                all_moves.push(Move::new(src, dest, None));
 
                 if dest_field.is_some() {
                     return;
@@ -296,7 +294,7 @@ impl Position {
 
             if dest_field.is_none() || dest_field.unwrap().player == opp_color {
                 if piece != Piece::Pawn {
-                    all_moves.push(Move::new(src, dest, piece, None));
+                    all_moves.push(Move::new(src, dest, None));
                 } else {
                     let reaches_last_row = match color {
                         Player::White => dest_row == 7,
@@ -305,10 +303,10 @@ impl Position {
 
                     if reaches_last_row {
                         for &promo_piece in PROMOTABLE_PIECES.iter() {
-                            all_moves.push(Move::new(src, dest, piece, Some(promo_piece)));
+                            all_moves.push(Move::new(src, dest, Some(promo_piece)));
                         }
                     } else {
-                        all_moves.push(Move::new(src, dest, piece, None));
+                        all_moves.push(Move::new(src, dest, None));
                     }
                 }
             }
