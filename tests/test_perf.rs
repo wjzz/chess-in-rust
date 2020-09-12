@@ -10,7 +10,7 @@ mod test_moves {
         let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
         let pos = Position::from_fen(fen);
-        let moves = pos.moves();
+        let moves = pos.legal_moves();
         println!("perfm 1 = {:#?}", moves);
 
         assert_eq!(20, moves.len());
@@ -21,7 +21,7 @@ mod test_moves {
         let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1";
 
         let pos = Position::from_fen(fen);
-        let moves = pos.moves();
+        let moves = pos.legal_moves();
         println!("perfm 1 = {:#?}", moves);
 
         assert_eq!(20, moves.len());
@@ -35,7 +35,7 @@ mod test_moves {
             20,
             400,
             8902,
-            // 197281,    // TODO: add check checking
+            // 197281,    // TODO: this is rather slow, but passes
         ];
 
         for (i, &value) in expected.iter().enumerate() {
@@ -48,16 +48,14 @@ mod test_moves {
     }
 
     // http://cinnamonchess.altervista.org/perft.html
-    // TODO: fails because we don't leave king in check
     #[test]
-    #[ignore]
     fn perf_imm_example_1() {
         let fen = "8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1";
 
         let expected = [
             18,
-            400, // 290
-            8902, // 5044
+            290,
+            5044,
         ];
 
         for (i, &value) in expected.iter().enumerate() {

@@ -402,4 +402,19 @@ mod test_moves {
             assert_eq!(true, pos.is_king_in_check(player));
         }
     }
+
+    #[test]
+    fn filter_moves_leaving_king_in_check() {
+        let inputs = [
+            ("rnbqkbnr/ppppp1pp/5p2/7Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2", 1),
+        ];
+
+        for (fen, value) in inputs.iter() {
+            let pos = Position::from_fen(fen);
+            let moves = pos.legal_moves();
+            println!("moves = {:#?}", moves);
+
+            assert_eq!(*value, moves.len());
+        }
+    }
 }

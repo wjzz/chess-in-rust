@@ -207,5 +207,18 @@ impl Position {
         // TODO: we assume the king is on the board here
         fields_attacked_by_opp.contains(&king_coord.unwrap())
     }
+
+    pub fn legal_moves(&self) -> Vec<Move> {
+        let moves = self.moves();
+        let mut result = vec![];
+        for mv in moves.iter() {
+            let mut pos = self.clone();
+            pos.make_move(*mv).unwrap();
+            if !pos.is_king_in_check(self.to_move) {
+                result.push(*mv);
+            }
+        }
+        result
+    }
 }
 

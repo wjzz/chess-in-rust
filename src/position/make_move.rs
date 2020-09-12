@@ -45,7 +45,7 @@ impl Position {
             return 1;
         }
 
-        let moves = pos.moves();
+        let moves = pos.legal_moves();
         let mut result = 0;
 
         if depth == 1 {
