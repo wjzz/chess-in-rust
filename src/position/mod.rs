@@ -1,3 +1,3 @@
-pub mod move_gen;
+pub mod make_move;
 
-pub use move_gen::*;
+pub use make_move::*;
