@@ -1,4 +1,4 @@
-# Chess-in-rust
+# Chess-in-rust [![Build Status](https://travis-ci.org/wjzz/chess-in-rust.svg?branch=master)](https://travis-ci.org/wjzz/chess-in-rust)
 
 ## A simple chess engine written in Rust
 
