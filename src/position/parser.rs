@@ -78,7 +78,14 @@ impl Position {
             None
         };
 
-        Position::create(board, to_move, en_passant, castling_rights, half_moves, full_moves)
+        Position::create(
+            board,
+            to_move,
+            en_passant,
+            castling_rights,
+            half_moves,
+            full_moves,
+        )
     }
 }
 

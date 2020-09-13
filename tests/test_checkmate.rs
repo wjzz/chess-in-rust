@@ -19,6 +19,9 @@ mod tests {
         ];
         for fen in fens.iter() {
             let pos = Position::from_fen(fen);
+            println!("{}", fen);
+            println!("legal moves len = {}", pos.legal_moves().len());
+            println!("{:?}", pos.legal_moves());
             assert!(pos.is_checkmate());
         }
     }

@@ -431,4 +431,107 @@ mod test_moves {
             assert_eq!(*value, moves.len());
         }
     }
+
+    #[test]
+    fn castling_moves() {
+        let inputs = [
+            (
+                // king side
+                "4k3/8/8/8/8/8/7P/4K2R w K - 0 1",
+                10,
+            ),
+            (
+                // queen side
+                "4k3/8/8/8/8/8/P7/R3K3 w Q - 0 1",
+                11,
+            ),
+            (
+                // italian game example
+                "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+                33,
+            ),
+        ];
+
+        for (fen, value) in inputs.iter() {
+            let pos = Position::from_fen(fen);
+            let moves = pos.legal_moves();
+            println!("moves = {:#?}", moves);
+
+            assert_eq!(*value, moves.len());
+        }
+    }
+
+    #[test]
+    fn castling_impossible_no_rights() {
+        let inputs = [
+            (
+                // king side
+                "4k3/8/8/8/8/8/7P/4K2R w - - 0 1",
+                9
+            ),
+            (
+                // queen side
+                "4k3/8/8/8/8/8/P7/R3K3 w - - 0 1",
+                10
+            ),
+            (
+                // italian game example
+                "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w - - 4 4",
+                32
+            ),
+        ];
+
+        for (fen, value) in inputs.iter() {
+            let pos = Position::from_fen(fen);
+            let moves = pos.legal_moves();
+            println!("moves = {:#?}", moves);
+
+            assert_eq!(*value, moves.len());
+        }
+    }
+
+    #[test]
+    fn castling_impossible_other() {
+        let inputs = [
+            (
+                // king in check
+                "1k6/8/8/8/4r3/8/8/R3K2R w KQ - 0 1",
+                4
+            ),
+            (
+                // squares occupied
+                "1k6/2r5/8/8/8/8/P6P/RN2K1NR w KQ - 0 1",
+                15
+            ),
+            (
+                // unsafe square
+                "k7/8/8/8/3r1r2/8/7P/4K2R w K - 0 1",
+                5
+            ),
+            (
+                // unsafe square
+                "k7/8/8/8/3r2r1/8/r6P/4K2R w K - 0 1",
+                5
+            ),
+            (
+                // unsafe square
+                "k7/8/8/8/3r2r1/8/P6r/R3K3 w Q - 0 1",
+                6
+            ),
+            (
+                // unsafe square
+                "k7/8/8/8/2r3r1/8/P6r/R3K3 w Q - 0 1",
+                7
+            ),
+        ];
+
+
+        for (fen, value) in inputs.iter() {
+            let pos = Position::from_fen(fen);
+            let moves = pos.legal_moves();
+            println!("moves = {:#?}", moves);
+
+            assert_eq!(*value, moves.len());
+        }
+    }
 }

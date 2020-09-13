@@ -19,7 +19,6 @@ mod tests {
         }
     }
 
-
     #[test]
     fn non_stalemated_king() {
         let fens = [
