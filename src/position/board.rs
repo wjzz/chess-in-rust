@@ -16,6 +16,7 @@ pub struct Position {
     can_castle_white: bool,
     can_castle_black: bool,
     pub en_passant: Option<Coord>,
+    pub half_moves: u32,
     pub full_moves: u32,
 }
 
@@ -30,6 +31,7 @@ impl Position {
             can_castle_black: true,
             can_castle_white: true,
             en_passant: None,
+            half_moves: 0,
             full_moves: 1,
         }
     }
@@ -38,6 +40,7 @@ impl Position {
         board: Board,
         to_move: Player,
         en_passant: Option<Coord>,
+        half_moves: u32,
         full_moves: u32,
     ) -> Position {
         Position {
@@ -46,6 +49,7 @@ impl Position {
             can_castle_black: true,
             can_castle_white: true,
             en_passant,
+            half_moves,
             full_moves,
         }
     }
@@ -102,7 +106,10 @@ impl Position {
         };
 
         // TODO: implement checking castling rights
-        result.push_str(&format!("KQkq {} 0 {}", en_passant_str, self.full_moves));
+        result.push_str(&format!(
+            "KQkq {} {} {}",
+            en_passant_str, self.half_moves, self.full_moves
+        ));
         result
     }
 

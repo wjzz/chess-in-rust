@@ -79,19 +79,19 @@ mod test_moves {
             // knights
             (
                 "B1->A3",
-                "rnbqkbnr/pppppppp/8/8/8/N7/PPPPPPPP/R1BQKBNR b KQkq - 0 1",
+                "rnbqkbnr/pppppppp/8/8/8/N7/PPPPPPPP/R1BQKBNR b KQkq - 1 1",
             ),
             (
                 "B1->C3",
-                "rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 0 1",
+                "rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 1",
             ),
             (
                 "G1->F3",
-                "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 0 1",
+                "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 1",
             ),
             (
                 "G1->H3",
-                "rnbqkbnr/pppppppp/8/8/8/7N/PPPPPPPP/RNBQKB1R b KQkq - 0 1",
+                "rnbqkbnr/pppppppp/8/8/8/7N/PPPPPPPP/RNBQKB1R b KQkq - 1 1",
             ),
         ];
 
@@ -145,6 +145,38 @@ mod test_moves {
         let mv = Move::from_ascii("D7->D5");
         pos.make_move(mv).unwrap();
         assert_eq!(3, pos.full_moves);
+    }
+
+    #[test]
+    fn make_move_change_half_moves() {
+        let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        let mut pos = Position::from_fen(fen);
+        assert_eq!(0, pos.half_moves);
+
+        // white moves a pawn
+        let mv = Move::from_ascii("E2->E4");
+        pos.make_move(mv).unwrap();
+        assert_eq!(0, pos.half_moves);
+
+        // black moves a pawn too
+        let mv = Move::from_ascii("E7->E5");
+        pos.make_move(mv).unwrap();
+        assert_eq!(0, pos.half_moves);
+
+        // white moves a knight
+        let mv = Move::from_ascii("G1->F3");
+        pos.make_move(mv).unwrap();
+        assert_eq!(1, pos.half_moves); // FIXME:
+
+        // black moves a knight too
+        let mv = Move::from_ascii("B8->C6");
+        pos.make_move(mv).unwrap();
+        assert_eq!(2, pos.half_moves);
+
+        // white captures a pawn by the knight
+        let mv = Move::from_ascii("F3->E5");
+        pos.make_move(mv).unwrap();
+        assert_eq!(0, pos.half_moves);
     }
 
     #[test]

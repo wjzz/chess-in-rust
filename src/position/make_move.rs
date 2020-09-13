@@ -72,6 +72,12 @@ impl Position {
             }
         }
 
+        if piece == Piece::Pawn || self[dest].is_some() {
+            self.half_moves = 0;
+        } else {
+            self.half_moves += 1;
+        }
+
         // make the actual changes
         self.board[coord2index(src)] = None;
         self.board[coord2index(dest)] = Some(PlayerPiece::new(color, new_piece));

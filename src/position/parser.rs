@@ -15,9 +15,10 @@ impl Position {
 
         // TODO: parse all fields
         let _castling_str = parts[2];
-        let _half_moves_since_capture_or_pawn_move = parts[4];
+        let half_moves_str = parts[4];
         let full_moves_str = parts[5];
 
+        let half_moves: u32 = half_moves_str.parse().unwrap();
         let full_moves: u32 = full_moves_str.parse().unwrap();
 
         let to_move = match to_move_str {
@@ -77,7 +78,7 @@ impl Position {
             None
         };
 
-        Position::create(board, to_move, en_passant, full_moves)
+        Position::create(board, to_move, en_passant, half_moves, full_moves)
     }
 }
 
@@ -143,6 +144,7 @@ mod tests {
         let pos = Position::from_fen(fen);
 
         assert_eq!(1, pos.full_moves);
+        assert_eq!(0, pos.half_moves);
     }
 
     #[test]
@@ -184,6 +186,7 @@ mod tests {
             "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
             "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
             "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b KQkq - 0 1",
+            "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b KQkq - 5 1",
         ];
 
         for &fen in fens.iter() {

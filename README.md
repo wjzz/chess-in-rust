@@ -14,8 +14,8 @@ Priority TODOs:
 - [ ] `mate` checking
 - [ ] `stalemate` checking
 - [x] legal move generation
+- [x] half_move counter since pawn move or capture for fen
 - [x] full_move counter for fen
-- [ ] half_move counter since pawn move or capture for fen
 - [ ] implement faster board indexing, don't use `Coord`s everywhere
 
 PERFT [clone instead of unmove]: (bugs found)
@@ -36,7 +36,6 @@ Later:
 Other/infra:
 - [x] Put the repo under Travis/CI
 - [ ] Some tests can be slow on `debug` build, consider reading about bechmarks for cargo
-
 
 ## To run slow tests
 
