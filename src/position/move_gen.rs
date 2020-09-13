@@ -253,4 +253,8 @@ impl Position {
         }
         result
     }
+
+    pub fn is_checkmate(&self) -> bool {
+        self.legal_moves().len() == 0 && self.is_king_in_check(self.to_move)
+    }
 }
