@@ -14,6 +14,8 @@ Priority TODOs:
 - [ ] `mate` checking
 - [ ] `stalemate` checking
 - [x] legal move generation
+- [ ] move counters for fen
+- [ ] implement faster board indexing, don't use `Coord`s everywhere
 
 PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 1
@@ -21,7 +23,8 @@ PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 3    # pawn captured forward, pawn jumping over knight
 - [x] depth = 4    # king cant be left in check
 - [x] depth = 5    # missing en passant    TODO: requires more than 3 minutes, need to optimize
-- [ ] depth = 6
+- [x] depth = 6    # TODO: requires 60min on single core | 20 min on all cores
+- [ ] depth = 7    # no result after 6h hours
 
 Later:
 - [ ] Bitboards
