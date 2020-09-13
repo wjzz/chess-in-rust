@@ -11,11 +11,12 @@ Priority TODOs:
 - [x] Make move
 - [ ] Unmake move
 - [x] `check` checking
-- [ ] `mate` checking
-- [ ] `stalemate` checking
+- [x] `mate` checking
+- [x] `stalemate` checking
 - [x] legal move generation
 - [x] half_move counter since pawn move or capture for fen
 - [x] full_move counter for fen
+- [ ] `draw by insufficent material` checking
 - [ ] implement faster board indexing, don't use `Coord`s everywhere
 
 PERFT [clone instead of unmove]: (bugs found)
