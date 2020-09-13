@@ -32,4 +32,11 @@ Other/infra:
 - [x] Put the repo under Travis/CI
 - [ ] Some tests can be slow on `debug` build, consider reading about bechmarks for cargo
 
+
+## To run slow tests
+
+`cargo test -- --ignored`
+
+## Credits
+
 Wojciech Jedynak @ 2020

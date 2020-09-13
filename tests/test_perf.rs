@@ -28,6 +28,7 @@ mod test_moves {
     }
 
     #[test]
+    #[ignore]
     fn perf_imm_starting_1() {
         let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -49,6 +50,7 @@ mod test_moves {
 
     // http://cinnamonchess.altervista.org/perft.html
     #[test]
+    #[ignore]
     fn perf_imm_example_1() {
         let fen = "8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1";
 
