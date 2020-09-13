@@ -152,9 +152,16 @@ impl Position {
                 let king_initial_coord = if color == Player::White { "E1" } else { "E8" };
 
                 if src == king_initial_coord {
-
-                    let ascii_k = PlayerPiece { piece: Piece::King, player: color }.to_ascii();
-                    let ascii_q = PlayerPiece { piece: Piece::Queen, player: color }.to_ascii();
+                    let ascii_k = PlayerPiece {
+                        piece: Piece::King,
+                        player: color,
+                    }
+                    .to_ascii();
+                    let ascii_q = PlayerPiece {
+                        piece: Piece::Queen,
+                        player: color,
+                    }
+                    .to_ascii();
                     let king_side_dx = 1;
                     let queen_side_dx = -1;
 
@@ -162,10 +169,29 @@ impl Position {
                     if self.castle_rights.contains(&ascii_k) {
                         let rook_col = src_col + 3 * king_side_dx;
                         let rook_dest = rowcol2coord(src_row, rook_col);
-                        assert!(self[rook_dest] == Some(PlayerPiece { player: color, piece: Piece::Rook}));
 
-                        let free1 = self[rowcol2coord(src_row, src_col+king_side_dx)] == None;
-                        let free2 = self[rowcol2coord(src_row, src_col+2*king_side_dx)] == None;
+                        let test = self[rook_dest]
+                        == Some(PlayerPiece {
+                            player: color,
+                            piece: Piece::Rook
+                        });
+
+                        if !test {
+                            println!("DEBUG: ");
+                            println!("{}", self.to_ascii());
+                            println!("FEN {}", self.to_fen());
+
+                        }
+                        assert!(
+                            self[rook_dest]
+                                == Some(PlayerPiece {
+                                    player: color,
+                                    piece: Piece::Rook
+                                })
+                        );
+
+                        let free1 = self[rowcol2coord(src_row, src_col + king_side_dx)] == None;
+                        let free2 = self[rowcol2coord(src_row, src_col + 2 * king_side_dx)] == None;
 
                         if free1 && free2 {
                             self.try_add(src, src_row, src_col + 2 * king_side_dx, &mut all_moves);
@@ -176,11 +202,19 @@ impl Position {
                     if self.castle_rights.contains(&ascii_q) {
                         let rook_col = src_col + 4 * queen_side_dx;
                         let rook_dest = rowcol2coord(src_row, rook_col);
-                        assert!(self[rook_dest] == Some(PlayerPiece { player: color, piece: Piece::Rook}));
+                        assert!(
+                            self[rook_dest]
+                                == Some(PlayerPiece {
+                                    player: color,
+                                    piece: Piece::Rook
+                                })
+                        );
 
-                        let free1 = self[rowcol2coord(src_row, src_col+queen_side_dx)] == None;
-                        let free2 = self[rowcol2coord(src_row, src_col+2*queen_side_dx)] == None;
-                        let free3 = self[rowcol2coord(src_row, src_col+3*queen_side_dx)] == None;
+                        let free1 = self[rowcol2coord(src_row, src_col + queen_side_dx)] == None;
+                        let free2 =
+                            self[rowcol2coord(src_row, src_col + 2 * queen_side_dx)] == None;
+                        let free3 =
+                            self[rowcol2coord(src_row, src_col + 3 * queen_side_dx)] == None;
 
                         if free1 && free2 && free3 {
                             self.try_add(src, src_row, src_col + 2 * queen_side_dx, &mut all_moves);
@@ -277,12 +311,16 @@ impl Position {
         fields_attacked_by_opp.contains(&king_coord.unwrap())
     }
 
-    fn is_castling_move(&self, mv: Move) -> bool {
-       let Move { src, dest , promote_to: _ } = mv;
-       match self.to_move {
-           Player::White => src == "E1" && (dest == "G1" || dest == "C1"),
-           Player::Black => src == "E8" && (dest == "G8" || dest == "C8"),
-       }
+    pub fn is_castling_move(&self, mv: Move) -> bool {
+        let Move {
+            src,
+            dest,
+            promote_to: _,
+        } = mv;
+        match self.to_move {
+            Player::White => src == "E1" && (dest == "G1" || dest == "C1"),
+            Player::Black => src == "E8" && (dest == "G8" || dest == "C8"),
+        }
     }
 
     fn fields_to_check_castling(&self, mv: Move) -> Vec<Coord> {
@@ -291,6 +329,16 @@ impl Position {
             (Player::White, "C1") => vec!["D1", "C1"],
             (Player::Black, "G8") => vec!["F8", "G8"],
             (Player::Black, "C8") => vec!["D8", "C8"],
+            _ => panic!("Incorrect castling move {:?}", mv),
+        }
+    }
+
+    pub fn rook_position_castling(&self, mv: Move) -> (Coord, Coord) {
+        match (self.to_move, mv.dest) {
+            (Player::White, "G1") => ("H1", "F1"),
+            (Player::White, "C1") => ("A1", "D1"),
+            (Player::Black, "G8") => ("H8", "F8"),
+            (Player::Black, "C8") => ("A8", "D8"),
             _ => panic!("Incorrect castling move {:?}", mv),
         }
     }

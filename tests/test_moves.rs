@@ -467,17 +467,17 @@ mod test_moves {
             (
                 // king side
                 "4k3/8/8/8/8/8/7P/4K2R w - - 0 1",
-                9
+                9,
             ),
             (
                 // queen side
                 "4k3/8/8/8/8/8/P7/R3K3 w - - 0 1",
-                10
+                10,
             ),
             (
                 // italian game example
                 "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w - - 4 4",
-                32
+                32,
             ),
         ];
 
@@ -496,35 +496,34 @@ mod test_moves {
             (
                 // king in check
                 "1k6/8/8/8/4r3/8/8/R3K2R w KQ - 0 1",
-                4
+                4,
             ),
             (
                 // squares occupied
                 "1k6/2r5/8/8/8/8/P6P/RN2K1NR w KQ - 0 1",
-                15
+                15,
             ),
             (
                 // unsafe square
                 "k7/8/8/8/3r1r2/8/7P/4K2R w K - 0 1",
-                5
+                5,
             ),
             (
                 // unsafe square
                 "k7/8/8/8/3r2r1/8/r6P/4K2R w K - 0 1",
-                5
+                5,
             ),
             (
                 // unsafe square
                 "k7/8/8/8/3r2r1/8/P6r/R3K3 w Q - 0 1",
-                6
+                6,
             ),
             (
                 // unsafe square
                 "k7/8/8/8/2r3r1/8/P6r/R3K3 w Q - 0 1",
-                7
+                7,
             ),
         ];
-
 
         for (fen, value) in inputs.iter() {
             let pos = Position::from_fen(fen);

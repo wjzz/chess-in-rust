@@ -52,6 +52,7 @@ impl Position {
         };
 
         // TODO: check if we make a capture?
+        // TODO: check with castling rights
 
         let new_piece = match promote_to {
             None => piece,
@@ -76,6 +77,38 @@ impl Position {
             self.half_moves = 0;
         } else {
             self.half_moves += 1;
+        }
+
+        // check if we have to take away castling rights
+        if piece == Piece::King || piece == Piece::Rook {
+            let rights = match (color, piece) {
+                (Player::White, Piece::King) => "KQ",
+                (Player::Black, Piece::King) => "kq",
+                (Player::White, Piece::Rook) if src == "A1" => "Q",
+                (Player::White, Piece::Rook) if src == "H1" => "K",
+                (Player::Black, Piece::Rook) if src == "A8" => "q",
+                (Player::Black, Piece::Rook) if src == "H8" => "k",
+                _ => "",
+            };
+            let castle_rights_new = self
+                .castle_rights
+                .chars()
+                .filter(|c| !rights.contains(*c))
+                .collect();
+            self.castle_rights = if castle_rights_new != "" {
+                castle_rights_new
+            } else {
+                "-".to_string()
+            };
+        }
+
+        // check if move is castling
+        if self.is_castling_move(mv) {
+            let (rook_src, rook_dest) = self.rook_position_castling(mv);
+            let rook_piece = PlayerPiece { player: color, piece: Piece::Rook };
+            assert_eq!(Some(rook_piece), self[rook_src]);
+            self.board[coord2index(rook_src)] = None;
+            self.board[coord2index(rook_dest)] = Some(rook_piece);
         }
 
         // make the actual changes
