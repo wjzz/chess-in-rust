@@ -13,13 +13,13 @@ impl Position {
         let to_move_str = parts[1];
         let en_passant_str = parts[3];
 
-        // TODO: parse all fields
-        let _castling_str = parts[2];
+        let castling_str = parts[2];
         let half_moves_str = parts[4];
         let full_moves_str = parts[5];
 
-        let half_moves: u32 = half_moves_str.parse().unwrap();
-        let full_moves: u32 = full_moves_str.parse().unwrap();
+        let castling_rights = castling_str.to_string();
+        let half_moves = half_moves_str.parse().unwrap();
+        let full_moves = full_moves_str.parse().unwrap();
 
         let to_move = match to_move_str {
             "w" => Player::White,
@@ -78,7 +78,7 @@ impl Position {
             None
         };
 
-        Position::create(board, to_move, en_passant, half_moves, full_moves)
+        Position::create(board, to_move, en_passant, castling_rights, half_moves, full_moves)
     }
 }
 
@@ -149,11 +149,12 @@ mod tests {
 
     #[test]
     fn parse_lonely_king() {
-        let fen = "7K/8/8/8/8/8/8/8 w KQkq - 0 1";
+        let fen = "7K/8/8/8/8/8/8/8 w - - 0 1";
         let pos = Position::from_fen(fen);
 
         let white_king = PlayerPiece::new(Player::White, Piece::King);
         assert_eq!(white_king, pos["H8"].unwrap());
+        assert_eq!("-", pos.castle_rights);
     }
 
     #[test]
@@ -187,6 +188,10 @@ mod tests {
             "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
             "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b KQkq - 0 1",
             "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b KQkq - 5 1",
+            "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b - - 5 1",
+            "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b kq - 5 1",
+            "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b Kk - 5 1",
+            "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b Qq - 5 1",
         ];
 
         for &fen in fens.iter() {
