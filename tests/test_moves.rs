@@ -168,7 +168,6 @@ mod test_moves {
         }
     }
 
-
     #[test]
     fn moves_knight_one_step_from_edge() {
         let fens = [
@@ -300,8 +299,14 @@ mod test_moves {
     fn moves_queen_blocked() {
         let inputs = [
             ("Qp6/pp6/8/8/8/8/8/8 w KQkq - 0 1", 3),
-            ("rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR w KQkq - 0 1", 27),
-            ("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1", 28),
+            (
+                "rnbqkbnr/pppppppp/8/8/8/3P4/PPP1PPPP/RNBQKBNR w KQkq - 0 1",
+                27,
+            ),
+            (
+                "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1",
+                28,
+            ),
         ];
 
         for (fen, value) in inputs.iter() {
@@ -348,7 +353,6 @@ mod test_moves {
             assert_eq!(7, moves.len());
         }
     }
-
 
     #[test]
     fn moves_bishop_inside() {
@@ -414,9 +418,10 @@ mod test_moves {
 
     #[test]
     fn filter_moves_leaving_king_in_check() {
-        let inputs = [
-            ("rnbqkbnr/ppppp1pp/5p2/7Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2", 1),
-        ];
+        let inputs = [(
+            "rnbqkbnr/ppppp1pp/5p2/7Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2",
+            1,
+        )];
 
         for (fen, value) in inputs.iter() {
             let pos = Position::from_fen(fen);

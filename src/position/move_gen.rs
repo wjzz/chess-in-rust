@@ -5,7 +5,10 @@ pub use parser::*;
 
 impl Position {
     fn line(&self, src: Coord, dx: i32, dy: i32, all_moves: &mut Vec<Move>) {
-        let RowCol { row: src_row, col: src_col } = coord2rowcol(src);
+        let RowCol {
+            row: src_row,
+            col: src_col,
+        } = coord2rowcol(src);
 
         let mut dest_row = src_row + dx;
         let mut dest_col = src_col + dy;
@@ -35,7 +38,14 @@ impl Position {
         self.try_add_pawn(src, dest_row, dest_col, all_moves, true);
     }
 
-    fn try_add_pawn(&self, src: Coord, dest_row: i32, dest_col: i32, all_moves: &mut Vec<Move>, capture_ok: bool) {
+    fn try_add_pawn(
+        &self,
+        src: Coord,
+        dest_row: i32,
+        dest_col: i32,
+        all_moves: &mut Vec<Move>,
+        capture_ok: bool,
+    ) {
         if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
             let PlayerPiece {
                 player: color,
@@ -96,7 +106,13 @@ impl Position {
                     let passing_square = rowcol2coord_safe(src_row + row_delta, src_col);
                     if let Some(passing) = passing_square {
                         if self[passing] == None {
-                            self.try_add_pawn(src, src_row + row_delta * 2, src_col, &mut all_moves, false);
+                            self.try_add_pawn(
+                                src,
+                                src_row + row_delta * 2,
+                                src_col,
+                                &mut all_moves,
+                                false,
+                            );
                         }
                     }
                 }
@@ -108,10 +124,21 @@ impl Position {
                     if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
                         let dest_piece = self[dest];
 
-                        let en_passant_ok = self.en_passant.is_some() && self.en_passant.unwrap() == dest;
+                        let en_passant_ok =
+                            self.en_passant.is_some() && self.en_passant.unwrap() == dest;
 
-                        if en_passant_ok || (!en_passant_ok && dest_piece.is_some() && dest_piece.unwrap().player != color) {
-                            self.try_add_pawn(src, src_row + row_delta, src_col + col_delta, &mut all_moves, true);
+                        if en_passant_ok
+                            || (!en_passant_ok
+                                && dest_piece.is_some()
+                                && dest_piece.unwrap().player != color)
+                        {
+                            self.try_add_pawn(
+                                src,
+                                src_row + row_delta,
+                                src_col + col_delta,
+                                &mut all_moves,
+                                true,
+                            );
                         }
                     }
                 }
@@ -124,9 +151,9 @@ impl Position {
                         }
                     }
                 }
-            },
+            }
             Piece::Knight => {
-                for (w, d) in [(1,2), (2,1)].iter() {
+                for (w, d) in [(1, 2), (2, 1)].iter() {
                     for s1 in [-1, 1].iter() {
                         for s2 in [-1, 1].iter() {
                             let dx = w * s1;
@@ -135,7 +162,7 @@ impl Position {
                         }
                     }
                 }
-            },
+            }
             Piece::Queen => {
                 self.line(src, 0, -1, &mut all_moves);
                 self.line(src, 0, 1, &mut all_moves);
@@ -145,19 +172,19 @@ impl Position {
                 self.line(src, 1, 1, &mut all_moves);
                 self.line(src, -1, -1, &mut all_moves);
                 self.line(src, -1, 1, &mut all_moves);
-            },
+            }
             Piece::Bishop => {
                 self.line(src, 1, -1, &mut all_moves);
                 self.line(src, 1, 1, &mut all_moves);
                 self.line(src, -1, -1, &mut all_moves);
                 self.line(src, -1, 1, &mut all_moves);
-            },
+            }
             Piece::Rook => {
                 self.line(src, 0, -1, &mut all_moves);
                 self.line(src, 0, 1, &mut all_moves);
                 self.line(src, -1, 0, &mut all_moves);
                 self.line(src, 1, 0, &mut all_moves);
-            },
+            }
         }
 
         all_moves
@@ -166,7 +193,6 @@ impl Position {
     pub fn moves(&self) -> Vec<Move> {
         self.moves_by(self.to_move)
     }
-
 
     pub fn moves_by(&self, color: Player) -> Vec<Move> {
         let mut all_moves = vec![];
@@ -187,7 +213,10 @@ impl Position {
     }
 
     fn king_location(&self, player: Player) -> Option<Coord> {
-        let king = PlayerPiece { player, piece: Piece::King };
+        let king = PlayerPiece {
+            player,
+            piece: Piece::King,
+        };
         for coord in COORDS.iter() {
             if self[coord] == Some(king) {
                 return Some(coord);
@@ -198,9 +227,10 @@ impl Position {
 
     pub fn fields_attacked_by(&self, player: Player) -> Vec<Coord> {
         // TODO: use a set here
-        self.moves_by(player).iter().map(|mv: &Move| {
-            mv.dest
-        }).collect()
+        self.moves_by(player)
+            .iter()
+            .map(|mv: &Move| mv.dest)
+            .collect()
     }
 
     pub fn is_king_in_check(&self, player: Player) -> bool {
@@ -224,4 +254,3 @@ impl Position {
         result
     }
 }
-

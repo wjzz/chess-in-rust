@@ -5,18 +5,24 @@ pub use move_gen::*;
 
 impl Position {
     pub fn make_move(&mut self, mv: Move) -> Result<(), String> {
-        let Move { src, dest, promote_to } = mv;
+        let Move {
+            src,
+            dest,
+            promote_to,
+        } = mv;
         let color = self.to_move;
 
         // verify there is a piece to move at src
         let piece = match self[src] {
-            None =>
-                return Err(format!("Expected to find a piece at {}!", src)),
-            Some(player_piece) if player_piece.player != color =>
-                return Err(format!("Expected to find {}'s piece at {}, but opponent piece found!", color.to_ascii(), src)),
-            Some(player_piece) => {
-                player_piece.piece
-            },
+            None => return Err(format!("Expected to find a piece at {}!", src)),
+            Some(player_piece) if player_piece.player != color => {
+                return Err(format!(
+                    "Expected to find {}'s piece at {}, but opponent piece found!",
+                    color.to_ascii(),
+                    src
+                ))
+            }
+            Some(player_piece) => player_piece.piece,
         };
 
         // TODO: should we check that `piece` can really move to dest (e.g. is this is diagonal move)
@@ -25,10 +31,15 @@ impl Position {
             return Err(format!("Can't capture own piece at {}", dest));
         }
 
-        let RowCol { row: src_row, col: src_col } = coord2rowcol(src);
-        let RowCol { row: dest_row, col: dest_col } = coord2rowcol(dest);
+        let RowCol {
+            row: src_row,
+            col: src_col,
+        } = coord2rowcol(src);
+        let RowCol {
+            row: dest_row,
+            col: dest_col,
+        } = coord2rowcol(dest);
         let en_passant_flag = if piece == Piece::Pawn {
-
             // initial pawn move
             if (dest_row - src_row).abs() == 2 && src_col == dest_col {
                 let ep_row = (src_row + dest_row) / 2;
@@ -53,7 +64,6 @@ impl Position {
         if piece == Piece::Pawn && prev_en_passant_flag.is_some() {
             let ep_dest = prev_en_passant_flag.unwrap();
             if dest == ep_dest {
-
                 let clear_row = src_row;
                 let clear_col = dest_col;
                 let clear_coord = rowcol2coord_safe(clear_row, clear_col).unwrap();
@@ -67,6 +77,10 @@ impl Position {
         self.board[coord2index(dest)] = Some(PlayerPiece::new(color, new_piece));
         self.to_move = color.opposite();
         self.en_passant = en_passant_flag;
+
+        if color == Player::Black {
+            self.full_moves += 1;
+        }
 
         Ok(())
     }
@@ -95,7 +109,7 @@ impl Position {
             // }
             let mut pos2 = pos.clone();
             pos2.make_move(mv).unwrap();
-            result += Position::perft_immutable_iter(depth-1, level+1, pos2);
+            result += Position::perft_immutable_iter(depth - 1, level + 1, pos2);
         }
 
         result
@@ -111,8 +125,8 @@ impl Position {
 
         let moves = pos.legal_moves();
 
-        use std::sync::Mutex;
         use std::sync::Arc;
+        use std::sync::Mutex;
         use std::thread;
 
         let mtx = Arc::new(Mutex::new(0));
@@ -129,17 +143,17 @@ impl Position {
             let mtx2 = Arc::clone(&mtx);
 
             threads.push(thread::spawn(move || {
-                let value = Position::perft_immutable_iter(depth-1, 1, pos2);
+                let value = Position::perft_immutable_iter(depth - 1, 1, pos2);
                 let mut result = mtx2.lock().unwrap();
                 *result += value;
             }));
         }
 
-
         for t in threads {
             t.join().unwrap();
         }
 
-        let x = *mtx.lock().unwrap(); x
+        let x = *mtx.lock().unwrap();
+        x
     }
 }

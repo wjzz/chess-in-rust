@@ -16,7 +16,9 @@ impl Position {
         // TODO: parse all fields
         let _castling_str = parts[2];
         let _half_moves_since_capture_or_pawn_move = parts[4];
-        let _moves_since_start = parts[5];
+        let full_moves_str = parts[5];
+
+        let full_moves: u32 = full_moves_str.parse().unwrap();
 
         let to_move = match to_move_str {
             "w" => Player::White,
@@ -63,7 +65,10 @@ impl Position {
         let en_passant = if en_passant_str != "-" {
             let row_char = en_passant_str.chars().last().unwrap();
             if row_char != '3' && row_char != '6' {
-                panic!("en_passant must end in 3 or 6, got {} instead", en_passant_str);
+                panic!(
+                    "en_passant must end in 3 or 6, got {} instead",
+                    en_passant_str
+                );
             }
             let coord_str = en_passant_str.to_ascii_uppercase();
 
@@ -72,7 +77,7 @@ impl Position {
             None
         };
 
-        Position::create(board, to_move, en_passant)
+        Position::create(board, to_move, en_passant, full_moves)
     }
 }
 
@@ -132,6 +137,13 @@ mod tests {
         assert_eq!(None, pos.en_passant);
     }
 
+    #[test]
+    fn parse_initial_board_move_count() {
+        let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        let pos = Position::from_fen(fen);
+
+        assert_eq!(1, pos.full_moves);
+    }
 
     #[test]
     fn parse_lonely_king() {
@@ -145,9 +157,18 @@ mod tests {
     #[test]
     fn parse_en_passant() {
         let tests = [
-            ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", None),
-            ("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", Some("E3")),
-            ("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1", Some("E6")),
+            (
+                "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                None,
+            ),
+            (
+                "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+                Some("E3"),
+            ),
+            (
+                "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+                Some("E6"),
+            ),
         ];
 
         for (fen, ep) in tests.iter() {
@@ -161,7 +182,7 @@ mod tests {
         let fens = [
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
-            "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1",
+            "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
             "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b KQkq - 0 1",
         ];
 

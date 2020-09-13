@@ -14,7 +14,8 @@ Priority TODOs:
 - [ ] `mate` checking
 - [ ] `stalemate` checking
 - [x] legal move generation
-- [ ] move counters for fen
+- [x] full_move counter for fen
+- [ ] half_move counter since pawn move or capture for fen
 - [ ] implement faster board indexing, don't use `Coord`s everywhere
 
 PERFT [clone instead of unmove]: (bugs found)

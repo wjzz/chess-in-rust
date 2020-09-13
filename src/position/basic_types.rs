@@ -18,7 +18,8 @@ impl Player {
         match self {
             Player::Black => "b",
             Player::White => "w",
-        }.to_string()
+        }
+        .to_string()
     }
 }
 

@@ -15,7 +15,12 @@ fn main() {
 
     for (i, &value) in expected.iter().enumerate() {
         let i = i as u32;
-        let result = Position::perft_immutable_par(i+1, fen);
-        println!("perf imm {} = {:#?} | correct: {}", i+1, result, value == result);
+        let result = Position::perft_immutable_par(i + 1, fen);
+        println!(
+            "perf imm {} = {:#?} | correct: {}",
+            i + 1,
+            result,
+            value == result
+        );
     }
 }

@@ -1,7 +1,7 @@
 use std::ops::Index;
 use std::slice;
 
-#[path="basic_types.rs"]
+#[path = "basic_types.rs"]
 mod basic_types;
 
 pub use basic_types::*;
@@ -16,6 +16,7 @@ pub struct Position {
     can_castle_white: bool,
     can_castle_black: bool,
     pub en_passant: Option<Coord>,
+    pub full_moves: u32,
 }
 
 impl Position {
@@ -29,16 +30,23 @@ impl Position {
             can_castle_black: true,
             can_castle_white: true,
             en_passant: None,
+            full_moves: 1,
         }
     }
 
-    pub fn create(board: Board, to_move: Player, en_passant: Option<Coord>) -> Position {
+    pub fn create(
+        board: Board,
+        to_move: Player,
+        en_passant: Option<Coord>,
+        full_moves: u32,
+    ) -> Position {
         Position {
             board,
             to_move,
             can_castle_black: true,
             can_castle_white: true,
-            en_passant
+            en_passant,
+            full_moves,
         }
     }
 
@@ -93,8 +101,8 @@ impl Position {
             Some(coord) => coord.to_ascii_lowercase(),
         };
 
-        // TODO: implement checking castling rights and en passant
-        result.push_str(&format!("KQkq {} 0 1", en_passant_str));
+        // TODO: implement checking castling rights
+        result.push_str(&format!("KQkq {} 0 {}", en_passant_str, self.full_moves));
         result
     }
 
@@ -111,8 +119,7 @@ impl Index<&str> for Position {
 
     fn index(&self, i: &str) -> &Field {
         match str2coord(i) {
-            None =>
-                panic!("Wrong coordinate: {}", i),
+            None => panic!("Wrong coordinate: {}", i),
             Some(coord) => {
                 let index = coord2index(coord);
                 return &self.board[index];
