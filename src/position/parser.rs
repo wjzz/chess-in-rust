@@ -11,8 +11,12 @@ impl Position {
 
         let board_str = parts[0];
         let to_move_str = parts[1];
+        let en_passant_str = parts[3];
+
+        // TODO: parse all fields
         let _castling_str = parts[2];
-        // TODO: Check the meaning of parts 3,4,5
+        let _half_moves_since_capture_or_pawn_move = parts[4];
+        let _moves_since_start = parts[5];
 
         let to_move = match to_move_str {
             "w" => Player::White,
@@ -55,7 +59,20 @@ impl Position {
                 }
             }
         }
-        Position::create(board, to_move)
+
+        let en_passant = if en_passant_str != "-" {
+            let row_char = en_passant_str.chars().last().unwrap();
+            if row_char != '3' && row_char != '6' {
+                panic!("en_passant must end in 3 or 6, got {} instead", en_passant_str);
+            }
+            let coord_str = en_passant_str.to_ascii_uppercase();
+
+            Some(str2coord(&coord_str).unwrap())
+        } else {
+            None
+        };
+
+        Position::create(board, to_move, en_passant)
     }
 }
 
@@ -108,6 +125,15 @@ mod tests {
     }
 
     #[test]
+    fn parse_initial_board_en_passant() {
+        let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        let pos = Position::from_fen(fen);
+
+        assert_eq!(None, pos.en_passant);
+    }
+
+
+    #[test]
     fn parse_lonely_king() {
         let fen = "7K/8/8/8/8/8/8/8 w KQkq - 0 1";
         let pos = Position::from_fen(fen);
@@ -116,11 +142,26 @@ mod tests {
         assert_eq!(white_king, pos["H8"].unwrap());
     }
 
+    #[test]
+    fn parse_en_passant() {
+        let tests = [
+            ("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", None),
+            ("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", Some("E3")),
+            ("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1", Some("E6")),
+        ];
+
+        for (fen, ep) in tests.iter() {
+            let pos = Position::from_fen(fen);
+            assert_eq!(*ep, pos.en_passant);
+        }
+    }
 
     #[test]
     fn parse_and_unparse() {
         let fens = [
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+            "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+            "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 1",
             "r3k1n1/p6p/8/8/8/8/PPPP4/4KBNR b KQkq - 0 1",
         ];
 

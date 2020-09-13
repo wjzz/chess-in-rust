@@ -7,17 +7,23 @@
 `cargo run`
 
 perf imm 4 = 197281 | correct: true
-
 real    2m2,061s
 
 `cargo run --release`
 
 perf imm 4 = 197281 | correct: true
-
 real    0m6,434s
+
+**After en passant rule is added**
+perf imm 4 = 197281 | correct: true
+real	0m8,446s
+
 
 ### Depth 5  (inclusive)
 
 perf imm 5 = 4865351 | correct: false
-
 real    2m37,604s
+
+**After en passant rule is added**
+perf imm 5 = 4865609 | correct: true
+real	3m32,410s

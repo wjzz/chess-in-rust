@@ -68,6 +68,15 @@ pub const COORDS: [Coord; FIELDS_NO] = [
     "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8",
 ];
 
+pub fn str2coord(s: &str) -> Option<Coord> {
+    for &coord in COORDS.iter() {
+        if coord == s {
+            return Some(coord);
+        }
+    }
+    return None;
+}
+
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct RowCol {
     pub row: i32,

@@ -6,7 +6,7 @@ Priority TODOs:
 
 - [x] Basic data structures
 - [x] Basic move generation
-- - [ ] En passant
+- - [x] En passant
 - - [ ] Castling
 - [x] Make move
 - [ ] Unmake move
@@ -20,7 +20,8 @@ PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 2    # color change after move
 - [x] depth = 3    # pawn captured forward, pawn jumping over knight
 - [x] depth = 4    # king cant be left in check
-- [ ] depth = 5    TODO: legal_moves is rather slow, en passant is missing
+- [x] depth = 5    # missing en passant    TODO: requires more than 3 minutes, need to optimize
+- [ ] depth = 6
 
 Later:
 - [ ] Bitboards

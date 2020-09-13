@@ -107,7 +107,10 @@ impl Position {
                     let dest_col = src_col + col_delta;
                     if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
                         let dest_piece = self[dest];
-                        if dest_piece.is_some() && dest_piece.unwrap().player != color {
+
+                        let en_passant_ok = self.en_passant.is_some() && self.en_passant.unwrap() == dest;
+
+                        if en_passant_ok || (!en_passant_ok && dest_piece.is_some() && dest_piece.unwrap().player != color) {
                             self.try_add_pawn(src, src_row + row_delta, src_col + col_delta, &mut all_moves, true);
                         }
                     }

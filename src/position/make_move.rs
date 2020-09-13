@@ -8,7 +8,7 @@ impl Position {
         let Move { src, dest, promote_to } = mv;
         let color = self.to_move;
 
-        // verify there is a piece at src
+        // verify there is a piece to move at src
         let piece = match self[src] {
             None =>
                 return Err(format!("Expected to find a piece at {}!", src)),
@@ -25,6 +25,21 @@ impl Position {
             return Err(format!("Can't capture own piece at {}", dest));
         }
 
+        let RowCol { row: src_row, col: src_col } = coord2rowcol(src);
+        let RowCol { row: dest_row, col: dest_col } = coord2rowcol(dest);
+        let en_passant_flag = if piece == Piece::Pawn {
+
+            // initial pawn move
+            if (dest_row - src_row).abs() == 2 && src_col == dest_col {
+                let ep_row = (src_row + dest_row) / 2;
+                Some(rowcol2coord(ep_row, src_col))
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
         // TODO: check if we make a capture?
 
         let new_piece = match promote_to {
@@ -32,10 +47,26 @@ impl Position {
             Some(piece) => piece,
         };
 
+        let prev_en_passant_flag = self.en_passant;
+
+        // if we take en passant, we have to clear another square
+        if piece == Piece::Pawn && prev_en_passant_flag.is_some() {
+            let ep_dest = prev_en_passant_flag.unwrap();
+            if dest == ep_dest {
+
+                let clear_row = src_row;
+                let clear_col = dest_col;
+                let clear_coord = rowcol2coord_safe(clear_row, clear_col).unwrap();
+
+                self.board[coord2index(clear_coord)] = None;
+            }
+        }
+
         // make the actual changes
         self.board[coord2index(src)] = None;
         self.board[coord2index(dest)] = Some(PlayerPiece::new(color, new_piece));
         self.to_move = color.opposite();
+        self.en_passant = en_passant_flag;
 
         Ok(())
     }

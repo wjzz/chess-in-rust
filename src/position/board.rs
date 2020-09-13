@@ -15,7 +15,7 @@ pub struct Position {
     pub board: Board,
     can_castle_white: bool,
     can_castle_black: bool,
-    /* what about en passant? */
+    pub en_passant: Option<Coord>,
 }
 
 impl Position {
@@ -28,15 +28,17 @@ impl Position {
             board,
             can_castle_black: true,
             can_castle_white: true,
+            en_passant: None,
         }
     }
 
-    pub fn create(board: Board, to_move: Player) -> Position {
+    pub fn create(board: Board, to_move: Player, en_passant: Option<Coord>) -> Position {
         Position {
             board,
             to_move,
             can_castle_black: true,
             can_castle_white: true,
+            en_passant
         }
     }
 
@@ -86,8 +88,13 @@ impl Position {
         let mut result = lines.join("/");
         result.push_str(&format!(" {} ", self.to_move.to_ascii()));
 
+        let en_passant_str = match self.en_passant {
+            None => "-".to_string(),
+            Some(coord) => coord.to_ascii_lowercase(),
+        };
+
         // TODO: implement checking castling rights and en passant
-        result.push_str("KQkq - 0 1");
+        result.push_str(&format!("KQkq {} 0 1", en_passant_str));
         result
     }
 
@@ -103,13 +110,14 @@ impl Index<&str> for Position {
     type Output = Field;
 
     fn index(&self, i: &str) -> &Field {
-        for &coord in COORDS.iter() {
-            if i == coord {
+        match str2coord(i) {
+            None =>
+                panic!("Wrong coordinate: {}", i),
+            Some(coord) => {
                 let index = coord2index(coord);
                 return &self.board[index];
             }
         }
-        panic!("Wrong coordinate: {}", i);
     }
 }
 
@@ -122,6 +130,7 @@ mod tests {
         let pos = Position::new();
 
         assert_eq!(pos.to_move, Player::White);
+        assert_eq!(pos.en_passant, None);
 
         for &field in pos.fields() {
             assert_eq!(field, None);
@@ -145,5 +154,4 @@ mod tests {
             assert_eq!(None, pos[coord]);
         }
     }
-
 }
