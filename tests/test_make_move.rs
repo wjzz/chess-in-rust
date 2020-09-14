@@ -292,4 +292,43 @@ mod test_moves {
     }
 
     // TODO: ROOK CAPTURED = lose rights
+    #[test]
+    fn make_move_losing_the_rook_loses_castling() {
+        let fen = "rnbqk1nr/pppppp1p/6pb/8/8/1P6/PBPPPPPP/RN1QKBNR w KQkq - 2 3";
+        let mut pos = Position::from_fen(fen);
+
+        assert!(pos.castle_rights.contains("k"));
+        assert!(pos.castle_rights.contains("q"));
+
+        let mv = "B2->H8";
+        pos.make_move(Move::from_ascii(mv)).unwrap();
+
+        let result_fen = "rnbqk1nB/pppppp1p/6pb/8/8/1P6/P1PPPPPP/RN1QKBNR b KQq - 0 3";
+        assert_eq!(pos.to_fen(), result_fen);
+        assert!(!pos.castle_rights.contains("k"));
+        assert!(pos.castle_rights.contains("q"));
+    }
+
+
+    #[test]
+    fn make_move_losing_the_rook_loses_castling2() {
+        let fen = "rn1qkbnr/p1pppppp/bp6/8/8/6P1/PPPPPPBP/RNBQK1NR w KQkq - 2 3";
+        let mut pos = Position::from_fen(fen);
+
+        assert!(pos.castle_rights.contains("k"));
+        assert!(pos.castle_rights.contains("q"));
+
+        let mv = "G2->A8";
+        pos.make_move(Move::from_ascii(mv)).unwrap();
+
+        let result_fen = "Bn1qkbnr/p1pppppp/bp6/8/8/6P1/PPPPPP1P/RNBQK1NR b KQk - 0 3";
+        assert_eq!(pos.to_fen(), result_fen);
+        assert!(pos.castle_rights.contains("k"));
+        assert!(!pos.castle_rights.contains("q"));
+    }
+
+
+
+
+
 }

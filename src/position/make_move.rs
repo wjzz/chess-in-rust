@@ -10,7 +10,9 @@ impl Position {
             dest,
             promote_to,
         } = mv;
+
         let color = self.to_move;
+        let opponent = color.opposite();
 
         // verify there is a piece to move at src
         let piece = match self[src] {
@@ -53,6 +55,36 @@ impl Position {
 
         // TODO: check if we make a capture?
         // TODO: check with castling rights
+
+        if self[dest].is_some() {
+            let to_remove = if opponent == Player::White {
+                if dest == "A1" {
+                    "Q"
+                } else if dest == "H1" {
+                    "K"
+                } else {
+                    ""
+                }
+            } else {
+                if dest == "A8" {
+                    "q"
+                } else if dest == "H8" {
+                    "k"
+                } else {
+                    ""
+                }
+            };
+            let castle_rights_new = self
+                .castle_rights
+                .chars()
+                .filter(|c| !to_remove.contains(*c))
+                .collect();
+            self.castle_rights = if castle_rights_new != "" {
+                castle_rights_new
+            } else {
+                "-".to_string()
+            };
+        }
 
         let new_piece = match promote_to {
             None => piece,
