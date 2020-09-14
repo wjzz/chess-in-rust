@@ -171,16 +171,15 @@ impl Position {
                         let rook_dest = rowcol2coord(src_row, rook_col);
 
                         let test = self[rook_dest]
-                        == Some(PlayerPiece {
-                            player: color,
-                            piece: Piece::Rook
-                        });
+                            == Some(PlayerPiece {
+                                player: color,
+                                piece: Piece::Rook,
+                            });
 
                         if !test {
                             println!("DEBUG: ");
                             println!("{}", self.to_ascii());
                             println!("FEN {}", self.to_fen());
-
                         }
                         assert!(
                             self[rook_dest]

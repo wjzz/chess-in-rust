@@ -309,7 +309,6 @@ mod test_moves {
         assert!(pos.castle_rights.contains("q"));
     }
 
-
     #[test]
     fn make_move_losing_the_rook_loses_castling2() {
         let fen = "rn1qkbnr/p1pppppp/bp6/8/8/6P1/PPPPPPBP/RNBQK1NR w KQkq - 2 3";
@@ -326,9 +325,4 @@ mod test_moves {
         assert!(pos.castle_rights.contains("k"));
         assert!(!pos.castle_rights.contains("q"));
     }
-
-
-
-
-
 }

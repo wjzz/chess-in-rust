@@ -7,7 +7,7 @@ Priority TODOs:
 - [x] Basic data structures
 - [x] Basic move generation
 - - [x] En passant
-- - [ ] Castling
+- - [x] Castling
 - [x] Make move
 - [ ] Unmake move
 - [x] `check` checking

@@ -1,3 +1,3 @@
-pub mod make_move;
+pub mod perft;
 
-pub use make_move::*;
+pub use perft::*;

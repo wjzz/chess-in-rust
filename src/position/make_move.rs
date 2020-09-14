@@ -137,7 +137,10 @@ impl Position {
         // check if move is castling
         if self.is_castling_move(mv) {
             let (rook_src, rook_dest) = self.rook_position_castling(mv);
-            let rook_piece = PlayerPiece { player: color, piece: Piece::Rook };
+            let rook_piece = PlayerPiece {
+                player: color,
+                piece: Piece::Rook,
+            };
             assert_eq!(Some(rook_piece), self[rook_src]);
             self.board[coord2index(rook_src)] = None;
             self.board[coord2index(rook_dest)] = Some(rook_piece);
@@ -154,77 +157,5 @@ impl Position {
         }
 
         Ok(())
-    }
-
-    fn perft_immutable_iter(depth: u32, level: u32, pos: Position) -> u32 {
-        if depth == 0 {
-            return 1;
-        }
-
-        let moves = pos.legal_moves();
-        let mut result = 0;
-
-        if depth == 1 {
-            return moves.len() as u32;
-        }
-
-        // if level == 0 && depth > 4 {
-        //     println!("Total {} top moves.", moves.len());
-        // }
-
-        // let mut counter = 1;
-        for &mv in moves.iter() {
-            // if level == 0 && depth > 4 {
-            //     println!(" {:2}/{}\t{}->{}", counter, moves.len(), mv.src, mv.dest);
-            //     counter += 1;
-            // }
-            let mut pos2 = pos.clone();
-            pos2.make_move(mv).unwrap();
-            result += Position::perft_immutable_iter(depth - 1, level + 1, pos2);
-        }
-
-        result
-    }
-
-    pub fn perft_immutable(depth: u32, fen: &str) -> u32 {
-        let pos = Position::from_fen(fen);
-        Position::perft_immutable_iter(depth, 0, pos)
-    }
-
-    pub fn perft_immutable_par(depth: u32, fen: &str) -> u32 {
-        let pos = Position::from_fen(fen);
-
-        let moves = pos.legal_moves();
-
-        use std::sync::Arc;
-        use std::sync::Mutex;
-        use std::thread;
-
-        let mtx = Arc::new(Mutex::new(0));
-        let mut threads = vec![];
-
-        for (counter, mv) in moves.iter().enumerate() {
-            if depth > 5 {
-                println!(" {:2}/{}\t{}->{}", counter, moves.len(), mv.src, mv.dest);
-            }
-
-            let mut pos2 = pos.clone();
-            pos2.make_move(*mv).unwrap();
-
-            let mtx2 = Arc::clone(&mtx);
-
-            threads.push(thread::spawn(move || {
-                let value = Position::perft_immutable_iter(depth - 1, 1, pos2);
-                let mut result = mtx2.lock().unwrap();
-                *result += value;
-            }));
-        }
-
-        for t in threads {
-            t.join().unwrap();
-        }
-
-        let x = *mtx.lock().unwrap();
-        x
     }
 }

@@ -35,6 +35,11 @@ real	3m32,410s
 perf imm 5 = 4865609 | correct: true
 real	0m55,846s
 
+**New parallel ver: After castling and en passant are added**
+
+4 threads | perf imm 5 =    4865609 | correct: true | total time   49.77s
+perf imm 5 =    4865609 | correct: true | total time   58.34s
+
 ### Depth 6  (inclusive)
 
 **After en passant rule is added**
