@@ -15,7 +15,7 @@ impl Position {
         let opponent = color.opposite();
 
         // verify there is a piece to move at src
-        let piece = match self[src] {
+        let piece = match self.board[src] {
             None => return Err(format!("Expected to find a piece at {}!", src)),
             Some(player_piece) if player_piece.player != color => {
                 return Err(format!(
@@ -29,18 +29,18 @@ impl Position {
 
         // TODO: should we check that `piece` can really move to dest (e.g. is this is diagonal move)
 
-        if self[dest].is_some() && self[dest].unwrap().player == color {
+        if self.board[dest].is_some() && self.board[dest].unwrap().player == color {
             return Err(format!("Can't capture own piece at {}", dest));
         }
 
         let RowCol {
             row: src_row,
             col: src_col,
-        } = coord2rowcol(src);
+        } = index2rowcol(src);
         let RowCol {
             row: dest_row,
             col: dest_col,
-        } = coord2rowcol(dest);
+        } = index2rowcol(dest);
         let en_passant_flag = if piece == Piece::Pawn {
             // initial pawn move
             if (dest_row - src_row).abs() == 2 && src_col == dest_col {
@@ -56,7 +56,9 @@ impl Position {
         // TODO: check if we make a capture?
         // TODO: check with castling rights
 
-        if self[dest].is_some() {
+        if self.board[dest].is_some() {
+            let dest = index2coord(dest);
+
             let to_remove = if opponent == Player::White {
                 if dest == "A1" {
                     "Q"
@@ -96,7 +98,7 @@ impl Position {
         // if we take en passant, we have to clear another square
         if piece == Piece::Pawn && prev_en_passant_flag.is_some() {
             let ep_dest = prev_en_passant_flag.unwrap();
-            if dest == ep_dest {
+            if dest == coord2index(ep_dest) {
                 let clear_row = src_row;
                 let clear_col = dest_col;
                 let clear_coord = rowcol2coord_safe(clear_row, clear_col).unwrap();
@@ -105,7 +107,7 @@ impl Position {
             }
         }
 
-        if piece == Piece::Pawn || self[dest].is_some() {
+        if piece == Piece::Pawn || self.board[dest].is_some() {
             self.half_moves = 0;
         } else {
             self.half_moves += 1;
@@ -113,6 +115,8 @@ impl Position {
 
         // check if we have to take away castling rights
         if piece == Piece::King || piece == Piece::Rook {
+            let src = index2coord(src);
+
             let rights = match (color, piece) {
                 (Player::White, Piece::King) => "KQ",
                 (Player::Black, Piece::King) => "kq",
@@ -147,8 +151,8 @@ impl Position {
         }
 
         // make the actual changes
-        self.board[coord2index(src)] = None;
-        self.board[coord2index(dest)] = Some(PlayerPiece::new(color, new_piece));
+        self.board[src] = None;
+        self.board[dest] = Some(PlayerPiece::new(color, new_piece));
         self.to_move = color.opposite();
         self.en_passant = en_passant_flag;
 

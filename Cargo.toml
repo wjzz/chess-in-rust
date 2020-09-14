@@ -11,4 +11,4 @@ edition = "2018"
 # lto = "fat"
 # codegen-units = 1
 # panic = "abort"
-# -C target-cpu=native
+# RUSTFLAGS='-C target-cpu=native' cargo run --release 4

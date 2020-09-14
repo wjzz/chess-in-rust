@@ -90,8 +90,27 @@ impl RowCol {
     }
 }
 
+// TODO: add unit tests
+pub fn index2rowcol(i: usize) -> RowCol {
+    let col = (i % 8) as i32;
+    let row = (i / 8) as i32;
+    RowCol { row, col }
+}
+
+pub fn index2coord(i: usize) -> Coord {
+    let RowCol { row, col } = index2rowcol(i);
+    rowcol2coord(row, col)
+}
+
 pub fn rowcol2index(row: i32, col: i32) -> usize {
     (row * 8 + col) as usize
+}
+
+pub fn rowcol2index_safe(row: i32, col: i32) -> Option<usize> {
+    if 0 > row || row >= 8 || 0 > col || col >= 8 {
+        return None;
+    }
+    Some((row * 8 + col) as usize)
 }
 
 pub fn rowcol2coord(row: i32, col: i32) -> Coord {
@@ -132,13 +151,13 @@ pub fn coord2index(coord: Coord) -> usize {
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Move {
-    pub src: Coord,
-    pub dest: Coord,
+    pub src: usize,
+    pub dest: usize,
     pub promote_to: Option<Piece>,
 }
 
 impl Move {
-    pub fn new(src: Coord, dest: Coord, promote_to: Option<Piece>) -> Self {
+    pub fn new(src: usize, dest: usize, promote_to: Option<Piece>) -> Self {
         Move {
             src,
             dest,
@@ -146,13 +165,22 @@ impl Move {
         }
     }
 
+    pub fn create(src: Coord, dest: Coord, promote_to: Option<Piece>) -> Self {
+        Move {
+            src: coord2index(src),
+            dest: coord2index(dest),
+            promote_to,
+        }
+    }
+
+
     pub fn from_ascii(ascii: &'static str) -> Self {
         let src = &ascii[0..2];
         assert_eq!("->", &ascii[2..4]);
         let dest = &ascii[4..6];
 
         // TODO: ignore promotion for the time being, it could be denoted as E7->E8=Q
-        Move::new(src, dest, None)
+        Move::create(src, dest, None)
     }
 }
 

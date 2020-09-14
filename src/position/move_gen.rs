@@ -4,20 +4,20 @@ pub mod parser;
 pub use parser::*;
 
 impl Position {
-    fn line(&self, src: Coord, dx: i32, dy: i32, all_moves: &mut Vec<Move>) {
+    fn line(&self, src: usize, dx: i32, dy: i32, all_moves: &mut Vec<Move>) {
         let RowCol {
             row: src_row,
             col: src_col,
-        } = coord2rowcol(src);
+        } = index2rowcol(src);
 
         let mut dest_row = src_row + dx;
         let mut dest_col = src_col + dy;
 
-        let color = self[src].unwrap().player;
+        let color = self.board[src].unwrap().player;
         let opp_color = color.opposite();
 
-        while let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
-            let dest_field = self[dest];
+        while let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
+            let dest_field = self.board[dest];
 
             if dest_field.is_none() || dest_field.unwrap().player == opp_color {
                 all_moves.push(Move::new(src, dest, None));
@@ -34,25 +34,25 @@ impl Position {
         }
     }
 
-    fn try_add(&self, src: Coord, dest_row: i32, dest_col: i32, all_moves: &mut Vec<Move>) {
+    fn try_add(&self, src: usize, dest_row: i32, dest_col: i32, all_moves: &mut Vec<Move>) {
         self.try_add_pawn(src, dest_row, dest_col, all_moves, true);
     }
 
     fn try_add_pawn(
         &self,
-        src: Coord,
+        src: usize,
         dest_row: i32,
         dest_col: i32,
         all_moves: &mut Vec<Move>,
         capture_ok: bool,
     ) {
-        if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
+        if let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
             let PlayerPiece {
                 player: color,
                 piece,
-            } = self[src].unwrap();
+            } = self.board[src].unwrap();
             let opp_color = color.opposite();
-            let dest_field = self[dest];
+            let dest_field = self.board[dest];
 
             if dest_field.is_none() || (capture_ok && dest_field.unwrap().player == opp_color) {
                 if piece != Piece::Pawn {
@@ -75,13 +75,13 @@ impl Position {
         }
     }
 
-    fn generate_moves_from(&self, src: Coord, piece: Piece, color: Player) -> Vec<Move> {
-        assert_eq!(PlayerPiece::new(color, piece), self[src].unwrap());
+    fn generate_moves_from(&self, src: usize, piece: Piece, color: Player) -> Vec<Move> {
+        assert_eq!(PlayerPiece::new(color, piece), self.board[src].unwrap());
 
         let RowCol {
             row: src_row,
             col: src_col,
-        } = coord2rowcol(src);
+        } = index2rowcol(src);
 
         let row_delta: i32 = if color == Player::White { 1 } else { -1 };
 
@@ -117,11 +117,11 @@ impl Position {
                 for col_delta in [-1, 1].iter() {
                     let dest_row = src_row + row_delta;
                     let dest_col = src_col + col_delta;
-                    if let Some(dest) = rowcol2coord_safe(dest_row, dest_col) {
-                        let dest_piece = self[dest];
+                    if let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
+                        let dest_piece = self.board[dest];
 
                         let en_passant_ok =
-                            self.en_passant.is_some() && self.en_passant.unwrap() == dest;
+                            self.en_passant.is_some() && coord2index(self.en_passant.unwrap()) == dest;
 
                         if en_passant_ok
                             || (!en_passant_ok
@@ -151,7 +151,7 @@ impl Position {
                 // castling
                 let king_initial_coord = if color == Player::White { "E1" } else { "E8" };
 
-                if src == king_initial_coord {
+                if src == coord2index(king_initial_coord) {
                     let ascii_k = PlayerPiece {
                         piece: Piece::King,
                         player: color,
@@ -168,9 +168,9 @@ impl Position {
                     // castling kingside
                     if self.castle_rights.contains(&ascii_k) {
                         let rook_col = src_col + 3 * king_side_dx;
-                        let rook_dest = rowcol2coord(src_row, rook_col);
+                        let rook_dest = rowcol2index(src_row, rook_col);
 
-                        let test = self[rook_dest]
+                        let test = self.board[rook_dest]
                             == Some(PlayerPiece {
                                 player: color,
                                 piece: Piece::Rook,
@@ -182,15 +182,15 @@ impl Position {
                             println!("FEN {}", self.to_fen());
                         }
                         assert!(
-                            self[rook_dest]
+                            self.board[rook_dest]
                                 == Some(PlayerPiece {
                                     player: color,
                                     piece: Piece::Rook
                                 })
                         );
 
-                        let free1 = self[rowcol2coord(src_row, src_col + king_side_dx)] == None;
-                        let free2 = self[rowcol2coord(src_row, src_col + 2 * king_side_dx)] == None;
+                        let free1 = self.board[rowcol2index(src_row, src_col + king_side_dx)] == None;
+                        let free2 = self.board[rowcol2index(src_row, src_col + 2 * king_side_dx)] == None;
 
                         if free1 && free2 {
                             self.try_add(src, src_row, src_col + 2 * king_side_dx, &mut all_moves);
@@ -200,20 +200,20 @@ impl Position {
                     // castling queenside
                     if self.castle_rights.contains(&ascii_q) {
                         let rook_col = src_col + 4 * queen_side_dx;
-                        let rook_dest = rowcol2coord(src_row, rook_col);
+                        let rook_dest = rowcol2index(src_row, rook_col);
                         assert!(
-                            self[rook_dest]
+                            self.board[rook_dest]
                                 == Some(PlayerPiece {
                                     player: color,
                                     piece: Piece::Rook
                                 })
                         );
 
-                        let free1 = self[rowcol2coord(src_row, src_col + queen_side_dx)] == None;
+                        let free1 = self.board[rowcol2index(src_row, src_col + queen_side_dx)] == None;
                         let free2 =
-                            self[rowcol2coord(src_row, src_col + 2 * queen_side_dx)] == None;
+                            self.board[rowcol2index(src_row, src_col + 2 * queen_side_dx)] == None;
                         let free3 =
-                            self[rowcol2coord(src_row, src_col + 3 * queen_side_dx)] == None;
+                            self.board[rowcol2index(src_row, src_col + 3 * queen_side_dx)] == None;
 
                         if free1 && free2 && free3 {
                             self.try_add(src, src_row, src_col + 2 * queen_side_dx, &mut all_moves);
@@ -266,11 +266,11 @@ impl Position {
     pub fn moves_by(&self, color: Player) -> Vec<Move> {
         let mut all_moves = vec![];
 
-        for coord in COORDS.iter() {
-            if let Some(player_piece) = self[coord] {
+        for index in 0..64 {
+            if let Some(player_piece) = self.board[index] {
                 if player_piece.player == color {
                     all_moves.append(&mut self.generate_moves_from(
-                        coord,
+                        index,
                         player_piece.piece,
                         color,
                     ));
@@ -281,20 +281,20 @@ impl Position {
         all_moves
     }
 
-    fn king_location(&self, player: Player) -> Option<Coord> {
+    fn king_location(&self, player: Player) -> Option<usize> {
         let king = PlayerPiece {
             player,
             piece: Piece::King,
         };
-        for coord in COORDS.iter() {
-            if self[coord] == Some(king) {
-                return Some(coord);
+        for index in 0..64 {
+            if self.board[index] == Some(king) {
+                return Some(index);
             }
         }
         return None;
     }
 
-    pub fn fields_attacked_by(&self, player: Player) -> Vec<Coord> {
+    pub fn fields_attacked_by(&self, player: Player) -> Vec<usize> {
         // TODO: use a set here
         self.moves_by(player)
             .iter()
@@ -316,6 +316,8 @@ impl Position {
             dest,
             promote_to: _,
         } = mv;
+        let src = index2coord(src);
+        let dest = index2coord(dest);
         match self.to_move {
             Player::White => src == "E1" && (dest == "G1" || dest == "C1"),
             Player::Black => src == "E8" && (dest == "G8" || dest == "C8"),
@@ -323,7 +325,8 @@ impl Position {
     }
 
     fn fields_to_check_castling(&self, mv: Move) -> Vec<Coord> {
-        match (self.to_move, mv.dest) {
+        let dest = index2coord(mv.dest);
+        match (self.to_move, dest) {
             (Player::White, "G1") => vec!["F1", "G1"],
             (Player::White, "C1") => vec!["D1", "C1"],
             (Player::Black, "G8") => vec!["F8", "G8"],
@@ -333,7 +336,8 @@ impl Position {
     }
 
     pub fn rook_position_castling(&self, mv: Move) -> (Coord, Coord) {
-        match (self.to_move, mv.dest) {
+        let dest = index2coord(mv.dest);
+        match (self.to_move, dest) {
             (Player::White, "G1") => ("H1", "F1"),
             (Player::White, "C1") => ("A1", "D1"),
             (Player::Black, "G8") => ("H8", "F8"),
@@ -347,7 +351,8 @@ impl Position {
         let attacked_fields = self.fields_attacked_by(self.to_move.opposite());
         for coord in fields.iter() {
             // make sure coord in not attacked
-            if attacked_fields.contains(coord) {
+            let index = coord2index(coord);
+            if attacked_fields.contains(&index) {
                 return false;
             }
         }

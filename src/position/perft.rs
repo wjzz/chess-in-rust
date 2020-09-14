@@ -66,14 +66,14 @@ impl Position {
                     let mut result = mtx2.lock().unwrap();
                     *result += value;
 
-                    if depth >= 5 {
+                    if depth > 5 {
                         println!(
                             " Thread {} finished mv {:2}/{}\t{}->{} after {:.2?}",
                             id + 1,
                             i + 1,
                             moves.len(),
-                            mv.src,
-                            mv.dest,
+                            index2coord(mv.src),
+                            index2coord(mv.dest),
                             start.elapsed()
                         );
                     }
