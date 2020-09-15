@@ -75,8 +75,10 @@ perf imm 5 =    4865609 | correct: true | total time   42.40s
 **After going for normal indexing**
 
 Using 4 threads.
-perf imm 1 =         20 | correct: true | total time 380.72µs
-perf imm 2 =        400 | correct: true | total time 576.64µs
-perf imm 3 =       8902 | correct: true | total time  13.75ms
-perf imm 4 =     197281 | correct: true | total time 140.97ms
-perf imm 5 =    4865609 | correct: true | total time    3.30s
+perf imm 1 =         20 | correct: true | total time 535.44µs
+perf imm 2 =        400 | correct: true | total time 615.69µs
+perf imm 3 =       8902 | correct: true | total time  12.13ms
+perf imm 4 =     197281 | correct: true | total time 215.28ms
+perf imm 5 =    4865609 | correct: true | total time    3.33s
+perf imm 6 =  119060324 | correct: true | total time   86.10s   [  1.2 min]
+perf imm 7 = 3195901860 | correct: true | total time 3025.23s   [ 50.0 min]
