@@ -139,7 +139,7 @@ impl Position {
         }
 
         // check if move is castling
-        if self.is_castling_move(mv) {
+        if piece == Piece::King && self.is_castling_move(mv) {
             let (rook_src, rook_dest) = self.rook_position_castling(mv);
             let rook_piece = PlayerPiece {
                 player: color,
