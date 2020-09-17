@@ -149,6 +149,25 @@ pub fn coord2index(coord: Coord) -> usize {
     rowcol2index(row, col)
 }
 
+pub fn usi2rowcol(coord: &str) -> usize {
+    let col = match coord.chars().nth(0).unwrap() {
+        'a' => 0,
+        'b' => 1,
+        'c' => 2,
+        'd' => 3,
+        'e' => 4,
+        'f' => 5,
+        'g' => 6,
+        'h' => 7,
+        _ => panic!("Wrong index! {}", coord),
+    };
+
+    let row = (coord.chars().nth(1).unwrap().to_digit(10).unwrap() - 1) as i32;
+    assert!(row < 8);
+    rowcol2index(row, col)
+}
+
+
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Move {
     pub src: usize,
@@ -181,6 +200,33 @@ impl Move {
 
         // TODO: ignore promotion for the time being, it could be denoted as E7->E8=Q
         Move::create(src, dest, None)
+    }
+
+    // TODO: add a unit test for this function
+    pub fn from_uci_ascii(ascii: &str) -> Self {
+        let src = &ascii[0..2];
+        let dest = &ascii[2..4];
+
+        let chars: Vec<_> = ascii.chars().collect();
+        let promotion = match chars.get(4) {
+            Some('n') => Some(Piece::Knight),
+            Some('b') => Some(Piece::Bishop),
+            Some('r') => Some(Piece::Rook),
+            Some('q') => Some(Piece::Queen),
+            _ => None
+        };
+
+        Move::new(usi2rowcol(src), usi2rowcol(dest), promotion)
+    }
+
+    pub fn to_usi_ascii(self: &Self) -> String {
+        let src = index2coord(self.src);
+        let dest = index2coord(self.dest);
+        let prom = match self.promote_to {
+            Some(piece) => piece.to_ascii(),
+            None => String::from(""),
+        };
+        format!("{}{}{}", src, dest, prom).to_ascii_lowercase()
     }
 }
 
