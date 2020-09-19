@@ -313,7 +313,8 @@ impl Position {
         fields_attacked_by_opp.contains(&king_coord.unwrap())
     }
 
-    pub fn is_castling_move(&self, mv: Move) -> bool {
+
+    pub fn is_castling_move_color(&self, mv: Move, color: Player) -> bool {
         let Move {
             src,
             dest,
@@ -321,10 +322,14 @@ impl Position {
         } = mv;
         let src = index2coord(src);
         let dest = index2coord(dest);
-        match self.to_move {
+        match color {
             Player::White => src == "E1" && (dest == "G1" || dest == "C1"),
             Player::Black => src == "E8" && (dest == "G8" || dest == "C8"),
         }
+    }
+
+    pub fn is_castling_move(&self, mv: Move) -> bool {
+        return self.is_castling_move_color(mv, self.to_move);
     }
 
     fn fields_to_check_castling(&self, mv: Move) -> Vec<Coord> {
@@ -339,8 +344,12 @@ impl Position {
     }
 
     pub fn rook_position_castling(&self, mv: Move) -> (Coord, Coord) {
+        self.rook_position_castling_color(mv, self.to_move)
+    }
+
+    pub fn rook_position_castling_color(&self, mv: Move, color: Player) -> (Coord, Coord) {
         let dest = index2coord(mv.dest);
-        match (self.to_move, dest) {
+        match (color, dest) {
             (Player::White, "G1") => ("H1", "F1"),
             (Player::White, "C1") => ("A1", "D1"),
             (Player::Black, "G8") => ("H8", "F8"),
@@ -348,6 +357,7 @@ impl Position {
             _ => panic!("Incorrect castling move {:?}", mv),
         }
     }
+
 
     fn can_safely_castle(&self, mv: Move) -> bool {
         let fields = self.fields_to_check_castling(mv);
@@ -362,7 +372,7 @@ impl Position {
         return true;
     }
 
-    pub fn legal_moves(&self) -> Vec<Move> {
+    pub fn legal_moves(&mut self) -> Vec<Move> {
         let moves = self.moves();
         let mut result = vec![];
         for mv in moves.iter() {
@@ -371,21 +381,30 @@ impl Position {
                     result.push(*mv);
                 }
             } else {
-                let mut pos = self.clone();
-                pos.make_move(*mv).unwrap();
-                if !pos.is_king_in_check(self.to_move) {
+                let to_move = self.to_move;
+                // let mut pos = self.clone();
+                let fen1 = self.to_fen();
+                self.make_move(*mv).unwrap();
+                if !self.is_king_in_check(to_move) {
                     result.push(*mv);
                 }
+                self.unmake_move(*mv).unwrap();
+                let fen2 = self.to_fen();
+                if fen1 != fen2 {
+                    println!("{}", self.to_ascii());
+                    println!("move = {}", mv.to_usi_ascii());
+                }
+                assert_eq!(fen1, fen2);
             }
         }
         result
     }
 
-    pub fn is_checkmate(&self) -> bool {
+    pub fn is_checkmate(&mut self) -> bool {
         self.legal_moves().len() == 0 && self.is_king_in_check(self.to_move)
     }
 
-    pub fn is_stalemate(&self) -> bool {
+    pub fn is_stalemate(&mut self) -> bool {
         self.legal_moves().len() == 0 && !self.is_king_in_check(self.to_move)
     }
 }

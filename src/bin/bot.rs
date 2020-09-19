@@ -14,7 +14,7 @@ fn play_move(fen: &str, moves: &[&str]) -> String {
         pos.make_move(mv).unwrap();
     }
 
-    let mv = best_move_negamax(&pos, 3);
+    let mv = best_move_negamax(&mut pos, 3);
     // let mv = choose_move(&pos);
     mv.to_usi_ascii()
 }

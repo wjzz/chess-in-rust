@@ -31,7 +31,7 @@ fn eval_position(pos: &Position) -> f64 {
     result
 }
 
-fn negamax(pos: &Position, depth: i32) -> f64 {
+fn negamax(pos: &mut Position, depth: i32) -> f64 {
     unsafe {
         visited_nodes += 1;
     }
@@ -48,9 +48,13 @@ fn negamax(pos: &Position, depth: i32) -> f64 {
     let moves = pos.legal_moves();
     let mut best = -10000000.0;
     for &mv in moves.iter() {
-        let mut pos2 = pos.clone();
-        pos2.make_move(mv).unwrap();
-        let val = -negamax(&pos2, depth - 1);
+        // let mut pos2 = pos.clone();
+        // pos2.make_move(mv).unwrap();
+        // let val = -negamax(&pos2, depth - 1);
+        pos.make_move(mv).unwrap();
+        let val = -negamax(&mut *pos, depth - 1);
+        pos.unmake_move(mv).unwrap();
+
         if val > best {
             best = val;
         }
@@ -58,7 +62,7 @@ fn negamax(pos: &Position, depth: i32) -> f64 {
     best
 }
 
-pub fn best_move_negamax(pos: &Position, depth: i32) -> Move {
+pub fn best_move_negamax(pos: &mut Position, depth: i32) -> Move {
     let moves = pos.legal_moves();
     let mut best = 0.0;
     let mut best_index = 0;
@@ -66,9 +70,10 @@ pub fn best_move_negamax(pos: &Position, depth: i32) -> Move {
         unsafe {
             visited_nodes += 1;
         }
-        let mut pos2 = pos.clone();
-        pos2.make_move(*mv).unwrap();
-        let val = -negamax(&pos2, depth - 1);
+        pos.make_move(*mv).unwrap();
+        let val = -negamax(&mut *pos, depth - 1);
+        pos.unmake_move(*mv).unwrap();
+
         if val > best || index == 0 {
             best = val;
             best_index = index;
@@ -77,7 +82,7 @@ pub fn best_move_negamax(pos: &Position, depth: i32) -> Move {
     moves[best_index]
 }
 
-fn can_give_mate(pos: &Position) -> bool {
+fn can_give_mate(pos: &mut Position) -> bool {
     for mv in pos.legal_moves() {
         let mut pos2 = pos.clone();
         pos2.make_move(mv).unwrap();
@@ -88,7 +93,7 @@ fn can_give_mate(pos: &Position) -> bool {
     return false;
 }
 
-pub fn choose_move(pos: &Position) -> Move {
+pub fn choose_move(pos: &mut Position) -> Move {
     let mut rng = thread_rng();
 
     let mut good_moves = vec![];
@@ -97,7 +102,7 @@ pub fn choose_move(pos: &Position) -> Move {
     for &mv in moves.iter() {
         let mut pos2 = pos.clone();
         pos2.make_move(mv).unwrap();
-        if !can_give_mate(&pos2) {
+        if !can_give_mate(&mut pos2) {
             good_moves.push(mv);
         }
     }
@@ -109,7 +114,7 @@ pub fn choose_move(pos: &Position) -> Move {
     }
 }
 
-pub fn choose_move_rng(pos: &Position) -> Move {
+pub fn choose_move_rng(pos: &mut Position) -> Move {
     let mut rng = thread_rng();
 
     let moves = pos.legal_moves();

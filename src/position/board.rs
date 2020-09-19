@@ -15,8 +15,12 @@ pub struct Position {
     pub to_move: Player,
     pub castle_rights: String,
     pub en_passant: Option<Coord>,
-    pub half_moves: u32,
+    pub half_moves: u32, // FIXME: we could remove this and only leave the stack
     pub full_moves: u32,
+    pub half_moves_stack: Vec<u32>,
+    pub captures: Vec<Field>,
+    pub ep_stack: Vec<Option<Coord>>,
+    pub castling_stack: Vec<String>,
 }
 
 impl Position {
@@ -31,6 +35,10 @@ impl Position {
             en_passant: None,
             half_moves: 0,
             full_moves: 1,
+            half_moves_stack: vec![],
+            captures: vec![],
+            ep_stack: vec![],
+            castling_stack: vec![],
         }
     }
 
@@ -49,6 +57,10 @@ impl Position {
             en_passant,
             half_moves,
             full_moves,
+            half_moves_stack: vec![],
+            captures: vec![],
+            ep_stack: vec![],
+            castling_stack: vec![],
         }
     }
 

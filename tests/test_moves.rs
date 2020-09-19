@@ -424,7 +424,7 @@ mod test_moves {
         )];
 
         for (fen, value) in inputs.iter() {
-            let pos = Position::from_fen(fen);
+            let mut pos = Position::from_fen(fen);
             let moves = pos.legal_moves();
             println!("moves = {:#?}", moves);
 
@@ -453,7 +453,7 @@ mod test_moves {
         ];
 
         for (fen, value) in inputs.iter() {
-            let pos = Position::from_fen(fen);
+            let mut pos = Position::from_fen(fen);
             let moves = pos.legal_moves();
             println!("moves = {:#?}", moves);
 
@@ -482,7 +482,7 @@ mod test_moves {
         ];
 
         for (fen, value) in inputs.iter() {
-            let pos = Position::from_fen(fen);
+            let mut pos = Position::from_fen(fen);
             let moves = pos.legal_moves();
             println!("moves = {:#?}", moves);
 
@@ -526,7 +526,7 @@ mod test_moves {
         ];
 
         for (fen, value) in inputs.iter() {
-            let pos = Position::from_fen(fen);
+            let mut pos = Position::from_fen(fen);
             let moves = pos.legal_moves();
             println!("moves = {:#?}", moves);
 

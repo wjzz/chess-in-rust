@@ -14,7 +14,7 @@ mod tests {
             "5k2/8/4Q1K1/8/8/8/8/8 b - - 0 1",
         ];
         for fen in fens.iter() {
-            let pos = Position::from_fen(fen);
+            let mut pos = Position::from_fen(fen);
             assert!(pos.is_stalemate());
         }
     }
@@ -28,7 +28,7 @@ mod tests {
             "5k2/8/4Q1K1/8/8/8/8/8 w - - 0 1",
         ];
         for fen in fens.iter() {
-            let pos = Position::from_fen(fen);
+            let mut pos = Position::from_fen(fen);
             assert!(!pos.is_stalemate());
         }
     }

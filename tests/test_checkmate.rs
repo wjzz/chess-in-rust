@@ -18,7 +18,7 @@ mod tests {
             "r1bqkb1r/pp1npppp/2pN1n2/8/3P4/8/PPP1QPPP/R1B1KBNR b KQkq - 4 6",
         ];
         for fen in fens.iter() {
-            let pos = Position::from_fen(fen);
+            let mut pos = Position::from_fen(fen);
             println!("{}", fen);
             println!("legal moves len = {}", pos.legal_moves().len());
             println!("{:?}", pos.legal_moves());
@@ -39,7 +39,7 @@ mod tests {
             "r1b1kbnr/pppp1ppp/2n5/4p3/6Pq/3P1P2/PPP1P2P/RNBQKBNR w KQkq - 1 4",
         ];
         for fen in fens.iter() {
-            let pos = Position::from_fen(fen);
+            let mut pos = Position::from_fen(fen);
             assert!(!pos.is_checkmate());
         }
     }
