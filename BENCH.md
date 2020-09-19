@@ -60,6 +60,7 @@ real	376m13,488s (= 6h)
 
 ### Benchmark
 
+**make sure to turn on debug symbols in .toml**
 valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes --simulate-cache=yes target/release/rust-chess
 kcachegrind callgrind.out.19316
 

@@ -145,7 +145,7 @@ impl Position {
                 player: color,
                 piece: Piece::Rook,
             };
-            assert_eq!(Some(rook_piece), self[rook_src]);
+            assert_eq!(Some(rook_piece), self.board[coord2index(rook_src)]);
             self.board[coord2index(rook_src)] = None;
             self.board[coord2index(rook_dest)] = Some(rook_piece);
         }

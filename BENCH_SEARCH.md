@@ -15,3 +15,33 @@ Negamax d=1 | b4c3 |         54 | 5.26ms | 10 knps
 Negamax d=2 | f7f6 |       1261 | 177.34ms | 7 knps
 Negamax d=3 | d8h4 |      33891 | 6.34s | 5 knps
 Negamax d=4 | f7f6 |    1477885 | 217.73s | 7 knps
+
+# Before removing pos[index]
+
+Benchmarking position rnbqk1nr/3p1ppp/1pp1p3/p2P4/PbB1P3/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 11
+Negamax d = 1 | b4c3 |         66 | 7.77ms | 8 knps
+Negamax d = 2 | c6d5 |       1347 | 296.53ms | 5 knps
+Negamax d = 3 | c6d5 |      42460 | 10.42s | 4 knps
+Benchmarking position rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+Negamax d = 1 | b1a3 |         40 | 2.71ms | 15 knps
+Negamax d = 2 | b1a3 |        440 | 61.95ms | 7 knps
+Negamax d = 3 | b1a3 |       9342 | 1.38s | 7 knps
+Benchmarking position rnbqk1nr/3p1ppp/1p1P4/p3p3/PbB5/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 1
+Negamax d = 1 | b4c3 |         54 | 7.03ms | 8 knps
+Negamax d = 2 | f7f6 |       1261 | 247.46ms | 5 knps
+Negamax d = 3 | d8h4 |      33891 | 8.81s | 4 knps
+
+# After removing the pos[index] indexing
+
+Benchmarking position rnbqk1nr/3p1ppp/1pp1p3/p2P4/PbB1P3/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 11
+Negamax d = 1 | b4c3 |         66 | 5.35ms | 12 knps
+Negamax d = 2 | c6d5 |       1347 | 210.26ms | 6 knps
+Negamax d = 3 | c6d5 |      42460 | 7.37s | 6 knps
+Benchmarking position rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+Negamax d = 1 | b1a3 |         40 | 1.75ms | 23 knps
+Negamax d = 2 | b1a3 |        440 | 37.80ms | 12 knps
+Negamax d = 3 | b1a3 |       9342 | 919.60ms | 10 knps
+Benchmarking position rnbqk1nr/3p1ppp/1p1P4/p3p3/PbB5/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 1
+Negamax d = 1 | b4c3 |         54 | 4.84ms | 11 knps
+Negamax d = 2 | f7f6 |       1261 | 185.74ms | 7 knps
+Negamax d = 3 | d8h4 |      33891 | 6.13s | 6 knps

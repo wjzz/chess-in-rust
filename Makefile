@@ -1,4 +1,4 @@
-.PHONY: bot bench perft
+.PHONY: bot bench perft valgrind
 
 bot:
 	@cargo build --release --bin bot
@@ -10,3 +10,8 @@ bench:
 
 perft:
 	@cargo run --bin rust-chess --release
+
+valgrind:
+	@cargo build --release --bin benchmark
+	valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes --simulate-cache=yes target/release/benchmark
+	kcachegrind callgrind.out*

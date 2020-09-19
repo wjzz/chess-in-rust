@@ -35,7 +35,8 @@ PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 4    # king cant be left in check
 - [x] depth = 5    # missing en passant    TODO: requires more than 3 minutes, need to optimize
 - [x] depth = 6    # TODO: requires 60min on single core | 20 min on all cores
-- [ ] depth = 7    # no result after 6h hours
+- [x] depth = 7    # a few hours
+- [ ] depth = 8
 
 Later:
 - [ ] Bitboards
