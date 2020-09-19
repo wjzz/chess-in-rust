@@ -65,7 +65,7 @@ pub fn best_move_negamax(pos: &Position, depth: i32) -> Move {
     for (index, mv) in moves.iter().enumerate() {
         unsafe {
             visited_nodes += 1;
-        }
+        };
         let mut pos2 = pos.clone();
         pos2.make_move(*mv).unwrap();
         let val = -negamax(&pos2, depth - 1);
