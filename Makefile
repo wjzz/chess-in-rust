@@ -1,4 +1,4 @@
-.PHONY: bot bench
+.PHONY: bot bench perft
 
 bot:
 	@cargo build --release --bin bot
@@ -7,3 +7,6 @@ bot:
 
 bench:
 	@cargo run --bin benchmark --release
+
+perft:
+	@cargo run --bin rust-chess --release

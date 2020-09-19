@@ -9,20 +9,24 @@ Priority TODOs:
 - - [x] En passant
 - - [x] Castling
 - [x] Make move
-- [ ] Unmake move
+- [1/2] Unmake move [implemented in a branch, efficiency dropped down]
 - [x] `check` checking
 - [x] `mate` checking
 - [x] `stalemate` checking
 - [x] legal move generation
 - [x] half_move counter since pawn move or capture for fen
 - [x] full_move counter for fen
-- [ ] `draw by insufficent material` checking
 - [x] implement faster board indexing, don't use `Coord`s everywhere
+- [ ] `draw by insufficent material` checking
+- [ ] draw by repetition
+- [ ] position hash
+- [ ] king in check flag
 
 Bot TODOs:
 
 - [ ] alpha-beta
 - [ ] opening book
+- [ ] ending table
 
 PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 1
