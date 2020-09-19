@@ -82,3 +82,13 @@ perf imm 4 =     197281 | correct: true | total time 215.28ms
 perf imm 5 =    4865609 | correct: true | total time    3.33s
 perf imm 6 =  119060324 | correct: true | total time   86.10s   [  1.2 min]
 perf imm 7 = 3195901860 | correct: true | total time 3025.23s   [ 50.0 min]
+
+**Using unmake move with fixed unmake move**
+
+Using 4 threads.
+perf imm 1 =         20 | correct: true | total time 219.89µs
+perf imm 2 =        400 | correct: true | total time 514.40µs
+perf imm 3 =       8902 | correct: true | total time   7.13ms
+perf imm 4 =     197281 | correct: true | total time  88.68ms
+perf imm 5 =    4865609 | correct: true | total time    2.08s
+perf imm 6 =  119060324 | correct: true | total time   63.12s

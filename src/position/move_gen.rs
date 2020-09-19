@@ -101,7 +101,7 @@ impl Position {
                     // make sure the square before the pawn is empty!
                     let passing_square = rowcol2coord_safe(src_row + row_delta, src_col);
                     if let Some(passing) = passing_square {
-                        if self[passing] == None {
+                        if self.board[coord2index(passing)] == None {
                             self.try_add_pawn(
                                 src,
                                 src_row + row_delta * 2,
@@ -383,18 +383,18 @@ impl Position {
             } else {
                 let to_move = self.to_move;
                 // let mut pos = self.clone();
-                let fen1 = self.to_fen();
+                // let fen1 = self.to_fen();
                 self.make_move(*mv).unwrap();
                 if !self.is_king_in_check(to_move) {
                     result.push(*mv);
                 }
                 self.unmake_move(*mv).unwrap();
-                let fen2 = self.to_fen();
-                if fen1 != fen2 {
-                    println!("{}", self.to_ascii());
-                    println!("move = {}", mv.to_usi_ascii());
-                }
-                assert_eq!(fen1, fen2);
+                // let fen2 = self.to_fen();
+                // if fen1 != fen2 {
+                //     println!("{}", self.to_ascii());
+                //     println!("move = {}", mv.to_usi_ascii());
+                // }
+                // assert_eq!(fen1, fen2);
             }
         }
         result
