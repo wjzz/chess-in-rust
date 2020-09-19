@@ -5,7 +5,10 @@ use rust_chess::Position;
 
 fn parse_args(args: Vec<String>) -> u32 {
     let default = 4;
-    args.get(1).map(|s| s.parse().ok()).flatten().unwrap_or(default)
+    args.get(1)
+        .map(|s| s.parse().ok())
+        .flatten()
+        .unwrap_or(default)
 }
 
 fn main() {

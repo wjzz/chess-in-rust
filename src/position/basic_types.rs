@@ -167,7 +167,6 @@ pub fn usi2rowcol(coord: &str) -> usize {
     rowcol2index(row, col)
 }
 
-
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Move {
     pub src: usize,
@@ -192,7 +191,6 @@ impl Move {
         }
     }
 
-
     pub fn from_ascii(ascii: &'static str) -> Self {
         let src = &ascii[0..2];
         assert_eq!("->", &ascii[2..4]);
@@ -213,7 +211,7 @@ impl Move {
             Some('b') => Some(Piece::Bishop),
             Some('r') => Some(Piece::Rook),
             Some('q') => Some(Piece::Queen),
-            _ => None
+            _ => None,
         };
 
         Move::new(usi2rowcol(src), usi2rowcol(dest), promotion)

@@ -17,7 +17,12 @@ Priority TODOs:
 - [x] half_move counter since pawn move or capture for fen
 - [x] full_move counter for fen
 - [ ] `draw by insufficent material` checking
-- [ ] implement faster board indexing, don't use `Coord`s everywhere
+- [x] implement faster board indexing, don't use `Coord`s everywhere
+
+Bot TODOs:
+
+- [ ] alpha-beta
+- [ ] opening book
 
 PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 1

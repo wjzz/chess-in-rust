@@ -120,8 +120,8 @@ impl Position {
                     if let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
                         let dest_piece = self.board[dest];
 
-                        let en_passant_ok =
-                            self.en_passant.is_some() && coord2index(self.en_passant.unwrap()) == dest;
+                        let en_passant_ok = self.en_passant.is_some()
+                            && coord2index(self.en_passant.unwrap()) == dest;
 
                         if en_passant_ok
                             || (!en_passant_ok
@@ -189,8 +189,10 @@ impl Position {
                                 })
                         );
 
-                        let free1 = self.board[rowcol2index(src_row, src_col + king_side_dx)] == None;
-                        let free2 = self.board[rowcol2index(src_row, src_col + 2 * king_side_dx)] == None;
+                        let free1 =
+                            self.board[rowcol2index(src_row, src_col + king_side_dx)] == None;
+                        let free2 =
+                            self.board[rowcol2index(src_row, src_col + 2 * king_side_dx)] == None;
 
                         if free1 && free2 {
                             self.try_add(src, src_row, src_col + 2 * king_side_dx, &mut all_moves);
@@ -209,7 +211,8 @@ impl Position {
                                 })
                         );
 
-                        let free1 = self.board[rowcol2index(src_row, src_col + queen_side_dx)] == None;
+                        let free1 =
+                            self.board[rowcol2index(src_row, src_col + queen_side_dx)] == None;
                         let free2 =
                             self.board[rowcol2index(src_row, src_col + 2 * queen_side_dx)] == None;
                         let free3 =
