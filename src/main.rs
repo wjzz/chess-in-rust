@@ -34,7 +34,7 @@ fn main() {
     for (depth, &value) in expected.iter().enumerate() {
         let depth = depth as u32 + 1;
         let start = time::Instant::now();
-        let result = Position::perft_immutable_par(depth, fen, n_threads);
+        let result = Position::perft_mutable_par(depth, fen, n_threads);
         let time_str = format!("{:.2?}", start.elapsed());
         println!(
             "perf imm {} = {:10} | correct: {} | total time{: >9}",

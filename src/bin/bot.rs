@@ -1,7 +1,7 @@
 use rust_chess::move_search::*;
 use rust_chess::position::*;
 
-fn play_move(fen: &str, moves: &[&str]) -> String {
+fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32) -> String {
     let fen = if fen == "startpos" {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     } else {
@@ -9,13 +9,28 @@ fn play_move(fen: &str, moves: &[&str]) -> String {
     };
 
     let mut pos = Position::from_fen(fen);
+
     for mv_str in moves.iter() {
         let mv = Move::from_uci_ascii(mv_str);
         pos.make_move(mv).unwrap();
     }
 
-    let mv = best_move_negamax(&pos, 3);
-    // let mv = choose_move(&pos);
+    let time_left = if pos.to_move == Player::White { wtime } else { btime };
+    let final_fen = pos.to_fen();
+
+    eprintln!("FEN: {}", final_fen);
+    let mv = if time_left > 60 * 1000 {
+        let (mv, val) = best_move_pvs(&mut pos, 4);
+        // let mv = best_move_negamax(&mut pos, 3);
+        // let mv = choose_move(&pos);
+        eprintln!("MOVE: {} EVAL: {:.1}", mv.to_usi_ascii(), val);
+        mv
+    } else {
+        let mv = choose_move(&mut pos);
+        eprintln!("MOVE: {}", mv.to_usi_ascii());
+        mv
+    };
+
     mv.to_usi_ascii()
 }
 
@@ -58,9 +73,13 @@ fn main() {
                 let line2 = read_line();
                 let parts2: Vec<_> = line2.split_ascii_whitespace().collect();
                 // println!("<< parts2 {:?}", parts2);
-
+                // go wtime 19870 btime 27130 winc 0 binc 0
                 assert_eq!(parts2[0], "go");
-                let bot_move = play_move(fen, moves);
+                assert_eq!(parts2[1], "wtime");
+                let wtime: i32 = parts2[2].parse().unwrap();
+                assert_eq!(parts2[3], "btime");
+                let btime: i32 = parts2[4].parse().unwrap();
+                let bot_move = play_move(fen, moves, wtime, btime);
                 println!("bestmove {}", bot_move);
             }
         } else {

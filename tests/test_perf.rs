@@ -9,7 +9,7 @@ mod test_moves {
     fn perf_starting_1() {
         let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        let pos = Position::from_fen(fen);
+        let mut pos = Position::from_fen(fen);
         let moves = pos.legal_moves();
         println!("perfm 1 = {:#?}", moves);
 
@@ -20,7 +20,7 @@ mod test_moves {
     fn perf_starting_1_black() {
         let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1";
 
-        let pos = Position::from_fen(fen);
+        let mut pos = Position::from_fen(fen);
         let moves = pos.legal_moves();
         println!("perfm 1 = {:#?}", moves);
 
