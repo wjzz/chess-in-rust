@@ -104,3 +104,14 @@ perf imm 4 =     197281 | correct: true | total time  96.78ms
 perf imm 5 =    4865609 | correct: true | total time    2.02s
 perf imm 6 =  119060324 | correct: true | total time   58.28s
 perf imm 7 = 3195901860 | correct: true | total time 1721.53s  [ 29.0 min]
+
+**After removing unnecessary vector copying in move gen**
+
+Using 4 threads.
+perf imm 1 =         20 | correct: true | total time 243.58µs
+perf imm 2 =        400 | correct: true | total time 372.28µs
+perf imm 3 =       8902 | correct: true | total time   5.39ms
+perf imm 4 =     197281 | correct: true | total time  92.78ms
+perf imm 5 =    4865609 | correct: true | total time    1.62s
+perf imm 6 =  119060324 | correct: true | total time   44.27s
+perf imm 7 = 3195901860 | correct: true | total time 1472.22s [ 24.5 min]

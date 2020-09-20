@@ -77,7 +77,7 @@ impl Position {
         }
     }
 
-    fn generate_moves_from(&self, src: usize, piece: Piece, color: Player) -> Vec<IntMove> {
+    fn generate_moves_from(&self, src: usize, piece: Piece, color: Player, all_moves: &mut Vec<IntMove>) {
         assert_eq!(boardcell_encode(color, piece), self.board[src]);
 
         let RowCol {
@@ -87,8 +87,6 @@ impl Position {
 
         let row_delta: i32 = if color == Player::White { 1 } else { -1 };
 
-        let mut all_moves = vec![];
-
         match piece {
             Piece::Pawn => {
                 let is_first_move = match color {
@@ -96,7 +94,7 @@ impl Position {
                     Player::Black => src_row == 6,
                 };
 
-                self.try_add_pawn(src, src_row + row_delta, src_col, &mut all_moves, 0, false);
+                self.try_add_pawn(src, src_row + row_delta, src_col, all_moves, 0, false);
 
                 // first move by two squares
                 if is_first_move {
@@ -108,7 +106,7 @@ impl Position {
                                 src,
                                 src_row + row_delta * 2,
                                 src_col,
-                                &mut all_moves,
+                                all_moves,
                                 0,
                                 false,
                             );
@@ -135,7 +133,7 @@ impl Position {
                                 src,
                                 src_row + row_delta,
                                 src_col + col_delta,
-                                &mut all_moves,
+                                all_moves,
                                 0,
                                 true,
                             );
@@ -147,7 +145,7 @@ impl Position {
                 for dx in -1..=1 {
                     for dy in -1..=1 {
                         if dx != 0 || dy != 0 {
-                            self.try_add(src, src_row + dy, src_col + dx, &mut all_moves);
+                            self.try_add(src, src_row + dy, src_col + dx, all_moves);
                         }
                     }
                 }
@@ -182,7 +180,7 @@ impl Position {
                             self.board[rowcol2index(src_row, src_col + 2 * king_side_dx)] == EMPTY;
 
                         if free1 && free2 {
-                            self.try_add(src, src_row, src_col + 2 * king_side_dx, &mut all_moves);
+                            self.try_add(src, src_row, src_col + 2 * king_side_dx, all_moves);
                         }
                     }
 
@@ -201,7 +199,7 @@ impl Position {
                             self.board[rowcol2index(src_row, src_col + 3 * queen_side_dx)] == EMPTY;
 
                         if free1 && free2 && free3 {
-                            self.try_add_flag(src, src_row, src_col + 2 * queen_side_dx, &mut all_moves, CASTLE_FLAG);
+                            self.try_add_flag(src, src_row, src_col + 2 * queen_side_dx, all_moves, CASTLE_FLAG);
                         }
                     }
                 }
@@ -212,36 +210,34 @@ impl Position {
                         for s2 in [-1, 1].iter() {
                             let dx = w * s1;
                             let dy = d * s2;
-                            self.try_add(src, src_row + dy, src_col + dx, &mut all_moves);
+                            self.try_add(src, src_row + dy, src_col + dx, all_moves);
                         }
                     }
                 }
             }
             Piece::Queen => {
-                self.line(src, 0, -1, &mut all_moves);
-                self.line(src, 0, 1, &mut all_moves);
-                self.line(src, -1, 0, &mut all_moves);
-                self.line(src, 1, 0, &mut all_moves);
-                self.line(src, 1, -1, &mut all_moves);
-                self.line(src, 1, 1, &mut all_moves);
-                self.line(src, -1, -1, &mut all_moves);
-                self.line(src, -1, 1, &mut all_moves);
+                self.line(src, 0, -1, all_moves);
+                self.line(src, 0, 1, all_moves);
+                self.line(src, -1, 0, all_moves);
+                self.line(src, 1, 0, all_moves);
+                self.line(src, 1, -1, all_moves);
+                self.line(src, 1, 1, all_moves);
+                self.line(src, -1, -1, all_moves);
+                self.line(src, -1, 1, all_moves);
             }
             Piece::Bishop => {
-                self.line(src, 1, -1, &mut all_moves);
-                self.line(src, 1, 1, &mut all_moves);
-                self.line(src, -1, -1, &mut all_moves);
-                self.line(src, -1, 1, &mut all_moves);
+                self.line(src, 1, -1, all_moves);
+                self.line(src, 1, 1, all_moves);
+                self.line(src, -1, -1, all_moves);
+                self.line(src, -1, 1, all_moves);
             }
             Piece::Rook => {
-                self.line(src, 0, -1, &mut all_moves);
-                self.line(src, 0, 1, &mut all_moves);
-                self.line(src, -1, 0, &mut all_moves);
-                self.line(src, 1, 0, &mut all_moves);
+                self.line(src, 0, -1, all_moves);
+                self.line(src, 0, 1, all_moves);
+                self.line(src, -1, 0, all_moves);
+                self.line(src, 1, 0, all_moves);
             }
         }
-
-        all_moves
     }
 
     pub fn moves(&self) -> Vec<IntMove> {
@@ -255,11 +251,11 @@ impl Position {
             let player_piece = self.board[index];
             if player_piece != EMPTY {
                 if boardcell_player(player_piece) == color {
-                    all_moves.append(&mut self.generate_moves_from(
+                    self.generate_moves_from(
                         index,
                         boardcell_piece(player_piece),
                         color,
-                    ));
+                        &mut all_moves);
                 }
             }
         }
@@ -294,7 +290,6 @@ impl Position {
         }
         return false;
     }
-
 
     pub fn is_castling_move_color(&self, mv: IntMove, color: Player) -> bool {
         let (src, dest, _promote_to) = intmove_destructure(mv);
@@ -337,7 +332,6 @@ impl Position {
             _ => panic!("Incorrect castling move {:?}", mv),
         }
     }
-
 
     fn can_safely_castle(&self, mv: IntMove) -> bool {
         let fields = self.fields_to_check_castling(mv);

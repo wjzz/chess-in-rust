@@ -13,7 +13,9 @@ perft:
 
 valgrind:
 	@cargo build --release --bin benchmark
-	valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes --simulate-cache=yes target/release/benchmark
+	@cargo build --release --bin rust-chess
+	valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes --simulate-cache=yes target/release/rust-chess
+	# valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes --simulate-cache=yes target/release/benchmark
 	kcachegrind callgrind.out*
 
 test:
