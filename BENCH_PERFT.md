@@ -93,3 +93,14 @@ perf imm 3 =       8902 | correct: true | total time   7.13ms
 perf imm 4 =     197281 | correct: true | total time  88.68ms
 perf imm 5 =    4865609 | correct: true | total time    2.08s
 perf imm 6 =  119060324 | correct: true | total time   63.12s
+
+**After changing move repr**
+
+Using 4 threads.
+perf imm 1 =         20 | correct: true | total time 483.61µs
+perf imm 2 =        400 | correct: true | total time 341.03µs
+perf imm 3 =       8902 | correct: true | total time   8.59ms
+perf imm 4 =     197281 | correct: true | total time  96.78ms
+perf imm 5 =    4865609 | correct: true | total time    2.02s
+perf imm 6 =  119060324 | correct: true | total time   58.28s
+perf imm 7 = 3195901860 | correct: true | total time 1721.53s  [ 29.0 min]

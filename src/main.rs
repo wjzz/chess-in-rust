@@ -21,7 +21,7 @@ fn main() {
 
     let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-    let expected = [
+    let expected: [u64;8] = [
         20,
         400,
         8_902,
@@ -29,6 +29,7 @@ fn main() {
         4_865_609,
         119_060_324,
         3_195_901_860,
+        84_998_978_956,
     ];
 
     for (depth, &value) in expected.iter().enumerate() {

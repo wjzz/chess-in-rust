@@ -93,7 +93,7 @@ impl Position {
 }
 
 impl Position {
-    fn perft_mutable_iter(depth: u32, level: u32, pos: &mut Position) -> u32 {
+    fn perft_mutable_iter(depth: u32, level: u32, pos: &mut Position) -> u64 {
         if depth == 0 {
             return 1;
         }
@@ -102,7 +102,7 @@ impl Position {
         let mut result = 0;
 
         if depth == 1 {
-            return moves.len() as u32;
+            return moves.len() as u64;
         }
 
         for &mv in moves.iter() {
@@ -118,7 +118,7 @@ impl Position {
         result
     }
 
-    pub fn perft_mutable_par(depth: u32, fen: &str, n_threads: u32) -> u32 {
+    pub fn perft_mutable_par(depth: u32, fen: &str, n_threads: u32) -> u64 {
         let mut pos = Position::from_fen(fen);
 
         let moves = pos.legal_moves();

@@ -33,9 +33,9 @@ PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 2    # color change after move
 - [x] depth = 3    # pawn captured forward, pawn jumping over knight
 - [x] depth = 4    # king cant be left in check
-- [x] depth = 5    # missing en passant    TODO: requires more than 2 minutes, need to optimize
-- [x] depth = 6    # TODO: requires 60min on single core | 20 min on all cores
-- [x] depth = 7    # a few hours
+- [x] depth = 5    # missing en passant # around 2 secs
+- [x] depth = 6    # less than a minute
+- [x] depth = 7    # 29 mins [4 coes]
 - [ ] depth = 8
 
 Later:
