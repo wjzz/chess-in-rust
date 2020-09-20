@@ -45,7 +45,7 @@ impl Position {
             // initial pawn move
             if (dest_row - src_row).abs() == 2 && src_col == dest_col {
                 let ep_row = (src_row + dest_row) / 2;
-                Some(rowcol2coord(ep_row, src_col))
+                Some(rowcol2index(ep_row, src_col))
             } else {
                 None
             }
@@ -102,7 +102,7 @@ impl Position {
         // if we take en passant, we have to clear another square
         if piece == Piece::Pawn && prev_en_passant_flag.is_some() {
             let ep_dest = prev_en_passant_flag.unwrap();
-            if dest == coord2index(ep_dest) {
+            if dest == ep_dest {
                 let clear_row = src_row;
                 let clear_col = dest_col;
                 let clear_coord = rowcol2coord_safe(clear_row, clear_col).unwrap();
@@ -205,7 +205,7 @@ impl Position {
             None => None,
             Some(ep_coord) => {
                 // println!(">> EP COORD = {}", ep_coord);
-                let ep_field = coord2index(ep_coord);
+                let ep_field = ep_coord;
                 // we just made an en passant capture
                 if ep_field == dest && piece == Piece::Pawn {
                     let src_rc = index2rowcol(src);

@@ -115,3 +115,13 @@ perf imm 4 =     197281 | correct: true | total time  92.78ms
 perf imm 5 =    4865609 | correct: true | total time    1.62s
 perf imm 6 =  119060324 | correct: true | total time   44.27s
 perf imm 7 = 3195901860 | correct: true | total time 1472.22s [ 24.5 min]
+
+**After removing coord2index conversions and changing en passant repr to index**
+
+Using 4 threads.
+perf imm 1 =         20 | correct: true | total time 232.80µs
+perf imm 2 =        400 | correct: true | total time 356.15µs
+perf imm 3 =       8902 | correct: true | total time   7.60ms
+perf imm 4 =     197281 | correct: true | total time  75.68ms
+perf imm 5 =    4865609 | correct: true | total time    1.53s
+perf imm 6 =  119060324 | correct: true | total time   42.26s

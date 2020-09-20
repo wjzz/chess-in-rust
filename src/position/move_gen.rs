@@ -122,7 +122,7 @@ impl Position {
                         let dest_piece = self.board[dest];
 
                         let en_passant_ok = self.en_passant.is_some()
-                            && coord2index(self.en_passant.unwrap()) == dest;
+                            && self.en_passant.unwrap() == dest;
 
                         if en_passant_ok
                             || (!en_passant_ok

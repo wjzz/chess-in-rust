@@ -15,12 +15,12 @@ pub struct Position {
     pub board: Board,
     pub to_move: Player,
     pub castle_rights: String,
-    pub en_passant: Option<Coord>,
-    pub half_moves: u32, // FIXME: we could remove this and only leave the stack
+    pub en_passant: Option<usize>,
+    pub half_moves: u32, // TODO: we could remove this and only leave the stack
     pub full_moves: u32,
     pub half_moves_stack: Vec<u32>,
     pub captures: Vec<BoardCell>,
-    pub ep_stack: Vec<Option<Coord>>,
+    pub ep_stack: Vec<Option<usize>>,
     pub castling_stack: Vec<String>,
 }
 
@@ -46,7 +46,7 @@ impl Position {
     pub fn create(
         board: Board,
         to_move: Player,
-        en_passant: Option<Coord>,
+        en_passant: Option<usize>,
         castle_rights: String,
         half_moves: u32,
         full_moves: u32,
@@ -110,7 +110,7 @@ impl Position {
 
         let en_passant_str = match self.en_passant {
             None => "-".to_string(),
-            Some(coord) => coord.to_ascii_lowercase(),
+            Some(field) => index2coord(field).to_ascii_lowercase(),
         };
 
         result.push_str(&format!(

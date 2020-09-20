@@ -73,7 +73,7 @@ impl Position {
             }
             let coord_str = en_passant_str.to_ascii_uppercase();
 
-            Some(str2coord(&coord_str).unwrap())
+            Some(coord2index(str2coord(&coord_str).unwrap()))
         } else {
             None
         };
@@ -183,7 +183,7 @@ mod tests {
 
         for (fen, ep) in tests.iter() {
             let pos = Position::from_fen(fen);
-            assert_eq!(*ep, pos.en_passant);
+            assert_eq!(ep.map(|c|coord2index(c)), pos.en_passant);
         }
     }
 

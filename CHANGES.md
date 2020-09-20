@@ -11,3 +11,4 @@ search deeper to win.
 - Tried to add a `CASTLE_FLAG` to the move repr, but there were small node difference in `bench` so I stashed the changes.
 - Changed the Field type into a normal int with 0 == empty. No big performance changes, but lot of potential
 - Found many vector copying in move_generation. Changed function to pass a ref to vector and gained `20%` speedup!
+- Changed the representation of `en passant` field from coord to index. This allowed me to remove many coord2index calls. Got 5% speedup.
