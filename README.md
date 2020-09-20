@@ -42,6 +42,7 @@ Later:
 - [ ] Ox88 board
 - [ ] Bitboards
 - [ ] Experiments with more efficient/compact data structures
+- - [ ] Use `usize` for repr. moves instead of three ints
 - [ ] Compilation to WASM
 - [ ] Frontend in JS
 
