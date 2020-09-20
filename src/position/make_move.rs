@@ -4,12 +4,8 @@ pub mod move_gen;
 pub use move_gen::*;
 
 impl Position {
-    pub fn make_move(&mut self, mv: Move) -> Result<(), String> {
-        let Move {
-            src,
-            dest,
-            promote_to,
-        } = mv;
+    pub fn make_move(&mut self, mv: IntMove) -> Result<(), String> {
+        let (src, dest, promote_to) = intmove_destructure(mv);
 
         let color = self.to_move;
         let opponent = color.opposite();
@@ -174,12 +170,8 @@ impl Position {
 }
 
 impl Position {
-    pub fn unmake_move(&mut self, mv: Move) -> Result<(), String> {
-        let Move {
-            src,
-            dest,
-            promote_to,
-        } = mv;
+    pub fn unmake_move(&mut self, mv: IntMove) -> Result<(), String> {
+        let (src, dest, promote_to) = intmove_destructure(mv);
 
         // println!(">> {} ==> {}", index2coord(src), index2coord(dest));
 
@@ -190,7 +182,7 @@ impl Position {
         let piece = match self.board[dest] {
             None => {
                 println!("FEN = {}", self.to_fen());
-                println!("LAST MOVE = {}", mv.to_usi_ascii());
+                // println!("LAST MOVE = {}", mv.to_usi_ascii());
                 return Err(format!("Expected to find a piece at {}!", src));
             },
             Some(player_piece) if player_piece.player != color => {

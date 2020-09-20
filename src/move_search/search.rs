@@ -62,7 +62,7 @@ fn negamax(pos: &mut Position, depth: i32) -> f64 {
     best
 }
 
-pub fn best_move_negamax(pos: &mut Position, depth: i32) -> Move {
+pub fn best_move_negamax(pos: &mut Position, depth: i32) -> IntMove {
     let moves = pos.legal_moves();
     let mut best = 0.0;
     let mut best_index = 0;
@@ -99,9 +99,9 @@ pub fn best_move_negamax(pos: &mut Position, depth: i32) -> Move {
 // (* Initial call for Player A's root node *)
 // negamax(rootNode, depth, −∞, +∞, 1)
 
-static mut ALPHA_BETA_BEST_MOVE: Option<Move> = None;
+static mut ALPHA_BETA_BEST_MOVE: Option<IntMove> = None;
 static mut RESULT_VEC: Vec<f64> = vec![];
-static mut ORDERING: Vec<Move> = vec![];
+static mut ORDERING: Vec<IntMove> = vec![];
 
 fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64 {
     unsafe {
@@ -178,7 +178,7 @@ fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, bet
     best
 }
 
-pub fn best_move_alphabeta_negamax(pos: &mut Position, depth: i32) -> Move {
+pub fn best_move_alphabeta_negamax(pos: &mut Position, depth: i32) -> IntMove {
     alphabeta_negamax(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
     let best_move = unsafe {
         ALPHA_BETA_BEST_MOVE.unwrap()
@@ -255,7 +255,7 @@ fn pvs(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64
 }
 
 
-pub fn best_move_pvs(pos: &mut Position, depth: i32) -> (Move, f64) {
+pub fn best_move_pvs(pos: &mut Position, depth: i32) -> (IntMove, f64) {
     let val = pvs(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
     let best_move = unsafe {
         ALPHA_BETA_BEST_MOVE.unwrap()
@@ -276,7 +276,7 @@ fn can_give_mate(pos: &mut Position) -> bool {
     return false;
 }
 
-pub fn choose_move(pos: &mut Position) -> Move {
+pub fn choose_move(pos: &mut Position) -> IntMove {
     let mut rng = thread_rng();
 
     let mut good_moves = vec![];
@@ -297,7 +297,7 @@ pub fn choose_move(pos: &mut Position) -> Move {
     }
 }
 
-pub fn choose_move_rng(pos: &mut Position) -> Move {
+pub fn choose_move_rng(pos: &mut Position) -> IntMove {
     let mut rng = thread_rng();
 
     let moves = pos.legal_moves();

@@ -167,6 +167,101 @@ pub fn usi2rowcol(coord: &str) -> usize {
     rowcol2index(row, col)
 }
 
+// Move
+// src: 0..63 2^6  = 6 bits
+// dest: 0..64 2^6 = 6 bits
+// promote to n,b,r,q = 2 bits (or normal piece size)
+// castling flag? = 1 or 2 bits
+// capture flag? = 1 bit
+// check? = 1 bit
+
+pub type IntMove = usize;
+
+pub fn intmove_encode(src: usize, dest: usize, promote_to: Option<Piece>) -> IntMove {
+    let mut intmove = 0usize;
+    assert!(src < 64);
+    intmove |= src;
+    intmove <<= 8;
+
+    intmove |= dest;
+    intmove <<= 8;
+
+    if let Some(piece) = promote_to {
+        intmove |= piece as usize;
+    }
+    return intmove;
+}
+
+pub fn intmove_from_move(mv: &Move) -> IntMove {
+    let Move { src, dest, promote_to } = mv;
+    intmove_encode(*src, *dest, *promote_to)
+}
+
+fn show_bytes(intmove: IntMove) {
+    println!("intmove = {}", intmove);
+    for i in (0..32usize).rev() {
+        print!("{}", if intmove & (1usize << i) != 0 { "1"} else { "0"});
+        if i % 8 == 0 {
+            print!(" ");
+        }
+    }
+    println!("");
+}
+
+pub fn intmove_dest(intmove: IntMove) -> usize {
+    (intmove >> 8) % 256
+}
+
+pub fn intmove_src(intmove: IntMove) -> usize {
+    (intmove >> 16) % 256
+}
+
+pub fn intmove_promote_to(intmove: IntMove) -> Option<Piece> {
+    match intmove % 8 {
+        0 => None,
+        2 => Some(Piece::Knight),
+        3 => Some(Piece::Bishop),
+        4 => Some(Piece::Rook),
+        5 => Some(Piece::Queen),
+        _ => panic!("Wrong promote_to value: {}", intmove % 8),
+    }
+}
+
+pub fn intmove_destructure(intmove: IntMove) -> (usize, usize, Option<Piece>) {
+    let mut intmove = intmove;
+    let promote_to_bits = intmove % 8;
+    intmove >>= 8;
+
+    let dest = intmove % 256;
+    intmove >>= 8;
+
+    let src = intmove % 256;
+    let promote_to = match promote_to_bits {
+        0 => None,
+        2 => Some(Piece::Knight),
+        3 => Some(Piece::Bishop),
+        4 => Some(Piece::Rook),
+        5 => Some(Piece::Queen),
+        _ => panic!("Wrong promote_to value: {}", promote_to_bits),
+    };
+    // println!("src={} dest={}", src, dest);
+    return (src, dest, promote_to);
+}
+
+pub fn move_from_intmove(intmove: IntMove) -> Move {
+    let (src, dest, promote_to) = intmove_destructure(intmove);
+    Move { src, dest, promote_to }
+}
+
+pub fn intmove_from_ascii(ascii: &'static str) -> IntMove {
+    intmove_from_move(&Move::from_ascii(ascii))
+}
+
+pub fn intmove_to_uci_ascii(intmove: IntMove) -> String {
+    move_from_intmove(intmove).to_usi_ascii()
+}
+
+
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Move {
     pub src: usize,

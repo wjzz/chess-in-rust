@@ -97,7 +97,7 @@ mod test_unmoves {
 
         for (mv, fen_after) in inputs.iter() {
             let mut pos = Position::from_fen(fen);
-            let mv = Move::from_ascii(mv);
+            let mv = intmove_from_ascii(mv);
             pos.make_move(mv).unwrap();
             assert_eq!(fen_after.to_string(), pos.to_fen());
 
@@ -172,10 +172,6 @@ mod test_unmoves {
                 }
                 pos.unmake_move(*mv2).unwrap();
                 let after2 = pos.to_fen();
-                if after2 != before2 {
-                    println!("move {}", mv.to_usi_ascii());
-                    println!("move {}", mv2.to_usi_ascii());
-                }
                 assert_eq!(before2, after2);
             }
             let after = pos.to_fen();
@@ -195,11 +191,11 @@ mod test_unmoves {
         let mut pos = Position::from_fen(fen);
         assert_eq!(White, pos.to_move);
 
-        let mv = Move::from_ascii("E2->E4");
+        let mv = intmove_from_ascii("E2->E4");
         pos.make_move(mv).unwrap();
         assert_eq!(Black, pos.to_move);
 
-        let mv2 = Move::from_ascii("E7->E5");
+        let mv2 = intmove_from_ascii("E7->E5");
         pos.make_move(mv2).unwrap();
         assert_eq!(White, pos.to_move);
 
@@ -217,22 +213,22 @@ mod test_unmoves {
         assert_eq!(1, pos.full_moves);
 
         // white moves
-        let mv = Move::from_ascii("E2->E4");
+        let mv = intmove_from_ascii("E2->E4");
         pos.make_move(mv).unwrap();
         assert_eq!(1, pos.full_moves);
 
         // black moves
-        let mv2 = Move::from_ascii("E7->E5");
+        let mv2 = intmove_from_ascii("E7->E5");
         pos.make_move(mv2).unwrap();
         assert_eq!(2, pos.full_moves);
 
         // white moves
-        let mv3 = Move::from_ascii("D2->D4");
+        let mv3 = intmove_from_ascii("D2->D4");
         pos.make_move(mv3).unwrap();
         assert_eq!(2, pos.full_moves);
 
         // black moves
-        let mv4 = Move::from_ascii("D7->D5");
+        let mv4 = intmove_from_ascii("D7->D5");
         pos.make_move(mv4).unwrap();
         assert_eq!(3, pos.full_moves);
 
@@ -260,27 +256,27 @@ mod test_unmoves {
         assert_eq!(0, pos.half_moves);
 
         // white moves a pawn
-        let mv = Move::from_ascii("E2->E4");
+        let mv = intmove_from_ascii("E2->E4");
         pos.make_move(mv).unwrap();
         assert_eq!(0, pos.half_moves);
 
         // black moves a pawn too
-        let mv2 = Move::from_ascii("E7->E5");
+        let mv2 = intmove_from_ascii("E7->E5");
         pos.make_move(mv2).unwrap();
         assert_eq!(0, pos.half_moves);
 
         // white moves a knight
-        let mv3 = Move::from_ascii("G1->F3");
+        let mv3 = intmove_from_ascii("G1->F3");
         pos.make_move(mv3).unwrap();
         assert_eq!(1, pos.half_moves);
 
         // black moves a knight too
-        let mv4 = Move::from_ascii("B8->C6");
+        let mv4 = intmove_from_ascii("B8->C6");
         pos.make_move(mv4).unwrap();
         assert_eq!(2, pos.half_moves);
 
         // white captures a pawn by the knight
-        let mv5 = Move::from_ascii("F3->E5");
+        let mv5 = intmove_from_ascii("F3->E5");
         pos.make_move(mv5).unwrap();
         assert_eq!(0, pos.half_moves);
 
@@ -309,12 +305,12 @@ mod test_unmoves {
         let mut pos = Position::from_fen(fen);
 
         let mv = "B1->C3"; // knight
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "rnbqkbnr/pppppppp/8/8/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 1";
         assert_eq!(pos.to_fen(), result_fen);
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -325,12 +321,12 @@ mod test_unmoves {
         let mut pos = Position::from_fen(fen);
 
         let mv = "F5->E6"; // ep.
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "k7/8/4P3/8/8/8/8/K7 b KQkq - 0 1";
         assert_eq!(pos.to_fen(), result_fen);
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -340,12 +336,12 @@ mod test_unmoves {
         let mut pos = Position::from_fen(fen);
 
         let mv = "F4->E3"; // ep.
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "8/8/8/8/8/4p3/8/8 w KQkq - 0 2";
         assert_eq!(pos.to_fen(), result_fen);
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -358,7 +354,7 @@ mod test_unmoves {
         assert!(pos.castle_rights.contains("Q"));
 
         let mv = "A1->A2";
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "6k1/8/8/8/8/8/R7/4K2R b K - 1 1";
 
@@ -366,7 +362,7 @@ mod test_unmoves {
         assert!(pos.castle_rights.contains("K"));
         assert!(!pos.castle_rights.contains("Q"));
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -379,7 +375,7 @@ mod test_unmoves {
         assert!(pos.castle_rights.contains("Q"));
 
         let mv = "H1->H2";
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "6k1/8/8/8/8/8/7R/R3K3 b Q - 1 1";
 
@@ -387,7 +383,7 @@ mod test_unmoves {
         assert!(!pos.castle_rights.contains("K"));
         assert!(pos.castle_rights.contains("Q"));
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -400,7 +396,7 @@ mod test_unmoves {
         assert!(pos.castle_rights.contains("Q"));
 
         let mv = "E1->E2";
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "6k1/8/8/8/8/8/4K3/R6R b - - 1 1";
 
@@ -408,7 +404,7 @@ mod test_unmoves {
         assert!(!pos.castle_rights.contains("K"));
         assert!(!pos.castle_rights.contains("Q"));
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -421,14 +417,14 @@ mod test_unmoves {
         assert!(pos.castle_rights.contains("Q"));
 
         let mv = "E1->G1";
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "6k1/8/8/8/8/8/8/R4RK1 b - - 1 1";
         assert_eq!(pos.to_fen(), result_fen);
         assert!(!pos.castle_rights.contains("K"));
         assert!(!pos.castle_rights.contains("Q"));
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -441,14 +437,14 @@ mod test_unmoves {
         assert!(pos.castle_rights.contains("Q"));
 
         let mv = "E1->C1";
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "6k1/8/8/8/8/8/8/2KR3R b - - 1 1";
         assert_eq!(pos.to_fen(), result_fen);
         assert!(!pos.castle_rights.contains("K"));
         assert!(!pos.castle_rights.contains("Q"));
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -461,14 +457,14 @@ mod test_unmoves {
         assert!(pos.castle_rights.contains("q"));
 
         let mv = "B2->H8";
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "rnbqk1nB/pppppp1p/6pb/8/8/1P6/P1PPPPPP/RN1QKBNR b KQq - 0 3";
         assert_eq!(pos.to_fen(), result_fen);
         assert!(!pos.castle_rights.contains("k"));
         assert!(pos.castle_rights.contains("q"));
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 
@@ -481,14 +477,14 @@ mod test_unmoves {
         assert!(pos.castle_rights.contains("q"));
 
         let mv = "G2->A8";
-        pos.make_move(Move::from_ascii(mv)).unwrap();
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "Bn1qkbnr/p1pppppp/bp6/8/8/6P1/PPPPPP1P/RNBQK1NR b KQk - 0 3";
         assert_eq!(pos.to_fen(), result_fen);
         assert!(pos.castle_rights.contains("k"));
         assert!(!pos.castle_rights.contains("q"));
 
-        pos.unmake_move(Move::from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
 }

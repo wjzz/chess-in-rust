@@ -10,7 +10,7 @@ enum MoveSearcher {
 }
 
 impl MoveSearcher {
-    pub fn bestmove(self: &Self, pos: &mut Position) -> Move {
+    pub fn bestmove(self: &Self, pos: &mut Position) -> IntMove {
         match self {
             MoveSearcher::Negamax(depth) =>
                 best_move_negamax(pos, *depth),
@@ -73,7 +73,7 @@ fn main() {
             let start = time::Instant::now();
             let mv = searcher.bestmove(&mut pos);
             let elapsed = start.elapsed();
-            let move_ascii = mv.to_usi_ascii();
+            let move_ascii = intmove_to_uci_ascii(mv);
             let visited_nodes_safe = unsafe { VISITED_NODES };
             let nodes_per_sec = visited_nodes_safe as f64 / elapsed.as_secs_f64() / 1000.0;
             let elapsed_str = format!("{:.2?}", elapsed);

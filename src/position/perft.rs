@@ -72,8 +72,8 @@ impl Position {
                             id + 1,
                             i + 1,
                             moves.len(),
-                            index2coord(mv.src),
-                            index2coord(mv.dest),
+                            index2coord(intmove_src(mv)),
+                            index2coord(intmove_dest(mv)),
                             start.elapsed()
                         );
                     }
@@ -153,8 +153,8 @@ impl Position {
                             id + 1,
                             i + 1,
                             moves.len(),
-                            index2coord(mv.src),
-                            index2coord(mv.dest),
+                            index2coord(intmove_src(mv)),
+                            index2coord(intmove_dest(mv)),
                             start.elapsed()
                         );
                     }

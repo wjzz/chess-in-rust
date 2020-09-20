@@ -12,6 +12,7 @@ fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32) -> String {
 
     for mv_str in moves.iter() {
         let mv = Move::from_uci_ascii(mv_str);
+        let mv = intmove_from_move(&mv);
         pos.make_move(mv).unwrap();
     }
 
@@ -23,15 +24,15 @@ fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32) -> String {
         let (mv, val) = best_move_pvs(&mut pos, 4);
         // let mv = best_move_negamax(&mut pos, 3);
         // let mv = choose_move(&pos);
-        eprintln!("MOVE: {} EVAL: {:.1}", mv.to_usi_ascii(), val);
+        eprintln!("MOVE: {} EVAL: {:.1}", intmove_to_uci_ascii(mv), val);
         mv
     } else {
         let mv = choose_move(&mut pos);
-        eprintln!("MOVE: {}", mv.to_usi_ascii());
+        eprintln!("MOVE: {}", intmove_to_uci_ascii(mv));
         mv
     };
 
-    mv.to_usi_ascii()
+    intmove_to_uci_ascii(mv)
 }
 
 fn read_line() -> String {

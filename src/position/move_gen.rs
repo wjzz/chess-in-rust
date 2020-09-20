@@ -4,7 +4,7 @@ pub mod parser;
 pub use parser::*;
 
 impl Position {
-    fn line(&self, src: usize, dx: i32, dy: i32, all_moves: &mut Vec<Move>) {
+    fn line(&self, src: usize, dx: i32, dy: i32, all_moves: &mut Vec<IntMove>) {
         let RowCol {
             row: src_row,
             col: src_col,
@@ -20,7 +20,7 @@ impl Position {
             let dest_field = self.board[dest];
 
             if dest_field.is_none() || dest_field.unwrap().player == opp_color {
-                all_moves.push(Move::new(src, dest, None));
+                all_moves.push(intmove_encode(src, dest, None));
 
                 if dest_field.is_some() {
                     return;
@@ -34,7 +34,7 @@ impl Position {
         }
     }
 
-    fn try_add(&self, src: usize, dest_row: i32, dest_col: i32, all_moves: &mut Vec<Move>) {
+    fn try_add(&self, src: usize, dest_row: i32, dest_col: i32, all_moves: &mut Vec<IntMove>) {
         self.try_add_pawn(src, dest_row, dest_col, all_moves, true);
     }
 
@@ -43,7 +43,7 @@ impl Position {
         src: usize,
         dest_row: i32,
         dest_col: i32,
-        all_moves: &mut Vec<Move>,
+        all_moves: &mut Vec<IntMove>,
         capture_ok: bool,
     ) {
         if let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
@@ -56,7 +56,7 @@ impl Position {
 
             if dest_field.is_none() || (capture_ok && dest_field.unwrap().player == opp_color) {
                 if piece != Piece::Pawn {
-                    all_moves.push(Move::new(src, dest, None));
+                    all_moves.push(intmove_encode(src, dest, None));
                 } else {
                     let reaches_last_row = match color {
                         Player::White => dest_row == 7,
@@ -65,17 +65,17 @@ impl Position {
 
                     if reaches_last_row {
                         for &promo_piece in PROMOTABLE_PIECES.iter() {
-                            all_moves.push(Move::new(src, dest, Some(promo_piece)));
+                            all_moves.push(intmove_encode(src, dest, Some(promo_piece)));
                         }
                     } else {
-                        all_moves.push(Move::new(src, dest, None));
+                        all_moves.push(intmove_encode(src, dest, None));
                     }
                 }
             }
         }
     }
 
-    fn generate_moves_from(&self, src: usize, piece: Piece, color: Player) -> Vec<Move> {
+    fn generate_moves_from(&self, src: usize, piece: Piece, color: Player) -> Vec<IntMove> {
         assert_eq!(PlayerPiece::new(color, piece), self.board[src].unwrap());
 
         let RowCol {
@@ -262,11 +262,11 @@ impl Position {
         all_moves
     }
 
-    pub fn moves(&self) -> Vec<Move> {
+    pub fn moves(&self) -> Vec<IntMove> {
         self.moves_by(self.to_move)
     }
 
-    pub fn moves_by(&self, color: Player) -> Vec<Move> {
+    pub fn moves_by(&self, color: Player) -> Vec<IntMove> {
         let mut all_moves = vec![];
 
         for index in 0..64 {
@@ -301,7 +301,7 @@ impl Position {
         // TODO: use a set here
         self.moves_by(player)
             .iter()
-            .map(|mv: &Move| mv.dest)
+            .map(|mv: &IntMove| intmove_dest(*mv))
             .collect()
     }
 
@@ -314,12 +314,9 @@ impl Position {
     }
 
 
-    pub fn is_castling_move_color(&self, mv: Move, color: Player) -> bool {
-        let Move {
-            src,
-            dest,
-            promote_to: _,
-        } = mv;
+    pub fn is_castling_move_color(&self, mv: IntMove, color: Player) -> bool {
+        let (src, dest, promote_to) = intmove_destructure(mv);
+
         let src = index2coord(src);
         let dest = index2coord(dest);
         match color {
@@ -328,12 +325,12 @@ impl Position {
         }
     }
 
-    pub fn is_castling_move(&self, mv: Move) -> bool {
+    pub fn is_castling_move(&self, mv: IntMove) -> bool {
         return self.is_castling_move_color(mv, self.to_move);
     }
 
-    fn fields_to_check_castling(&self, mv: Move) -> Vec<Coord> {
-        let dest = index2coord(mv.dest);
+    fn fields_to_check_castling(&self, mv: IntMove) -> Vec<Coord> {
+        let dest = index2coord(intmove_dest(mv));
         match (self.to_move, dest) {
             (Player::White, "G1") => vec!["F1", "G1"],
             (Player::White, "C1") => vec!["D1", "C1"],
@@ -343,12 +340,13 @@ impl Position {
         }
     }
 
-    pub fn rook_position_castling(&self, mv: Move) -> (Coord, Coord) {
+    pub fn rook_position_castling(&self, mv: IntMove) -> (Coord, Coord) {
         self.rook_position_castling_color(mv, self.to_move)
     }
 
-    pub fn rook_position_castling_color(&self, mv: Move, color: Player) -> (Coord, Coord) {
-        let dest = index2coord(mv.dest);
+    pub fn rook_position_castling_color(&self, mv: IntMove, color: Player) -> (Coord, Coord) {
+        // TODO: remove index calculations
+        let dest = index2coord(intmove_dest(mv));
         match (color, dest) {
             (Player::White, "G1") => ("H1", "F1"),
             (Player::White, "C1") => ("A1", "D1"),
@@ -359,7 +357,7 @@ impl Position {
     }
 
 
-    fn can_safely_castle(&self, mv: Move) -> bool {
+    fn can_safely_castle(&self, mv: IntMove) -> bool {
         let fields = self.fields_to_check_castling(mv);
         let attacked_fields = self.fields_attacked_by(self.to_move.opposite());
         for coord in fields.iter() {
@@ -372,7 +370,7 @@ impl Position {
         return true;
     }
 
-    pub fn legal_moves(&mut self) -> Vec<Move> {
+    pub fn legal_moves(&mut self) -> Vec<IntMove> {
         let moves = self.moves();
         let mut result = vec![];
         for mv in moves.iter() {
