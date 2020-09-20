@@ -27,7 +27,7 @@ pub const PLAYERS: [Player; 2] = [Player::White, Player::Black];
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Piece {
-    Pawn,
+    Pawn = 1,
     Knight,
     Bishop,
     Rook,

@@ -315,7 +315,7 @@ impl Position {
 
 
     pub fn is_castling_move_color(&self, mv: IntMove, color: Player) -> bool {
-        let (src, dest, promote_to) = intmove_destructure(mv);
+        let (src, dest, _promote_to) = intmove_destructure(mv);
 
         let src = index2coord(src);
         let dest = index2coord(dest);
@@ -380,19 +380,11 @@ impl Position {
                 }
             } else {
                 let to_move = self.to_move;
-                // let mut pos = self.clone();
-                // let fen1 = self.to_fen();
                 self.make_move(*mv).unwrap();
                 if !self.is_king_in_check(to_move) {
                     result.push(*mv);
                 }
                 self.unmake_move(*mv).unwrap();
-                // let fen2 = self.to_fen();
-                // if fen1 != fen2 {
-                //     println!("{}", self.to_ascii());
-                //     println!("move = {}", mv.to_usi_ascii());
-                // }
-                // assert_eq!(fen1, fen2);
             }
         }
         result
