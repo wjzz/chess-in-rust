@@ -1,0 +1,20 @@
+[Event "Casual Rapid game"]
+[Site "https://lichess.org/FOYmHGky"]
+[Date "2020.09.19"]
+[White "wojtek_bot"]
+[Black "kimagure"]
+[Result "0-1"]
+[UTCDate "2020.09.19"]
+[UTCTime "16:41:55"]
+[WhiteElo "1545"]
+[BlackElo "1525"]
+[WhiteTitle "BOT"]
+[Variant "Standard"]
+[TimeControl "600+10"]
+[ECO "B54"]
+[Opening "Sicilian Defense: Modern Variations, Main Line"]
+[Termination "Normal"]
+
+1. e4 c5 2. Ne2 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Bb5+ Bd7 6. Nc3 a6 7. Bxd7+ Nbxd7 8. Bg5 b5 9. Rb1 h6 10. Nc6 Qc7 11. Nxb5 axb5 12. Bxf6 Nxf6 13. Nd4 e5 14. Ne2 Be7 15. Qd3 Qc6 16. Nc3 b4 17. Nd5 Rxa2 18. Qb3 Ra8 19. Qxb4 Nxd5 20. exd5 Qxd5 21. Rc1 O-O 22. Kf1 Rfb8 23. Qc3 Bg5 24. Rb1 Rc8 25. Qb3 Qxb3 26. cxb3 Rab8 27. Rd1 Rb6 28. Ke1 Rc2 29. Ra1 Rxb2 30. Rd1 R2xb3 31. Ra1 Rb1+ 32. Rxb1 Rxb1+ 33. Ke2 Rxh1 34. h3 d5 35. Kd3 d4 36. f3 Rh2 37. Kc2 Rxg2+ 38. Kb1 d3 39. Ka1 d2 40. Kb2 d1=Q+ 41. Kc3 Qd4+ 42. Kb3 Rb2+ 43. Ka3 Qb6 44. Ka4 Qb4# 0-1
+
+

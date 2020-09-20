@@ -82,6 +82,189 @@ pub fn best_move_negamax(pos: &mut Position, depth: i32) -> Move {
     moves[best_index]
 }
 
+// function negamax(node, depth, α, β, color) is
+//     if depth = 0 or node is a terminal node then
+//         return color × the heuristic value of node
+
+//     childNodes := generateMoves(node)
+//     childNodes := orderMoves(childNodes)
+//     value := −∞
+//     foreach child in childNodes do
+//         value := max(value, −negamax(child, depth − 1, −β, −α, −color))
+//         α := max(α, value)
+//         if α ≥ β then
+//             break (* cut-off *)
+//     return value
+
+// (* Initial call for Player A's root node *)
+// negamax(rootNode, depth, −∞, +∞, 1)
+
+static mut alphabeta_best_move: Option<Move> = None;
+static mut result_vec: Vec<f64> = vec![];
+static mut ordering: Vec<Move> = vec![];
+
+fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64 {
+    unsafe {
+        visited_nodes += 1;
+        if level == 0 {
+            result_vec.clear();
+            if depth == 1 {
+                ordering.clear();
+            }
+        }
+    }
+
+    if pos.is_checkmate() {
+        return -10000.0;
+    } else if pos.is_stalemate() {
+        return 0.0;
+    }
+    if depth == 0 {
+        return eval_position(&pos);
+    }
+
+    let mut alpha = alpha;
+
+    let mut moves = pos.legal_moves();
+    let mut best = -10000000.0;
+
+    unsafe {
+        if level == 0 && ordering.len() > 0 {
+            assert_eq!(moves.len(), ordering.len());
+            moves = ordering.clone();
+            ordering.clear();
+        }
+    }
+    for &mv in moves.iter() {
+        pos.make_move(mv).unwrap();
+        let val = -alphabeta_negamax(&mut *pos, level+1, depth - 1, -beta, -alpha);
+        pos.unmake_move(mv).unwrap();
+
+        if level == 0 {
+            unsafe { result_vec.push(val); };
+        }
+
+        if val > best {
+            best = val;
+            if level == 0 {
+                unsafe {
+                    alphabeta_best_move = Some(mv);
+                }
+            }
+        }
+
+        alpha = alpha.max(best);
+        if alpha >= beta {
+            break;
+        }
+    }
+    if level == 0 {
+        unsafe {
+            let mut v = vec![];
+            for (i, res) in result_vec.iter().enumerate() {
+                v.push((*res, i));
+                // let mv = moves[i];
+                // println!("{} => {}", mv.to_usi_ascii(), res);
+
+            }
+            v.sort_by(|a, b| b.partial_cmp(a).unwrap());
+            for (_res, i) in v.iter() {
+                let mv = moves[*i];
+                ordering.push(mv);
+                // println!("{} => {}", mv.to_usi_ascii(), _res);
+            }
+        }
+    }
+    best
+}
+
+pub fn best_move_alphabeta_negamax(pos: &mut Position, depth: i32) -> Move {
+    alphabeta_negamax(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
+    let best_move = unsafe {
+        alphabeta_best_move.unwrap()
+    };
+    return best_move;
+}
+
+// function pvs(node, depth, α, β, color) is
+//     if depth = 0 or node is a terminal node then
+//         return color × the heuristic value of node
+//     for each child of node do
+//         if child is first child then
+//             score := −pvs(child, depth − 1, −β, −α, −color)
+//         else
+//             score := −pvs(child, depth − 1, −α − 1, −α, −color) (* search with a null window *)
+//             if α < score < β then
+//                 score := −pvs(child, depth − 1, −β, −score, −color) (* if it failed high, do a full re-search *)
+//         α := max(α, score)
+//         if α ≥ β then
+//             break (* beta cut-off *)
+//     return α
+
+
+fn pvs(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64 {
+    unsafe {
+        visited_nodes += 1;
+    }
+
+    if pos.is_checkmate() {
+        return -10000.0;
+    } else if pos.is_stalemate() {
+        return 0.0;
+    }
+    if depth == 0 {
+        return eval_position(&pos);
+    }
+
+    let mut alpha = alpha;
+
+    let moves = pos.legal_moves();
+
+    // TODO: add ordering
+    let mut first_node = true;
+    for &mv in moves.iter() {
+        pos.make_move(mv).unwrap();
+
+        let val = if first_node {
+            -pvs(&mut *pos, level+1, depth - 1, -beta, -alpha)
+        } else {
+            let val = -pvs(&mut *pos, level+1, depth - 1, -alpha-1.0, -alpha);
+            if alpha < val && val < beta {
+                -pvs(&mut *pos, level+1, depth - 1, -beta, -val)
+            } else {
+                val
+            }
+        };
+        pos.unmake_move(mv).unwrap();
+        first_node = false;
+
+        if val > alpha {
+            if level == 0 {
+                unsafe {
+                    alphabeta_best_move = Some(mv);
+                }
+            }
+        }
+
+        alpha = alpha.max(val);
+        if alpha >= beta {
+            break;
+        }
+    }
+    alpha
+}
+
+
+pub fn best_move_pvs(pos: &mut Position, depth: i32) -> (Move, f64) {
+    let val = pvs(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
+    let best_move = unsafe {
+        alphabeta_best_move.unwrap()
+    };
+    return (best_move, val);
+}
+
+
+
 fn can_give_mate(pos: &mut Position) -> bool {
     for mv in pos.legal_moves() {
         let mut pos2 = pos.clone();
