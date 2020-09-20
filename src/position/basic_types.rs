@@ -241,24 +241,6 @@ pub fn intmove_from_move(mv: &Move) -> IntMove {
     intmove_encode(*src, *dest, *promote_to)
 }
 
-fn show_bytes(intmove: IntMove) {
-    println!("intmove = {}", intmove);
-    for i in (0..32usize).rev() {
-        print!(
-            "{}",
-            if intmove & (1usize << i) != 0 {
-                "1"
-            } else {
-                "0"
-            }
-        );
-        if i % 8 == 0 {
-            print!(" ");
-        }
-    }
-    println!("");
-}
-
 pub fn intmove_dest(intmove: IntMove) -> usize {
     (intmove >> 8) % 256
 }

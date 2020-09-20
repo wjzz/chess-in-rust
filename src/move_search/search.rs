@@ -177,7 +177,9 @@ fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, bet
 }
 
 pub fn best_move_alphabeta_negamax(pos: &mut Position, depth: i32) -> IntMove {
-    alphabeta_negamax(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
+    for d in 1..=depth {
+        alphabeta_negamax(&mut *pos, 0, d, -1_000_000.0, 1_000_000.0);
+    }
     let best_move = unsafe {
         ALPHA_BETA_BEST_MOVE.unwrap()
     };

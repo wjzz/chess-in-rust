@@ -33,6 +33,9 @@ impl Position {
             return Err(format!("Can't capture own piece at {}", dest));
         }
 
+        if piece == Piece::King {
+            self.kings[color as usize] = dest;
+        }
 
         // let en_passant_flag = if piece == Piece::Pawn {
         //     // initial pawn move
@@ -189,6 +192,11 @@ impl Position {
             }
             player_piece => boardcell_piece(player_piece),
         };
+
+
+        if piece == Piece::King {
+            self.kings[color as usize] = src;
+        }
 
         // println!(">> piece = {}", piece.to_ascii());
 

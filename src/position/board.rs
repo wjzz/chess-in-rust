@@ -22,6 +22,7 @@ pub struct Position {
     pub captures: Vec<BoardCell>,
     pub ep_stack: Vec<Option<usize>>,
     pub castling_stack: Vec<String>,
+    pub kings: [usize; 2],
 }
 
 impl Position {
@@ -40,6 +41,7 @@ impl Position {
             captures: vec![],
             ep_stack: vec![],
             castling_stack: vec![],
+            kings: [0,0],
         }
     }
 
@@ -50,6 +52,7 @@ impl Position {
         castle_rights: String,
         half_moves: u32,
         full_moves: u32,
+        kings: [usize; 2]
     ) -> Position {
         Position {
             board,
@@ -62,6 +65,7 @@ impl Position {
             captures: vec![],
             ep_stack: vec![],
             castling_stack: vec![],
+            kings,
         }
     }
 

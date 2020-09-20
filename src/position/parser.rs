@@ -27,6 +27,8 @@ impl Position {
             _ => panic!("Wrong player in FEN {}", to_move_str),
         };
 
+        let mut kings = [0; 2];
+
         for (row, line) in board_str.split('/').rev().enumerate() {
             let mut col = 0;
             for ch in line.chars() {
@@ -57,6 +59,9 @@ impl Position {
                     // );
                     let field = boardcell_encode(player, piece);
                     let index = rowcol2index(row as i32, col as i32);
+                    if piece_str == 'k' {
+                        kings[player as usize] = index;
+                    }
                     assert!(index < MAX_INDEX88);
                     board[index] = field;
                     col += 1;
@@ -86,6 +91,7 @@ impl Position {
             castling_rights,
             half_moves,
             full_moves,
+            kings,
         )
     }
 }

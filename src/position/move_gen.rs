@@ -223,16 +223,6 @@ impl Position {
         all_moves
     }
 
-    fn king_location(&self, player: Player) -> Option<usize> {
-        let king = boardcell_encode(player, Piece::King);
-        for &index in &INDEXES88 {
-            if self.board[index] == king {
-                return Some(index);
-            }
-        }
-        return None;
-    }
-
     pub fn fields_attacked_by(&self, player: Player) -> Vec<usize> {
         // TODO: use a set here
         self.moves_by(player)
@@ -242,7 +232,7 @@ impl Position {
     }
 
     pub fn is_king_in_check(&self, player: Player) -> bool {
-        let king_coord = self.king_location(player).unwrap();
+        let king_coord = self.kings[player as usize];
         for mv in self.moves_by(player.opposite()).iter() {
             if intmove_dest(*mv) == king_coord {
                 return true;
