@@ -36,13 +36,17 @@ fn main() {
         let depth = depth as u32 + 1;
         let start = time::Instant::now();
         let result = Position::perft_mutable_par(depth, fen, n_threads);
-        let time_str = format!("{:.2?}", start.elapsed());
+        let elapsed = start.elapsed();
+        let time_str = format!("{:.2?}", elapsed);
+        let nps = result as f64 / elapsed.as_secs_f64() / 1000.0;
         println!(
-            "perf imm {} = {:10} | correct: {} | total time{: >9}",
+            "perf imm {} = {:10} | correct: {} | total time{: >9} | {:5.0} knps | {:5.0} knps (thread)",
             depth,
             result,
             value == result,
-            time_str
+            time_str,
+            nps,
+            nps / n_threads as f64
         );
     }
 }

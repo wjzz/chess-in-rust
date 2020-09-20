@@ -135,3 +135,13 @@ perf imm 3 =       8902 | correct: true | total time   6.84ms
 perf imm 4 =     197281 | correct: true | total time  74.34ms
 perf imm 5 =    4865609 | correct: true | total time    1.32s
 perf imm 6 =  119060324 | correct: true | total time   38.53s
+
+**Same as above, nicer stats**
+
+Using 4 threads.
+perf imm 1 =         20 | correct: true | total time 282.43µs |    71 knps |    18 knps (thread)
+perf imm 2 =        400 | correct: true | total time 497.90µs |   803 knps |   201 knps (thread)
+perf imm 3 =       8902 | correct: true | total time   5.00ms |  1781 knps |   445 knps (thread)
+perf imm 4 =     197281 | correct: true | total time  78.95ms |  2499 knps |   625 knps (thread)
+perf imm 5 =    4865609 | correct: true | total time    1.40s |  3483 knps |   871 knps (thread)
+perf imm 6 =  119060324 | correct: true | total time   44.32s |  2686 knps |   672 knps (thread)

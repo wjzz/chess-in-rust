@@ -4,12 +4,8 @@ pub mod make_move;
 pub use make_move::*;
 
 impl Position {
-    fn line(&self, src: usize, deltas: &[i32], all_moves: &mut Vec<IntMove>) {
+    fn line(&self, color: Player, src: usize, deltas: &[i32], all_moves: &mut Vec<IntMove>) {
         assert!(src < MAX_INDEX88);
-
-        // TODO: this should be given as param
-        let color = boardcell_player(self.board[src]);
-        let opp_color = color.opposite();
 
         for &delta in deltas {
             let mut dest = src as i32 + delta;
@@ -20,7 +16,7 @@ impl Position {
 
                 // println!("Trying to go from {} to {}", index2coord(src), index2coord(dest as usize));
 
-                if dest_field == EMPTY || boardcell_player(dest_field) == opp_color {
+                if dest_field == EMPTY || boardcell_player(dest_field) != color {
                     all_moves.push(intmove_encode(src, dest as usize, None));
 
                     if dest_field != EMPTY {
@@ -35,12 +31,21 @@ impl Position {
         }
     }
 
-    fn try_add(&self, src: usize, dest: i32, all_moves: &mut Vec<IntMove>) {
-        self.try_add_pawn(src, dest, all_moves, 0, true);
-    }
+    fn try_add_non_pawn(
+        &self,
+        color: Player,
+        src: usize,
+        dest: i32,
+        all_moves: &mut Vec<IntMove>,
+    ) {
+        if dest & 0x88 == 0 {
+            assert!(dest >= 0);
+            let dest_field = self.board[dest as usize];
 
-    fn try_add_flag(&self, src: usize, dest: i32, all_moves: &mut Vec<IntMove>, flag: usize) {
-        self.try_add_pawn(src, dest, all_moves, flag, true);
+            if dest_field == EMPTY || boardcell_player(dest_field) != color {
+                all_moves.push(intmove_encode(src, dest as usize, None));
+            }
+        }
     }
 
     fn try_add_pawn(
@@ -48,31 +53,25 @@ impl Position {
         src: usize,
         dest: i32,
         all_moves: &mut Vec<IntMove>,
-        flag: usize,
         capture_ok: bool
     ) {
         if dest & 0x88 == 0 {
             assert!(dest >= 0);
-            let (color, piece) = boardcell_destruct(self.board[src]);
-            let opp_color = color.opposite();
+            let color = boardcell_player(self.board[src]);
             let dest_field = self.board[dest as usize];
 
-            if dest_field == EMPTY || (capture_ok && boardcell_player(dest_field) == opp_color) {
-                if piece != Piece::Pawn {
-                    all_moves.push(intmove_encode_flags(src, dest as usize, None, flag));
-                } else {
-                    let reaches_last_row = match color {
-                        Player::White => dest >= 112, //dest_row == 7,
-                        Player::Black => dest <= 7, //dest_row == 0,
-                    };
+            if dest_field == EMPTY || (capture_ok && boardcell_player(dest_field) != color) {
+                let reaches_last_row = match color {
+                    Player::White => dest >= 112, //dest_row == 7,
+                    Player::Black => dest <= 7, //dest_row == 0,
+                };
 
-                    if reaches_last_row {
-                        for &promo_piece in PROMOTABLE_PIECES.iter() {
-                            all_moves.push(intmove_encode_flags(src, dest as usize, Some(promo_piece), flag));
-                        }
-                    } else {
-                        all_moves.push(intmove_encode_flags(src, dest as usize, None, flag));
+                if reaches_last_row {
+                    for &promo_piece in PROMOTABLE_PIECES.iter() {
+                        all_moves.push(intmove_encode(src, dest as usize, Some(promo_piece)));
                     }
+                } else {
+                    all_moves.push(intmove_encode(src, dest as usize, None));
                 }
             }
         }
@@ -81,23 +80,17 @@ impl Position {
     fn generate_moves_from(&self, src: usize, piece: Piece, color: Player, all_moves: &mut Vec<IntMove>) {
         assert_eq!(boardcell_encode(color, piece), self.board[src]);
 
-        let RowCol {
-            row: src_row,
-            col: _src_col,
-        } = index2rowcol(src);
-
-        let delta: i32 = if color == Player::White { 16 } else { -16 };
-
         match piece {
             Piece::Pawn => {
                 let is_first_move = match color {
-                    Player::White => src_row == 1,
-                    Player::Black => src_row == 6,
+                    Player::White => 16 <= src && src <= 23,
+                    Player::Black => 96 <= src && src <= 103,
                 };
 
+                let delta: i32 = if color == Player::White { 16 } else { -16 };
                 let square_in_front = src as i32 + delta;
 
-                self.try_add_pawn(src, square_in_front, all_moves, 0, false);
+                self.try_add_pawn(src, square_in_front, all_moves, false);
 
                 // first move by two squares
                 if is_first_move {
@@ -107,7 +100,6 @@ impl Position {
                             src,
                             src as i32 + 2 * delta,
                             all_moves,
-                            0,
                             false,
                         );
                     }
@@ -131,7 +123,6 @@ impl Position {
                                 src,
                                 dest,
                                 all_moves,
-                                0,
                                 true,
                             );
                         }
@@ -140,7 +131,7 @@ impl Position {
             }
             Piece::King => {
                 for delta in &[ 16, 17, 1, -15, -16, -17, -1, 15] {
-                    self.try_add(src, src as i32 + delta, all_moves);
+                    self.try_add_non_pawn(color, src, src as i32 + delta, all_moves);
                 }
 
                 // castling
@@ -168,7 +159,7 @@ impl Position {
                         assert_eq!(self.board[rook_dest], boardcell_encode(color, Piece::Rook));
 
                         if self.board[f1] == EMPTY && self.board[f2] == EMPTY {
-                            self.try_add(src, f2 as i32, all_moves);
+                            self.try_add_non_pawn(color, src, f2 as i32, all_moves);
                         }
                     }
 
@@ -182,27 +173,29 @@ impl Position {
                         assert_eq!(self.board[rook_dest], boardcell_encode(color, Piece::Rook));
 
                         if self.board[f1] == EMPTY && self.board[f2] == EMPTY && self.board[f3] == EMPTY {
-                            self.try_add_flag(src, f2 as i32, all_moves, CASTLE_FLAG);
+                            // self.try_add_flag(src, f2 as i32, all_moves, CASTLE_FLAG);
+                            self.try_add_non_pawn(color, src, f2 as i32, all_moves);
+
                         }
                     }
                 }
             }
             Piece::Knight => {
                 for delta in &[ 31, 33, -31, -33, 18, -14, -18, 14] {
-                    self.try_add(src, src as i32 + delta, all_moves);
+                    self.try_add_non_pawn(color, src, src as i32 + delta, all_moves);
                 }
             }
             Piece::Queen => {
                 let deltas = &[17, -15, -17, 15, 16, 1, -16, -1];
-                self.line(src, deltas, all_moves);
+                self.line(color, src, deltas, all_moves);
             }
             Piece::Bishop => {
                 let deltas = &[17, -15, -17, 15];
-                self.line(src, deltas, all_moves);
+                self.line(color, src, deltas, all_moves);
             }
             Piece::Rook => {
                 let deltas = &[16, 1, -16, -1];
-                self.line(src, deltas, all_moves);
+                self.line(color, src, deltas, all_moves);
             }
         }
     }
