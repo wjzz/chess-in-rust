@@ -229,3 +229,42 @@ PVS d = 1            | b4c3 |         35 |   4.00ms | 9 knps
 PVS d = 2            | c6d5 |        368 |  42.30ms | 9 knps
 PVS d = 3            | c6d5 |       4685 | 609.20ms | 8 knps
 PVS d = 4            | c6d5 |      41459 |    4.73s | 9 knps
+
+# Benchmarks after improving the is_king_safe procedure
+
+Benchmarking position rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+Negamax d = 1        | b1a3 |         40 |   1.29ms | 31 knps
+Negamax d = 2        | b1a3 |        440 |  27.06ms | 16 knps
+Negamax d = 3        | b1a3 |       9342 | 623.23ms | 15 knps
+AlphaBeta d = 1      | b1a3 |         21 |   1.27ms | 17 knps
+AlphaBeta d = 2      | h2h4 |         60 |   4.06ms | 15 knps
+AlphaBeta d = 3      | b1a3 |        586 |  37.24ms | 16 knps
+AlphaBeta d = 4      | h2h4 |       2369 | 170.81ms | 14 knps
+PVS d = 1            | b1a3 |         21 |   1.31ms | 16 knps
+PVS d = 2            | b1a3 |         60 |   4.05ms | 15 knps
+PVS d = 3            | b1a3 |        550 |  34.85ms | 16 knps
+PVS d = 4            | b1a3 |       2304 | 155.55ms | 15 knps
+Benchmarking position rnbqk1nr/3p1ppp/1p1P4/p3p3/PbB5/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 1
+Negamax d = 1        | b4c3 |         54 |   3.16ms | 17 knps
+Negamax d = 2        | f7f6 |       1261 | 114.97ms | 11 knps
+Negamax d = 3        | d8h4 |      33891 |    3.93s | 9 knps
+AlphaBeta d = 1      | b4c3 |         28 |   3.13ms | 9 knps
+AlphaBeta d = 2      | g8h6 |        871 |  80.63ms | 11 knps
+AlphaBeta d = 3      | d8h4 |       5658 | 703.72ms | 8 knps
+AlphaBeta d = 4      | g8f6 |     196075 |   18.85s | 10 knps
+PVS d = 1            | b4c3 |         30 |   3.69ms | 8 knps
+PVS d = 2            | f7f6 |        921 |  86.78ms | 11 knps
+PVS d = 3            | d8h4 |       2633 | 335.91ms | 8 knps
+PVS d = 4            | f7f6 |     155902 |   15.11s | 10 knps
+Benchmarking position rnbqk1nr/3p1ppp/1pp1p3/p2P4/PbB1P3/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 11
+Negamax d = 1        | b4c3 |         66 |   3.58ms | 18 knps
+Negamax d = 2        | c6d5 |       1347 | 135.83ms | 10 knps
+Negamax d = 3        | c6d5 |      42460 |    4.89s | 9 knps
+AlphaBeta d = 1      | b4c3 |         34 |   3.73ms | 9 knps
+AlphaBeta d = 2      | e6d5 |        164 |  18.20ms | 9 knps
+AlphaBeta d = 3      | c6d5 |       8952 |    1.09s | 8 knps
+AlphaBeta d = 4      | e6d5 |      16664 |    1.85s | 9 knps
+PVS d = 1            | b4c3 |         35 |   3.79ms | 9 knps
+PVS d = 2            | c6d5 |        368 |  39.82ms | 9 knps
+PVS d = 3            | c6d5 |       4685 | 603.08ms | 8 knps
+PVS d = 4            | c6d5 |      41459 |    4.58s | 9 knps

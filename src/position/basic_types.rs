@@ -177,7 +177,7 @@ pub fn usi2rowcol(coord: &str) -> usize {
 
 pub type IntMove = usize;
 
-pub fn intmove_encode(src: usize, dest: usize, promote_to: Option<Piece>) -> IntMove {
+pub fn intmove_encode_flags(src: usize, dest: usize, promote_to: Option<Piece>, flags: usize) -> IntMove {
     let mut intmove = 0usize;
     assert!(src < 64);
     intmove |= src;
@@ -189,7 +189,20 @@ pub fn intmove_encode(src: usize, dest: usize, promote_to: Option<Piece>) -> Int
     if let Some(piece) = promote_to {
         intmove |= piece as usize;
     }
+
+    intmove |= flags;
+
     return intmove;
+}
+
+pub const CASTLE_FLAG: usize = 1 << 24;
+
+pub fn intmove_is_castle(intmove: IntMove) -> bool {
+    (intmove & CASTLE_FLAG) != 0
+}
+
+pub fn intmove_encode(src: usize, dest: usize, promote_to: Option<Piece>) -> IntMove {
+    intmove_encode_flags(src, dest, promote_to, 0)
 }
 
 pub fn intmove_from_move(mv: &Move) -> IntMove {

@@ -35,7 +35,11 @@ impl Position {
     }
 
     fn try_add(&self, src: usize, dest_row: i32, dest_col: i32, all_moves: &mut Vec<IntMove>) {
-        self.try_add_pawn(src, dest_row, dest_col, all_moves, true);
+        self.try_add_pawn(src, dest_row, dest_col, all_moves, 0, true);
+    }
+
+    fn try_add_flag(&self, src: usize, dest_row: i32, dest_col: i32, all_moves: &mut Vec<IntMove>, flag: usize) {
+        self.try_add_pawn(src, dest_row, dest_col, all_moves, flag, true);
     }
 
     fn try_add_pawn(
@@ -44,7 +48,8 @@ impl Position {
         dest_row: i32,
         dest_col: i32,
         all_moves: &mut Vec<IntMove>,
-        capture_ok: bool,
+        flag: usize,
+        capture_ok: bool
     ) {
         if let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
             let PlayerPiece {
@@ -56,7 +61,7 @@ impl Position {
 
             if dest_field.is_none() || (capture_ok && dest_field.unwrap().player == opp_color) {
                 if piece != Piece::Pawn {
-                    all_moves.push(intmove_encode(src, dest, None));
+                    all_moves.push(intmove_encode_flags(src, dest, None, flag));
                 } else {
                     let reaches_last_row = match color {
                         Player::White => dest_row == 7,
@@ -65,10 +70,10 @@ impl Position {
 
                     if reaches_last_row {
                         for &promo_piece in PROMOTABLE_PIECES.iter() {
-                            all_moves.push(intmove_encode(src, dest, Some(promo_piece)));
+                            all_moves.push(intmove_encode_flags(src, dest, Some(promo_piece), flag));
                         }
                     } else {
-                        all_moves.push(intmove_encode(src, dest, None));
+                        all_moves.push(intmove_encode_flags(src, dest, None, flag));
                     }
                 }
             }
@@ -94,7 +99,7 @@ impl Position {
                     Player::Black => src_row == 6,
                 };
 
-                self.try_add_pawn(src, src_row + row_delta, src_col, &mut all_moves, false);
+                self.try_add_pawn(src, src_row + row_delta, src_col, &mut all_moves, 0, false);
 
                 // first move by two squares
                 if is_first_move {
@@ -107,6 +112,7 @@ impl Position {
                                 src_row + row_delta * 2,
                                 src_col,
                                 &mut all_moves,
+                                0,
                                 false,
                             );
                         }
@@ -133,6 +139,7 @@ impl Position {
                                 src_row + row_delta,
                                 src_col + col_delta,
                                 &mut all_moves,
+                                0,
                                 true,
                             );
                         }
@@ -170,17 +177,17 @@ impl Position {
                         let rook_col = src_col + 3 * king_side_dx;
                         let rook_dest = rowcol2index(src_row, rook_col);
 
-                        let test = self.board[rook_dest]
-                            == Some(PlayerPiece {
-                                player: color,
-                                piece: Piece::Rook,
-                            });
+                        // let test = self.board[rook_dest]
+                        //     == Some(PlayerPiece {
+                        //         player: color,
+                        //         piece: Piece::Rook,
+                        //     });
 
-                        if !test {
-                            println!("DEBUG: ");
-                            println!("{}", self.to_ascii());
-                            println!("FEN {}", self.to_fen());
-                        }
+                        // if !test {
+                        //     println!("DEBUG: ");
+                        //     println!("{}", self.to_ascii());
+                        //     println!("FEN {}", self.to_fen());
+                        // }
                         assert!(
                             self.board[rook_dest]
                                 == Some(PlayerPiece {
@@ -219,7 +226,7 @@ impl Position {
                             self.board[rowcol2index(src_row, src_col + 3 * queen_side_dx)] == None;
 
                         if free1 && free2 && free3 {
-                            self.try_add(src, src_row, src_col + 2 * queen_side_dx, &mut all_moves);
+                            self.try_add_flag(src, src_row, src_col + 2 * queen_side_dx, &mut all_moves, CASTLE_FLAG);
                         }
                     }
                 }
@@ -306,11 +313,13 @@ impl Position {
     }
 
     pub fn is_king_in_check(&self, player: Player) -> bool {
-        let king_coord = self.king_location(player);
-        let fields_attacked_by_opp = self.fields_attacked_by(player.opposite());
-
-        // TODO: we assume the king is on the board here
-        fields_attacked_by_opp.contains(&king_coord.unwrap())
+        let king_coord = self.king_location(player).unwrap();
+        for mv in self.moves_by(player.opposite()).iter() {
+            if intmove_dest(*mv) == king_coord {
+                return true;
+            }
+        }
+        return false;
     }
 
 
