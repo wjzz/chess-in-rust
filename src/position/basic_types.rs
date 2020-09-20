@@ -1,4 +1,7 @@
 pub const FIELDS_NO: usize = 64;
+pub const FIELDS88: usize = 128;
+
+pub const MAX_INDEX88: usize = 120;
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Player {
@@ -62,11 +65,15 @@ impl Piece {
 
 pub type Coord = &'static str;
 
-pub const COORDS: [Coord; FIELDS_NO] = [
-    "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8",
-    "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8",
-    "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8",
-    "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8",
+pub const COORDS: [Coord; FIELDS88] = [
+    "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "X", "X", "X", "X", "X", "X", "X", "X",
+    "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "X", "X", "X", "X", "X", "X", "X", "X",
+    "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "X", "X", "X", "X", "X", "X", "X", "X",
+    "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "X", "X", "X", "X", "X", "X", "X", "X",
+    "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "X", "X", "X", "X", "X", "X", "X", "X",
+    "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "X", "X", "X", "X", "X", "X", "X", "X",
+    "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "X", "X", "X", "X", "X", "X", "X", "X",
+    "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "X", "X", "X", "X", "X", "X", "X", "X",
 ];
 
 pub fn str2coord(s: &str) -> Option<Coord> {
@@ -92,8 +99,10 @@ impl RowCol {
 
 // TODO: add unit tests
 pub fn index2rowcol(i: usize) -> RowCol {
-    let col = (i % 8) as i32;
-    let row = (i / 8) as i32;
+    let col = (i & 7) as i32;
+    let row = (i >> 4) as i32;
+    // let col = (i % 8) as i32;
+    // let row = (i / 8) as i32;
     RowCol { row, col }
 }
 
@@ -103,20 +112,25 @@ pub fn index2coord(i: usize) -> Coord {
 }
 
 pub fn rowcol2index(row: i32, col: i32) -> usize {
-    (row * 8 + col) as usize
+    assert!(0 <= row && row < 8);
+    assert!(0 <= col && col < 8);
+
+    (row * 16 + col) as usize
 }
 
 pub fn rowcol2index_safe(row: i32, col: i32) -> Option<usize> {
     if 0 > row || row >= 8 || 0 > col || col >= 8 {
         return None;
     }
-    Some((row * 8 + col) as usize)
+    Some((row * 16 + col) as usize)
 }
 
 pub fn rowcol2coord(row: i32, col: i32) -> Coord {
-    // NOTE: we swap col and row here intentionally
-    let index = rowcol2index(col, row);
-    COORDS[index]
+    assert!(0 <= row && row < 8);
+    assert!(0 <= col && col < 8);
+
+    let index = col * 16 + row;
+    COORDS[index as usize]
 }
 
 pub fn rowcol2coord_safe(row: i32, col: i32) -> Option<Coord> {
@@ -179,7 +193,9 @@ pub type IntMove = usize;
 
 pub fn intmove_encode_flags(src: usize, dest: usize, promote_to: Option<Piece>, flags: usize) -> IntMove {
     let mut intmove = 0usize;
-    assert!(src < 64);
+    assert!(src < 2 * 64);
+    assert!(dest < 2 * 64);
+
     intmove |= src;
     intmove <<= 8;
 
@@ -453,9 +469,11 @@ mod tests {
     #[test]
     fn test_coord_rowcol_and_back() {
         for &coord in COORDS.iter() {
-            let RowCol { row, col } = coord2rowcol(coord);
-            let coord2 = rowcol2coord(row, col);
-            assert_eq!(coord, coord2);
+            if coord != "X" {
+                let RowCol { row, col } = coord2rowcol(coord);
+                let coord2 = rowcol2coord(row, col);
+                assert_eq!(coord, coord2);
+            }
         }
     }
 

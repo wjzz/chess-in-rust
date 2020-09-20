@@ -26,7 +26,7 @@ pub struct Position {
 
 impl Position {
     pub fn new() -> Self {
-        let board = vec![EMPTY; FIELDS_NO];
+        let board = vec![EMPTY; FIELDS88];
         let to_move = Player::White;
 
         Position {
@@ -156,7 +156,9 @@ mod tests {
         let pos = Position::new();
 
         for coord in COORDS.iter() {
-            assert_eq!(EMPTY, pos[coord]);
+            if *coord != "X" {
+                assert_eq!(EMPTY, pos[coord]);
+            }
         }
     }
 }

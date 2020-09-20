@@ -1,76 +1,77 @@
-#[path = "parser.rs"]
-pub mod parser;
+#[path = "make_move.rs"]
+pub mod make_move;
 
-pub use parser::*;
+pub use make_move::*;
 
 impl Position {
-    fn line(&self, src: usize, dx: i32, dy: i32, all_moves: &mut Vec<IntMove>) {
-        let RowCol {
-            row: src_row,
-            col: src_col,
-        } = index2rowcol(src);
+    fn line(&self, src: usize, deltas: &[i32], all_moves: &mut Vec<IntMove>) {
+        assert!(src < MAX_INDEX88);
 
-        let mut dest_row = src_row + dx;
-        let mut dest_col = src_col + dy;
-
+        // TODO: this should be given as param
         let color = boardcell_player(self.board[src]);
         let opp_color = color.opposite();
 
-        while let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
-            let dest_field = self.board[dest];
+        for &delta in deltas {
+            let mut dest = src as i32 + delta;
+            while dest & 0x88 == 0 {
+                assert!(0 <= dest && dest < MAX_INDEX88 as i32);
 
-            if dest_field == EMPTY || boardcell_player(dest_field) == opp_color {
-                all_moves.push(intmove_encode(src, dest, None));
+                let dest_field = self.board[dest as usize];
 
-                if dest_field != EMPTY {
-                    return;
+                // println!("Trying to go from {} to {}", index2coord(src), index2coord(dest as usize));
+
+                if dest_field == EMPTY || boardcell_player(dest_field) == opp_color {
+                    all_moves.push(intmove_encode(src, dest as usize, None));
+
+                    if dest_field != EMPTY {
+                        break;
+                    }
+                } else {
+                    break;
                 }
-            } else {
-                return;
-            }
 
-            dest_row += dx;
-            dest_col += dy;
+                dest += delta;
+            }
         }
     }
 
-    fn try_add(&self, src: usize, dest_row: i32, dest_col: i32, all_moves: &mut Vec<IntMove>) {
-        self.try_add_pawn(src, dest_row, dest_col, all_moves, 0, true);
+    fn try_add(&self, src: usize, dest: i32, all_moves: &mut Vec<IntMove>) {
+        self.try_add_pawn(src, dest, all_moves, 0, true);
     }
 
-    fn try_add_flag(&self, src: usize, dest_row: i32, dest_col: i32, all_moves: &mut Vec<IntMove>, flag: usize) {
-        self.try_add_pawn(src, dest_row, dest_col, all_moves, flag, true);
+    fn try_add_flag(&self, src: usize, dest: i32, all_moves: &mut Vec<IntMove>, flag: usize) {
+        self.try_add_pawn(src, dest, all_moves, flag, true);
     }
 
     fn try_add_pawn(
         &self,
         src: usize,
-        dest_row: i32,
-        dest_col: i32,
+        dest: i32,
         all_moves: &mut Vec<IntMove>,
         flag: usize,
         capture_ok: bool
     ) {
-        if let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
+        if dest & 0x88 == 0 {
+            assert!(dest >= 0);
             let (color, piece) = boardcell_destruct(self.board[src]);
             let opp_color = color.opposite();
-            let dest_field = self.board[dest];
+            let dest_field = self.board[dest as usize];
 
             if dest_field == EMPTY || (capture_ok && boardcell_player(dest_field) == opp_color) {
                 if piece != Piece::Pawn {
-                    all_moves.push(intmove_encode_flags(src, dest, None, flag));
+                    all_moves.push(intmove_encode_flags(src, dest as usize, None, flag));
                 } else {
                     let reaches_last_row = match color {
-                        Player::White => dest_row == 7,
-                        Player::Black => dest_row == 0,
+                        Player::White => dest >= 112, //dest_row == 7,
+                        Player::Black => dest <= 7, //dest_row == 0,
                     };
 
                     if reaches_last_row {
                         for &promo_piece in PROMOTABLE_PIECES.iter() {
-                            all_moves.push(intmove_encode_flags(src, dest, Some(promo_piece), flag));
+                            all_moves.push(intmove_encode_flags(src, dest as usize, Some(promo_piece), flag));
                         }
                     } else {
-                        all_moves.push(intmove_encode_flags(src, dest, None, flag));
+                        all_moves.push(intmove_encode_flags(src, dest as usize, None, flag));
                     }
                 }
             }
@@ -82,10 +83,10 @@ impl Position {
 
         let RowCol {
             row: src_row,
-            col: src_col,
+            col: _src_col,
         } = index2rowcol(src);
 
-        let row_delta: i32 = if color == Player::White { 1 } else { -1 };
+        let delta: i32 = if color == Player::White { 16 } else { -16 };
 
         match piece {
             Piece::Pawn => {
@@ -94,35 +95,32 @@ impl Position {
                     Player::Black => src_row == 6,
                 };
 
-                self.try_add_pawn(src, src_row + row_delta, src_col, all_moves, 0, false);
+                let square_in_front = src as i32 + delta;
+
+                self.try_add_pawn(src, square_in_front, all_moves, 0, false);
 
                 // first move by two squares
                 if is_first_move {
                     // make sure the square before the pawn is empty!
-                    let passing_square = rowcol2coord_safe(src_row + row_delta, src_col);
-                    if let Some(passing) = passing_square {
-                        if self.board[coord2index(passing)] == EMPTY {
-                            self.try_add_pawn(
-                                src,
-                                src_row + row_delta * 2,
-                                src_col,
-                                all_moves,
-                                0,
-                                false,
-                            );
-                        }
+                    if self.board[square_in_front as usize] == EMPTY {
+                        self.try_add_pawn(
+                            src,
+                            src as i32 + 2 * delta,
+                            all_moves,
+                            0,
+                            false,
+                        );
                     }
                 }
 
                 // captures
                 for col_delta in [-1, 1].iter() {
-                    let dest_row = src_row + row_delta;
-                    let dest_col = src_col + col_delta;
-                    if let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
-                        let dest_piece = self.board[dest];
+                    let dest = src as i32 + delta + col_delta;
+                    if dest & 0x88 == 0 {
+                        let dest_piece = self.board[dest as usize];
 
                         let en_passant_ok = self.en_passant.is_some()
-                            && self.en_passant.unwrap() == dest;
+                            && self.en_passant.unwrap() == dest as usize;
 
                         if en_passant_ok
                             || (!en_passant_ok
@@ -131,8 +129,7 @@ impl Position {
                         {
                             self.try_add_pawn(
                                 src,
-                                src_row + row_delta,
-                                src_col + col_delta,
+                                dest,
                                 all_moves,
                                 0,
                                 true,
@@ -142,18 +139,14 @@ impl Position {
                 }
             }
             Piece::King => {
-                for dx in -1..=1 {
-                    for dy in -1..=1 {
-                        if dx != 0 || dy != 0 {
-                            self.try_add(src, src_row + dy, src_col + dx, all_moves);
-                        }
-                    }
+                for delta in &[ 16, 17, 1, -15, -16, -17, -1, 15] {
+                    self.try_add(src, src as i32 + delta, all_moves);
                 }
 
                 // castling
-                let king_initial_coord = if color == Player::White { "E1" } else { "E8" };
+                let king_initial_coord = if color == Player::White { 4 } else { 116 };
 
-                if src == coord2index(king_initial_coord) {
+                if src == king_initial_coord {
                     let ascii_k = PlayerPiece {
                         piece: Piece::King,
                         player: color,
@@ -164,78 +157,52 @@ impl Position {
                         player: color,
                     }
                     .to_ascii();
-                    let king_side_dx = 1;
-                    let queen_side_dx = -1;
 
                     // castling kingside
                     if self.castle_rights.contains(&ascii_k) {
-                        let rook_col = src_col + 3 * king_side_dx;
-                        let rook_dest = rowcol2index(src_row, rook_col);
+                        let (rook_dest, f1, f2) = match color {
+                            Player::White => (7, 5, 6),
+                            Player::Black => (119, 117, 118),
+                        };
 
                         assert_eq!(self.board[rook_dest], boardcell_encode(color, Piece::Rook));
 
-                        let free1 =
-                            self.board[rowcol2index(src_row, src_col + king_side_dx)] == EMPTY;
-                        let free2 =
-                            self.board[rowcol2index(src_row, src_col + 2 * king_side_dx)] == EMPTY;
-
-                        if free1 && free2 {
-                            self.try_add(src, src_row, src_col + 2 * king_side_dx, all_moves);
+                        if self.board[f1] == EMPTY && self.board[f2] == EMPTY {
+                            self.try_add(src, f2 as i32, all_moves);
                         }
                     }
 
                     // castling queenside
                     if self.castle_rights.contains(&ascii_q) {
-                        let rook_col = src_col + 4 * queen_side_dx;
-                        let rook_dest = rowcol2index(src_row, rook_col);
+                        let (rook_dest, f1, f2, f3) = match color {
+                            Player::White => (0, 1, 2, 3),
+                            Player::Black => (112, 113, 114, 115),
+                        };
 
                         assert_eq!(self.board[rook_dest], boardcell_encode(color, Piece::Rook));
 
-                        let free1 =
-                            self.board[rowcol2index(src_row, src_col + queen_side_dx)] == EMPTY;
-                        let free2 =
-                            self.board[rowcol2index(src_row, src_col + 2 * queen_side_dx)] == EMPTY;
-                        let free3 =
-                            self.board[rowcol2index(src_row, src_col + 3 * queen_side_dx)] == EMPTY;
-
-                        if free1 && free2 && free3 {
-                            self.try_add_flag(src, src_row, src_col + 2 * queen_side_dx, all_moves, CASTLE_FLAG);
+                        if self.board[f1] == EMPTY && self.board[f2] == EMPTY && self.board[f3] == EMPTY {
+                            self.try_add_flag(src, f2 as i32, all_moves, CASTLE_FLAG);
                         }
                     }
                 }
             }
             Piece::Knight => {
-                for (w, d) in [(1, 2), (2, 1)].iter() {
-                    for s1 in [-1, 1].iter() {
-                        for s2 in [-1, 1].iter() {
-                            let dx = w * s1;
-                            let dy = d * s2;
-                            self.try_add(src, src_row + dy, src_col + dx, all_moves);
-                        }
-                    }
+                for delta in &[ 31, 33, -31, -33, 18, -14, -18, 14] {
+                    self.try_add(src, src as i32 + delta, all_moves);
                 }
             }
             Piece::Queen => {
-                self.line(src, 0, -1, all_moves);
-                self.line(src, 0, 1, all_moves);
-                self.line(src, -1, 0, all_moves);
-                self.line(src, 1, 0, all_moves);
-                self.line(src, 1, -1, all_moves);
-                self.line(src, 1, 1, all_moves);
-                self.line(src, -1, -1, all_moves);
-                self.line(src, -1, 1, all_moves);
+                let deltas = &[17, -15, -17, 15, 16, 1, -16, -1];
+                self.line(src, deltas, all_moves);
             }
             Piece::Bishop => {
-                self.line(src, 1, -1, all_moves);
-                self.line(src, 1, 1, all_moves);
-                self.line(src, -1, -1, all_moves);
-                self.line(src, -1, 1, all_moves);
+                let deltas = &[17, -15, -17, 15];
+                self.line(src, deltas, all_moves);
             }
             Piece::Rook => {
-                self.line(src, 0, -1, all_moves);
-                self.line(src, 0, 1, all_moves);
-                self.line(src, -1, 0, all_moves);
-                self.line(src, 1, 0, all_moves);
+                let deltas = &[16, 1, -16, -1];
+                self.line(src, deltas, all_moves);
             }
         }
     }
@@ -247,27 +214,32 @@ impl Position {
     pub fn moves_by(&self, color: Player) -> Vec<IntMove> {
         let mut all_moves = vec![];
 
-        for index in 0..64 {
-            let player_piece = self.board[index];
-            if player_piece != EMPTY {
-                if boardcell_player(player_piece) == color {
-                    self.generate_moves_from(
-                        index,
-                        boardcell_piece(player_piece),
-                        color,
-                        &mut all_moves);
+        // TODO: put the indexes in a table
+        for index in 0..MAX_INDEX88 {
+            if index & 0x88 == 0 {
+                let player_piece = self.board[index];
+                if player_piece != EMPTY {
+                    if boardcell_player(player_piece) == color {
+                        self.generate_moves_from(
+                            index,
+                            boardcell_piece(player_piece),
+                            color,
+                            &mut all_moves);
+                        }
+                    }
                 }
             }
-        }
 
         all_moves
     }
 
     fn king_location(&self, player: Player) -> Option<usize> {
         let king = boardcell_encode(player, Piece::King);
-        for index in 0..64 {
-            if self.board[index] == king {
-                return Some(index);
+        for index in 0..MAX_INDEX88 {
+            if index & 0x88 == 0 {
+                if self.board[index] == king {
+                    return Some(index);
+                }
             }
         }
         return None;

@@ -39,7 +39,7 @@ PERFT [clone instead of unmove]: (bugs found)
 - [ ] depth = 8
 
 Later:
-- [ ] Ox88 board
+- [x] Ox88 board
 - [ ] Bitboards
 - [ ] Experiments with more efficient/compact data structures
 - - [ ] Use `usize` for repr. moves instead of three ints

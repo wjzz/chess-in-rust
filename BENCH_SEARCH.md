@@ -283,6 +283,7 @@ PVS d = 1            | b1a3 |         21 | 985.11µs | 21 knps
 PVS d = 2            | b1a3 |         60 |   3.08ms | 19 knps
 PVS d = 3            | b1a3 |        550 |  25.96ms | 21 knps
 PVS d = 4            | b1a3 |       2304 | 122.02ms | 19 knps
+
 Benchmarking position rnbqk1nr/3p1ppp/1p1P4/p3p3/PbB5/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 1
 Negamax d = 1        | b4c3 |         54 |   2.49ms | 22 knps
 Negamax d = 2        | f7f6 |       1261 |  78.35ms | 16 knps
@@ -295,6 +296,7 @@ PVS d = 1            | b4c3 |         30 |   2.65ms | 11 knps
 PVS d = 2            | f7f6 |        921 |  58.07ms | 16 knps
 PVS d = 3            | d8h4 |       2633 | 255.50ms | 10 knps
 PVS d = 4            | f7f6 |     155902 |   10.10s | 15 knps
+
 Benchmarking position rnbqk1nr/3p1ppp/1pp1p3/p2P4/PbB1P3/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 11
 Negamax d = 1        | b4c3 |         66 |   2.86ms | 23 knps
 Negamax d = 2        | c6d5 |       1347 |  98.32ms | 14 knps
@@ -307,3 +309,44 @@ PVS d = 1            | b4c3 |         35 |   3.04ms | 12 knps
 PVS d = 2            | c6d5 |        368 |  31.16ms | 12 knps
 PVS d = 3            | c6d5 |       4685 | 443.94ms | 11 knps
 PVS d = 4            | c6d5 |      41459 |    3.19s | 13 knps
+
+# After moving to 0x88
+
+Benchmarking position rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+Negamax d = 1        | b1a3 |         40 | 764.78µs | 52 knps
+Negamax d = 2        | b1a3 |        440 |  16.35ms | 27 knps
+Negamax d = 3        | b1a3 |       9342 | 407.04ms | 23 knps
+AlphaBeta d = 1      | b1a3 |         21 | 827.61µs | 25 knps
+AlphaBeta d = 2      | h2h4 |         60 |   2.58ms | 23 knps
+AlphaBeta d = 3      | b1a3 |        586 |  23.49ms | 25 knps
+AlphaBeta d = 4      | h2h4 |       2369 | 104.58ms | 23 knps
+PVS d = 1            | b1a3 |         21 | 773.01µs | 27 knps
+PVS d = 2            | b1a3 |         60 |   2.42ms | 25 knps
+PVS d = 3            | b1a3 |        550 |  20.77ms | 26 knps
+PVS d = 4            | b1a3 |       2302 | 103.27ms | 22 knps
+
+Benchmarking position rnbqk1nr/3p1ppp/1p1P4/p3p3/PbB5/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 1
+Negamax d = 1        | b4c3 |         54 |   2.16ms | 25 knps
+Negamax d = 2        | f7f6 |       1261 |  69.75ms | 18 knps
+Negamax d = 3        | d8h4 |      33891 |    2.57s | 13 knps
+AlphaBeta d = 1      | b4c3 |         28 |   2.10ms | 13 knps
+AlphaBeta d = 2      | g8f6 |        842 |  47.74ms | 18 knps
+AlphaBeta d = 3      | d8h4 |       5357 | 420.75ms | 13 knps
+AlphaBeta d = 4      | g8f6 |     201297 |   11.30s | 18 knps
+PVS d = 1            | b4c3 |         30 |   2.22ms | 14 knps
+PVS d = 2            | f7f6 |        899 |  51.40ms | 17 knps
+PVS d = 3            | d8h4 |       2813 | 221.57ms | 13 knps
+PVS d = 4            | f7f6 |     170579 |    9.67s | 18 knps
+
+Benchmarking position rnbqk1nr/3p1ppp/1pp1p3/p2P4/PbB1P3/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 11
+Negamax d = 1        | b4c3 |         66 |   2.47ms | 27 knps
+Negamax d = 2        | c6d5 |       1347 |  88.52ms | 15 knps
+Negamax d = 3        | c6d5 |      42460 |    3.21s | 13 knps
+AlphaBeta d = 1      | b4c3 |         34 |   2.54ms | 13 knps
+AlphaBeta d = 2      | e6d5 |        163 |  12.34ms | 13 knps
+AlphaBeta d = 3      | c6d5 |       8123 | 647.24ms | 13 knps
+AlphaBeta d = 4      | e6d5 |      16360 |    1.10s | 15 knps
+PVS d = 1            | b4c3 |         35 |   2.53ms | 14 knps
+PVS d = 2            | c6d5 |        357 |  23.96ms | 15 knps
+PVS d = 3            | c6d5 |       4445 | 350.51ms | 13 knps
+PVS d = 4            | c6d5 |      40431 |    2.63s | 15 knps

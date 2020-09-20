@@ -12,3 +12,4 @@ search deeper to win.
 - Changed the Field type into a normal int with 0 == empty. No big performance changes, but lot of potential
 - Found many vector copying in move_generation. Changed function to pass a ref to vector and gained `20%` speedup!
 - Changed the representation of `en passant` field from coord to index. This allowed me to remove many coord2index calls. Got 5% speedup.
+- Changed the board representation to 0x88. Wrote 0xff so everything was broken. Also for i in 0..64 tripped me a few time.

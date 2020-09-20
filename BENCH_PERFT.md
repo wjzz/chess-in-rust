@@ -125,3 +125,13 @@ perf imm 3 =       8902 | correct: true | total time   7.60ms
 perf imm 4 =     197281 | correct: true | total time  75.68ms
 perf imm 5 =    4865609 | correct: true | total time    1.53s
 perf imm 6 =  119060324 | correct: true | total time   42.26s
+
+**After initial switching to 0x88 board representation**
+
+Using 4 threads.
+perf imm 1 =         20 | correct: true | total time 828.28µs
+perf imm 2 =        400 | correct: true | total time 351.85µs
+perf imm 3 =       8902 | correct: true | total time   6.84ms
+perf imm 4 =     197281 | correct: true | total time  74.34ms
+perf imm 5 =    4865609 | correct: true | total time    1.32s
+perf imm 6 =  119060324 | correct: true | total time   38.53s

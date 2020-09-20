@@ -1,7 +1,7 @@
-#[path = "move_gen.rs"]
-pub mod move_gen;
+#[path = "parser.rs"]
+pub mod parser;
 
-pub use move_gen::*;
+pub use parser::*;
 
 impl Position {
     pub fn make_move(&mut self, mv: IntMove) -> Result<(), String> {

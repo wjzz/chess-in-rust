@@ -5,7 +5,7 @@ pub use board::*;
 
 impl Position {
     pub fn from_fen(fen: &str) -> Self {
-        let mut board = vec![EMPTY; FIELDS_NO];
+        let mut board = vec![EMPTY; FIELDS88];
 
         let parts: Vec<&str> = fen.split_ascii_whitespace().collect();
 
@@ -57,6 +57,7 @@ impl Position {
                     // );
                     let field = boardcell_encode(player, piece);
                     let index = rowcol2index(row as i32, col as i32);
+                    assert!(index < MAX_INDEX88);
                     board[index] = field;
                     col += 1;
                 }

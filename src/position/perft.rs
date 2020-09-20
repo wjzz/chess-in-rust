@@ -1,10 +1,10 @@
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-#[path = "make_move.rs"]
-pub mod make_move;
+#[path = "move_gen.rs"]
+pub mod move_gen;
 
-pub use make_move::*;
+pub use move_gen::*;
 
 impl Position {
     fn perft_immutable_iter(depth: u32, level: u32, mut pos: Position) -> u32 {
