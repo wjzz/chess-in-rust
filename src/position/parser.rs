@@ -5,7 +5,7 @@ pub use board::*;
 
 impl Position {
     pub fn from_fen(fen: &str) -> Self {
-        let mut board = vec![None; FIELDS_NO];
+        let mut board = vec![EMPTY; FIELDS_NO];
 
         let parts: Vec<&str> = fen.split_ascii_whitespace().collect();
 
@@ -55,7 +55,7 @@ impl Position {
                     //     "row {}, col {}, coord {} ==> {:?} of {:?}",
                     //     row, col, coord, piece, player
                     // );
-                    let field = Some(PlayerPiece { player, piece });
+                    let field = boardcell_encode(player, piece);
                     let index = rowcol2index(row as i32, col as i32);
                     board[index] = field;
                     col += 1;
@@ -110,8 +110,8 @@ mod tests {
             for row in rows(player) {
                 for col in "ABCDEFGH".chars() {
                     let coord = format!("{}{}", col, row);
-                    assert!(pos[&coord].is_some());
-                    assert_eq!(player, pos[&coord].unwrap().player);
+                    assert!(pos[&coord] != EMPTY);
+                    assert_eq!(player, boardcell_player(pos[&coord]));
                 }
             }
         }
@@ -122,19 +122,19 @@ mod tests {
         let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         let pos = Position::from_fen(fen);
 
-        let white_rook = PlayerPiece::new(Player::White, Piece::Rook);
-        let white_king = PlayerPiece::new(Player::White, Piece::King);
-        let white_queen = PlayerPiece::new(Player::White, Piece::Queen);
+        let white_rook = boardcell_encode(Player::White, Piece::Rook);
+        let white_king = boardcell_encode(Player::White, Piece::King);
+        let white_queen = boardcell_encode(Player::White, Piece::Queen);
 
-        let black_king = PlayerPiece::new(Player::Black, Piece::King);
-        let black_queen = PlayerPiece::new(Player::Black, Piece::Queen);
+        let black_king = boardcell_encode(Player::Black, Piece::King);
+        let black_queen = boardcell_encode(Player::Black, Piece::Queen);
 
-        assert_eq!(white_rook, pos["A1"].unwrap());
-        assert_eq!(white_queen, pos["D1"].unwrap());
-        assert_eq!(white_king, pos["E1"].unwrap());
+        assert_eq!(white_rook, pos["A1"]);
+        assert_eq!(white_queen, pos["D1"]);
+        assert_eq!(white_king, pos["E1"]);
 
-        assert_eq!(black_queen, pos["D8"].unwrap());
-        assert_eq!(black_king, pos["E8"].unwrap());
+        assert_eq!(black_queen, pos["D8"]);
+        assert_eq!(black_king, pos["E8"]);
     }
 
     #[test]
@@ -159,8 +159,8 @@ mod tests {
         let fen = "7K/8/8/8/8/8/8/8 w - - 0 1";
         let pos = Position::from_fen(fen);
 
-        let white_king = PlayerPiece::new(Player::White, Piece::King);
-        assert_eq!(white_king, pos["H8"].unwrap());
+        let white_king = boardcell_encode(Player::White, Piece::King);
+        assert_eq!(white_king, pos["H8"]);
         assert_eq!("-", pos.castle_rights);
     }
 

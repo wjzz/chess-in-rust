@@ -12,11 +12,11 @@ impl Position {
 
         // verify there is a piece to move at src
         let piece = match self.board[src] {
-            None => {
+            EMPTY => {
                 println!("FEN = {}", self.to_fen());
                 return Err(format!("Expected to find a piece at {}!", index2coord(src)));
             },
-            Some(player_piece) if player_piece.player != color => {
+            player_piece if boardcell_player(player_piece) != color => {
 
                 return Err(format!(
                     "Expected to find {}'s piece at {}, but opponent piece found!",
@@ -24,12 +24,12 @@ impl Position {
                     src
                 ))
             }
-            Some(player_piece) => player_piece.piece,
+            player_piece => boardcell_piece(player_piece),
         };
 
         // TODO: should we check that `piece` can really move to dest (e.g. is this is diagonal move)
 
-        if self.board[dest].is_some() && self.board[dest].unwrap().player == color {
+        if self.board[dest] != EMPTY && boardcell_player(self.board[dest]) == color {
             return Err(format!("Can't capture own piece at {}", dest));
         }
 
@@ -58,7 +58,7 @@ impl Position {
 
         // TODO: check with castling rights
 
-        if self.board[dest].is_some() {
+        if self.board[dest] != EMPTY {
             let dest = index2coord(dest);
 
             let to_remove = if opponent == Player::White {
@@ -107,12 +107,12 @@ impl Position {
                 let clear_col = dest_col;
                 let clear_coord = rowcol2coord_safe(clear_row, clear_col).unwrap();
 
-                self.board[coord2index(clear_coord)] = None;
+                self.board[coord2index(clear_coord)] = EMPTY;
             }
         }
 
         self.half_moves_stack.push(self.half_moves);
-        if piece == Piece::Pawn || self.board[dest].is_some() {
+        if piece == Piece::Pawn || self.board[dest] != EMPTY {
             self.half_moves = 0;
         } else {
             self.half_moves += 1;
@@ -146,18 +146,16 @@ impl Position {
         // check if move is castling
         if piece == Piece::King && self.is_castling_move(mv) {
             let (rook_src, rook_dest) = self.rook_position_castling(mv);
-            let rook_piece = PlayerPiece {
-                player: color,
-                piece: Piece::Rook,
-            };
-            assert_eq!(Some(rook_piece), self.board[coord2index(rook_src)]);
-            self.board[coord2index(rook_src)] = None;
-            self.board[coord2index(rook_dest)] = Some(rook_piece);
+            let rook_piece = boardcell_encode(color, Piece::Rook);
+            assert_eq!(rook_piece, self.board[coord2index(rook_src)]);
+
+            self.board[coord2index(rook_src)] = EMPTY;
+            self.board[coord2index(rook_dest)] = rook_piece;
         }
 
         // make the actual changes
-        self.board[src] = None;
-        self.board[dest] = Some(PlayerPiece::new(color, new_piece));
+        self.board[src] = EMPTY;
+        self.board[dest] = boardcell_encode(color, new_piece);
         self.to_move = color.opposite();
         self.en_passant = en_passant_flag;
 
@@ -180,12 +178,12 @@ impl Position {
 
         // verify there is a piece to move at src
         let piece = match self.board[dest] {
-            None => {
+            EMPTY => {
                 println!("FEN = {}", self.to_fen());
                 // println!("LAST MOVE = {}", mv.to_usi_ascii());
                 return Err(format!("Expected to find a piece at {}!", src));
             },
-            Some(player_piece) if player_piece.player != color => {
+            player_piece if boardcell_player(player_piece) != color => {
                 println!("FEN = {}", self.to_fen());
                 return Err(format!(
                     "Expected to find {}'s piece at {}, but opponent piece found!",
@@ -193,7 +191,7 @@ impl Position {
                     dest
                 ))
             }
-            Some(player_piece) => player_piece.piece,
+            player_piece => boardcell_piece(player_piece),
         };
 
         // println!(">> piece = {}", piece.to_ascii());
@@ -224,18 +222,16 @@ impl Position {
         // check if move was castling and unmake the rook move
         if piece == Piece::King && self.is_castling_move_color(mv, color) {
             let (rook_src, rook_dest) = self.rook_position_castling_color(mv, color);
-            let rook_piece = PlayerPiece {
-                player: color,
-                piece: Piece::Rook,
-            };
-            assert_eq!(Some(rook_piece), self[rook_dest]);
-            self.board[coord2index(rook_src)] = Some(rook_piece);
-            self.board[coord2index(rook_dest)] = None;
+            let rook_piece = boardcell_encode(color, Piece::Rook);
+            assert_eq!(rook_piece, self[rook_dest]);
+
+            self.board[coord2index(rook_src)] = rook_piece;
+            self.board[coord2index(rook_dest)] = EMPTY;
         }
 
         // unpromote the pawn if needed
         let original_piece = if promote_to.is_some() {
-            Some(PlayerPiece { player: color, piece: Piece::Pawn })
+            boardcell_encode(color, Piece::Pawn)
         } else {
             self.board[dest]
         };
@@ -245,9 +241,9 @@ impl Position {
                 self.board[dest] = self.captures.pop().unwrap();
             }
             Some(taken_pawn_src) => {
-                self.board[dest] = None;
+                self.board[dest] = EMPTY;
                 self.captures.pop().unwrap();
-                self.board[taken_pawn_src] = Some(PlayerPiece { piece: Piece::Pawn, player: opponent });
+                self.board[taken_pawn_src] = boardcell_encode(opponent, Piece::Pawn);
             }
         }
 

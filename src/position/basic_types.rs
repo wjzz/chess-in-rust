@@ -356,6 +356,76 @@ impl PlayerPiece {
     }
 }
 
+pub type BoardCell = i32;
+
+pub const B_KING: BoardCell = -6;
+pub const B_QUEEN: BoardCell = -5;
+pub const B_ROOK: BoardCell = -4;
+pub const B_BISHOP: BoardCell = -3;
+pub const B_KNIGHT: BoardCell = -2;
+pub const B_PAWN: BoardCell = -1;
+pub const EMPTY: BoardCell = 0;
+pub const W_PAWN: BoardCell = 1;
+pub const W_KNIGHT: BoardCell = 2;
+pub const W_BISHOP: BoardCell = 3;
+pub const W_ROOK: BoardCell = 4;
+pub const W_QUEEN: BoardCell = 5;
+pub const W_KING: BoardCell = 6;
+
+pub fn boardcell_to_ascii(bc: BoardCell) -> String {
+    match bc {
+        EMPTY => ".",
+        B_KING => "k",
+        B_QUEEN => "q",
+        B_ROOK => "r",
+        B_BISHOP => "b",
+        B_KNIGHT => "n",
+        B_PAWN => "p",
+        W_PAWN => "P",
+        W_KNIGHT => "N",
+        W_BISHOP => "B",
+        W_ROOK => "R",
+        W_QUEEN => "Q",
+        W_KING => "K",
+        _ => panic!("wrong boardcell! {}", bc),
+    }.to_string()
+}
+
+pub fn boardcell_encode(player: Player, piece: Piece) -> BoardCell {
+    let val = piece as i32;
+    val * if player == Player::White { 1 } else { -1}
+}
+
+pub fn boardcell_player(bc: BoardCell) -> Player {
+    if bc > 0 {
+        Player::White
+    } else {
+        Player::Black
+    }
+}
+
+pub fn boardcell_piece(bc: BoardCell) -> Piece {
+    PIECES[(bc.abs()-1) as usize]
+}
+
+pub fn boardcell_from_playerpiece(pp: PlayerPiece) -> BoardCell {
+    let PlayerPiece { player, piece } = pp;
+    let val = piece as i32;
+    val * if player == Player::White { 1 } else { -1}
+}
+
+pub fn boardcell_destruct(bc: BoardCell) -> (Player, Piece) {
+    let piece = PIECES[(bc.abs()-1) as usize];
+    let player = if bc > 0 { Player::White } else { Player::Black };
+    (player, piece)
+}
+
+pub fn playerpierce_from_boardcell(bc: BoardCell) -> PlayerPiece {
+    let piece = PIECES[(bc.abs()-1) as usize];
+    let player = if bc > 0 { Player::White } else { Player::Black };
+    PlayerPiece { player, piece }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -386,6 +456,17 @@ mod tests {
             let RowCol { row, col } = coord2rowcol(coord);
             let coord2 = rowcol2coord(row, col);
             assert_eq!(coord, coord2);
+        }
+    }
+
+    #[test]
+    fn test_boardpiece() {
+        for &player in PLAYERS.iter() {
+            for &piece in PIECES.iter() {
+                let pp = PlayerPiece { player, piece };
+                let pp2 = playerpierce_from_boardcell(boardcell_from_playerpiece(pp));
+                assert_eq!(pp, pp2);
+            }
         }
     }
 }

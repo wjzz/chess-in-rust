@@ -13,16 +13,16 @@ impl Position {
         let mut dest_row = src_row + dx;
         let mut dest_col = src_col + dy;
 
-        let color = self.board[src].unwrap().player;
+        let color = boardcell_player(self.board[src]);
         let opp_color = color.opposite();
 
         while let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
             let dest_field = self.board[dest];
 
-            if dest_field.is_none() || dest_field.unwrap().player == opp_color {
+            if dest_field == EMPTY || boardcell_player(dest_field) == opp_color {
                 all_moves.push(intmove_encode(src, dest, None));
 
-                if dest_field.is_some() {
+                if dest_field != EMPTY {
                     return;
                 }
             } else {
@@ -52,14 +52,11 @@ impl Position {
         capture_ok: bool
     ) {
         if let Some(dest) = rowcol2index_safe(dest_row, dest_col) {
-            let PlayerPiece {
-                player: color,
-                piece,
-            } = self.board[src].unwrap();
+            let (color, piece) = boardcell_destruct(self.board[src]);
             let opp_color = color.opposite();
             let dest_field = self.board[dest];
 
-            if dest_field.is_none() || (capture_ok && dest_field.unwrap().player == opp_color) {
+            if dest_field == EMPTY || (capture_ok && boardcell_player(dest_field) == opp_color) {
                 if piece != Piece::Pawn {
                     all_moves.push(intmove_encode_flags(src, dest, None, flag));
                 } else {
@@ -81,7 +78,7 @@ impl Position {
     }
 
     fn generate_moves_from(&self, src: usize, piece: Piece, color: Player) -> Vec<IntMove> {
-        assert_eq!(PlayerPiece::new(color, piece), self.board[src].unwrap());
+        assert_eq!(boardcell_encode(color, piece), self.board[src]);
 
         let RowCol {
             row: src_row,
@@ -106,7 +103,7 @@ impl Position {
                     // make sure the square before the pawn is empty!
                     let passing_square = rowcol2coord_safe(src_row + row_delta, src_col);
                     if let Some(passing) = passing_square {
-                        if self.board[coord2index(passing)] == None {
+                        if self.board[coord2index(passing)] == EMPTY {
                             self.try_add_pawn(
                                 src,
                                 src_row + row_delta * 2,
@@ -131,8 +128,8 @@ impl Position {
 
                         if en_passant_ok
                             || (!en_passant_ok
-                                && dest_piece.is_some()
-                                && dest_piece.unwrap().player != color)
+                                && dest_piece != EMPTY
+                                && boardcell_player(dest_piece) != color)
                         {
                             self.try_add_pawn(
                                 src,
@@ -177,29 +174,12 @@ impl Position {
                         let rook_col = src_col + 3 * king_side_dx;
                         let rook_dest = rowcol2index(src_row, rook_col);
 
-                        // let test = self.board[rook_dest]
-                        //     == Some(PlayerPiece {
-                        //         player: color,
-                        //         piece: Piece::Rook,
-                        //     });
-
-                        // if !test {
-                        //     println!("DEBUG: ");
-                        //     println!("{}", self.to_ascii());
-                        //     println!("FEN {}", self.to_fen());
-                        // }
-                        assert!(
-                            self.board[rook_dest]
-                                == Some(PlayerPiece {
-                                    player: color,
-                                    piece: Piece::Rook
-                                })
-                        );
+                        assert_eq!(self.board[rook_dest], boardcell_encode(color, Piece::Rook));
 
                         let free1 =
-                            self.board[rowcol2index(src_row, src_col + king_side_dx)] == None;
+                            self.board[rowcol2index(src_row, src_col + king_side_dx)] == EMPTY;
                         let free2 =
-                            self.board[rowcol2index(src_row, src_col + 2 * king_side_dx)] == None;
+                            self.board[rowcol2index(src_row, src_col + 2 * king_side_dx)] == EMPTY;
 
                         if free1 && free2 {
                             self.try_add(src, src_row, src_col + 2 * king_side_dx, &mut all_moves);
@@ -210,20 +190,15 @@ impl Position {
                     if self.castle_rights.contains(&ascii_q) {
                         let rook_col = src_col + 4 * queen_side_dx;
                         let rook_dest = rowcol2index(src_row, rook_col);
-                        assert!(
-                            self.board[rook_dest]
-                                == Some(PlayerPiece {
-                                    player: color,
-                                    piece: Piece::Rook
-                                })
-                        );
+
+                        assert_eq!(self.board[rook_dest], boardcell_encode(color, Piece::Rook));
 
                         let free1 =
-                            self.board[rowcol2index(src_row, src_col + queen_side_dx)] == None;
+                            self.board[rowcol2index(src_row, src_col + queen_side_dx)] == EMPTY;
                         let free2 =
-                            self.board[rowcol2index(src_row, src_col + 2 * queen_side_dx)] == None;
+                            self.board[rowcol2index(src_row, src_col + 2 * queen_side_dx)] == EMPTY;
                         let free3 =
-                            self.board[rowcol2index(src_row, src_col + 3 * queen_side_dx)] == None;
+                            self.board[rowcol2index(src_row, src_col + 3 * queen_side_dx)] == EMPTY;
 
                         if free1 && free2 && free3 {
                             self.try_add_flag(src, src_row, src_col + 2 * queen_side_dx, &mut all_moves, CASTLE_FLAG);
@@ -277,11 +252,12 @@ impl Position {
         let mut all_moves = vec![];
 
         for index in 0..64 {
-            if let Some(player_piece) = self.board[index] {
-                if player_piece.player == color {
+            let player_piece = self.board[index];
+            if player_piece != EMPTY {
+                if boardcell_player(player_piece) == color {
                     all_moves.append(&mut self.generate_moves_from(
                         index,
-                        player_piece.piece,
+                        boardcell_piece(player_piece),
                         color,
                     ));
                 }
@@ -292,12 +268,9 @@ impl Position {
     }
 
     fn king_location(&self, player: Player) -> Option<usize> {
-        let king = PlayerPiece {
-            player,
-            piece: Piece::King,
-        };
+        let king = boardcell_encode(player, Piece::King);
         for index in 0..64 {
-            if self.board[index] == Some(king) {
+            if self.board[index] == king {
                 return Some(index);
             }
         }

@@ -7,7 +7,8 @@ mod basic_types;
 pub use basic_types::*;
 
 pub type Field = Option<PlayerPiece>;
-pub type Board = Vec<Field>;
+// pub type Board = Vec<Field>;
+pub type Board = Vec<BoardCell>;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Position {
@@ -18,14 +19,14 @@ pub struct Position {
     pub half_moves: u32, // FIXME: we could remove this and only leave the stack
     pub full_moves: u32,
     pub half_moves_stack: Vec<u32>,
-    pub captures: Vec<Field>,
+    pub captures: Vec<BoardCell>,
     pub ep_stack: Vec<Option<Coord>>,
     pub castling_stack: Vec<String>,
 }
 
 impl Position {
     pub fn new() -> Self {
-        let board = vec![None; FIELDS_NO];
+        let board = vec![EMPTY; FIELDS_NO];
         let to_move = Player::White;
 
         Position {
@@ -64,7 +65,7 @@ impl Position {
         }
     }
 
-    pub fn fields(&self) -> slice::Iter<Field> {
+    pub fn fields(&self) -> slice::Iter<BoardCell> {
         self.board.iter()
     }
 
@@ -72,10 +73,7 @@ impl Position {
         let mut result = String::new();
         for row in (0..8).rev() {
             for col in 0..8 {
-                let ch = match self.board[rowcol2index(row, col)] {
-                    None => ".".to_string(),
-                    Some(player_piece) => player_piece.to_ascii(),
-                };
+                let ch = boardcell_to_ascii(self.board[rowcol2index(row, col)]);
                 result.push_str(&ch);
             }
             result.push('\n');
@@ -92,13 +90,13 @@ impl Position {
 
             for col in 0..8 {
                 match self.board[rowcol2index(row, col)] {
-                    None => empty_in_a_row += 1,
-                    Some(player_piece) => {
+                    EMPTY => empty_in_a_row += 1,
+                    player_piece => {
                         if empty_in_a_row > 0 {
                             line.push_str(&empty_in_a_row.to_string());
                             empty_in_a_row = 0;
                         }
-                        line.push_str(&player_piece.to_ascii());
+                        line.push_str(&boardcell_to_ascii(player_piece));
                     }
                 };
             }
@@ -115,26 +113,18 @@ impl Position {
             Some(coord) => coord.to_ascii_lowercase(),
         };
 
-        // TODO: implement checking castling rights
         result.push_str(&format!(
             "{} {} {} {}",
             self.castle_rights, en_passant_str, self.half_moves, self.full_moves
         ));
         result
     }
-
-    pub fn count_pieces_by_player(&self, player: Player) -> usize {
-        self.board
-            .iter()
-            .filter(|f| f.is_some() && f.unwrap().player == player)
-            .count()
-    }
 }
 
 impl Index<&str> for Position {
-    type Output = Field;
+    type Output = BoardCell;
 
-    fn index(&self, i: &str) -> &Field {
+    fn index(&self, i: &str) -> &BoardCell {
         match str2coord(i) {
             None => panic!("Wrong coordinate: {}", i),
             Some(coord) => {
@@ -157,16 +147,7 @@ mod tests {
         assert_eq!(pos.en_passant, None);
 
         for &field in pos.fields() {
-            assert_eq!(field, None);
-        }
-    }
-
-    #[test]
-    fn count_pieces_new() {
-        let pos = Position::new();
-
-        for &player in PLAYERS.iter() {
-            assert_eq!(0, pos.count_pieces_by_player(player));
+            assert_eq!(field, EMPTY);
         }
     }
 
@@ -175,7 +156,7 @@ mod tests {
         let pos = Position::new();
 
         for coord in COORDS.iter() {
-            assert_eq!(None, pos[coord]);
+            assert_eq!(EMPTY, pos[coord]);
         }
     }
 }

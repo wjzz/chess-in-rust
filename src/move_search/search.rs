@@ -18,14 +18,12 @@ fn eval_piece(piece: Piece) -> f64 {
 
 fn eval_position(pos: &Position) -> f64 {
     let mut result = 0.0;
-    for field in pos.board.iter() {
-        match field {
-            None => (),
-            Some(PlayerPiece { player, piece }) => {
-                let val = eval_piece(*piece);
-                let sign = if pos.to_move == *player { 1.0 } else { -1.0 };
-                result += val * sign;
-            }
+    for &field in pos.board.iter() {
+        if field != EMPTY {
+            let (player, piece) = boardcell_destruct(field);
+            let val = eval_piece(piece);
+            let sign = if pos.to_move == player { 1.0 } else { -1.0 };
+            result += val * sign;
         }
     }
     result
