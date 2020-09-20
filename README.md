@@ -9,7 +9,7 @@ Priority TODOs:
 - - [x] En passant
 - - [x] Castling
 - [x] Make move
-- [1/2] Unmake move [implemented in a branch, efficiency dropped down]
+- [x] Unmake move
 - [x] `check` checking
 - [x] `mate` checking
 - [x] `stalemate` checking
@@ -24,8 +24,8 @@ Priority TODOs:
 
 Bot TODOs:
 
-- [ ] alpha-beta
-- [ ] opening book
+- [x] alpha-beta
+- [x] opening book (using python's driver and a book found somewhere)
 - [ ] ending table
 
 PERFT [clone instead of unmove]: (bugs found)
@@ -33,12 +33,13 @@ PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 2    # color change after move
 - [x] depth = 3    # pawn captured forward, pawn jumping over knight
 - [x] depth = 4    # king cant be left in check
-- [x] depth = 5    # missing en passant    TODO: requires more than 3 minutes, need to optimize
+- [x] depth = 5    # missing en passant    TODO: requires more than 2 minutes, need to optimize
 - [x] depth = 6    # TODO: requires 60min on single core | 20 min on all cores
 - [x] depth = 7    # a few hours
 - [ ] depth = 8
 
 Later:
+- [ ] Ox88 board
 - [ ] Bitboards
 - [ ] Experiments with more efficient/compact data structures
 - [ ] Compilation to WASM
