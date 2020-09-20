@@ -207,32 +207,27 @@ impl Position {
     pub fn moves_by(&self, color: Player) -> Vec<IntMove> {
         let mut all_moves = vec![];
 
-        // TODO: put the indexes in a table
-        for index in 0..MAX_INDEX88 {
-            if index & 0x88 == 0 {
-                let player_piece = self.board[index];
-                if player_piece != EMPTY {
-                    if boardcell_player(player_piece) == color {
-                        self.generate_moves_from(
-                            index,
-                            boardcell_piece(player_piece),
-                            color,
-                            &mut all_moves);
-                        }
+        for &index in &INDEXES88 {
+            let player_piece = self.board[index];
+            if player_piece != EMPTY {
+                if boardcell_player(player_piece) == color {
+                    self.generate_moves_from(
+                        index,
+                        boardcell_piece(player_piece),
+                        color,
+                        &mut all_moves);
                     }
                 }
-            }
+        }
 
         all_moves
     }
 
     fn king_location(&self, player: Player) -> Option<usize> {
         let king = boardcell_encode(player, Piece::King);
-        for index in 0..MAX_INDEX88 {
-            if index & 0x88 == 0 {
-                if self.board[index] == king {
-                    return Some(index);
-                }
+        for &index in &INDEXES88 {
+            if self.board[index] == king {
+                return Some(index);
             }
         }
         return None;

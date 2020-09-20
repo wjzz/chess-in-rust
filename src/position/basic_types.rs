@@ -3,6 +3,12 @@ pub const FIELDS88: usize = 128;
 
 pub const MAX_INDEX88: usize = 120;
 
+pub const INDEXES88: [usize; 64] = [
+    0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23, 32, 33, 34, 35, 36, 37, 38, 39, 48, 49,
+    50, 51, 52, 53, 54, 55, 64, 65, 66, 67, 68, 69, 70, 71, 80, 81, 82, 83, 84, 85, 86, 87, 96, 97,
+    98, 99, 100, 101, 102, 103, 112, 113, 114, 115, 116, 117, 118, 119,
+];
+
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Player {
     White,
@@ -66,14 +72,14 @@ impl Piece {
 pub type Coord = &'static str;
 
 pub const COORDS: [Coord; FIELDS88] = [
-    "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "X", "X", "X", "X", "X", "X", "X", "X",
-    "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "X", "X", "X", "X", "X", "X", "X", "X",
-    "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "X", "X", "X", "X", "X", "X", "X", "X",
-    "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "X", "X", "X", "X", "X", "X", "X", "X",
-    "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "X", "X", "X", "X", "X", "X", "X", "X",
-    "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "X", "X", "X", "X", "X", "X", "X", "X",
-    "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "X", "X", "X", "X", "X", "X", "X", "X",
-    "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "X", "X", "X", "X", "X", "X", "X", "X",
+    "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "X", "X", "X", "X", "X", "X", "X", "X", "B1",
+    "B2", "B3", "B4", "B5", "B6", "B7", "B8", "X", "X", "X", "X", "X", "X", "X", "X", "C1", "C2",
+    "C3", "C4", "C5", "C6", "C7", "C8", "X", "X", "X", "X", "X", "X", "X", "X", "D1", "D2", "D3",
+    "D4", "D5", "D6", "D7", "D8", "X", "X", "X", "X", "X", "X", "X", "X", "E1", "E2", "E3", "E4",
+    "E5", "E6", "E7", "E8", "X", "X", "X", "X", "X", "X", "X", "X", "F1", "F2", "F3", "F4", "F5",
+    "F6", "F7", "F8", "X", "X", "X", "X", "X", "X", "X", "X", "G1", "G2", "G3", "G4", "G5", "G6",
+    "G7", "G8", "X", "X", "X", "X", "X", "X", "X", "X", "H1", "H2", "H3", "H4", "H5", "H6", "H7",
+    "H8", "X", "X", "X", "X", "X", "X", "X", "X",
 ];
 
 pub fn str2coord(s: &str) -> Option<Coord> {
@@ -191,7 +197,12 @@ pub fn usi2rowcol(coord: &str) -> usize {
 
 pub type IntMove = usize;
 
-pub fn intmove_encode_flags(src: usize, dest: usize, promote_to: Option<Piece>, flags: usize) -> IntMove {
+pub fn intmove_encode_flags(
+    src: usize,
+    dest: usize,
+    promote_to: Option<Piece>,
+    flags: usize,
+) -> IntMove {
     let mut intmove = 0usize;
     assert!(src < 2 * 64);
     assert!(dest < 2 * 64);
@@ -222,14 +233,25 @@ pub fn intmove_encode(src: usize, dest: usize, promote_to: Option<Piece>) -> Int
 }
 
 pub fn intmove_from_move(mv: &Move) -> IntMove {
-    let Move { src, dest, promote_to } = mv;
+    let Move {
+        src,
+        dest,
+        promote_to,
+    } = mv;
     intmove_encode(*src, *dest, *promote_to)
 }
 
 fn show_bytes(intmove: IntMove) {
     println!("intmove = {}", intmove);
     for i in (0..32usize).rev() {
-        print!("{}", if intmove & (1usize << i) != 0 { "1"} else { "0"});
+        print!(
+            "{}",
+            if intmove & (1usize << i) != 0 {
+                "1"
+            } else {
+                "0"
+            }
+        );
         if i % 8 == 0 {
             print!(" ");
         }
@@ -279,7 +301,11 @@ pub fn intmove_destructure(intmove: IntMove) -> (usize, usize, Option<Piece>) {
 
 pub fn move_from_intmove(intmove: IntMove) -> Move {
     let (src, dest, promote_to) = intmove_destructure(intmove);
-    Move { src, dest, promote_to }
+    Move {
+        src,
+        dest,
+        promote_to,
+    }
 }
 
 pub fn intmove_from_ascii(ascii: &'static str) -> IntMove {
@@ -289,7 +315,6 @@ pub fn intmove_from_ascii(ascii: &'static str) -> IntMove {
 pub fn intmove_to_uci_ascii(intmove: IntMove) -> String {
     move_from_intmove(intmove).to_usi_ascii()
 }
-
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct Move {
@@ -404,12 +429,13 @@ pub fn boardcell_to_ascii(bc: BoardCell) -> String {
         W_QUEEN => "Q",
         W_KING => "K",
         _ => panic!("wrong boardcell! {}", bc),
-    }.to_string()
+    }
+    .to_string()
 }
 
 pub fn boardcell_encode(player: Player, piece: Piece) -> BoardCell {
     let val = piece as i32;
-    val * if player == Player::White { 1 } else { -1}
+    val * if player == Player::White { 1 } else { -1 }
 }
 
 pub fn boardcell_player(bc: BoardCell) -> Player {
@@ -421,23 +447,23 @@ pub fn boardcell_player(bc: BoardCell) -> Player {
 }
 
 pub fn boardcell_piece(bc: BoardCell) -> Piece {
-    PIECES[(bc.abs()-1) as usize]
+    PIECES[(bc.abs() - 1) as usize]
 }
 
 pub fn boardcell_from_playerpiece(pp: PlayerPiece) -> BoardCell {
     let PlayerPiece { player, piece } = pp;
     let val = piece as i32;
-    val * if player == Player::White { 1 } else { -1}
+    val * if player == Player::White { 1 } else { -1 }
 }
 
 pub fn boardcell_destruct(bc: BoardCell) -> (Player, Piece) {
-    let piece = PIECES[(bc.abs()-1) as usize];
+    let piece = PIECES[(bc.abs() - 1) as usize];
     let player = if bc > 0 { Player::White } else { Player::Black };
     (player, piece)
 }
 
 pub fn playerpierce_from_boardcell(bc: BoardCell) -> PlayerPiece {
-    let piece = PIECES[(bc.abs()-1) as usize];
+    let piece = PIECES[(bc.abs() - 1) as usize];
     let player = if bc > 0 { Player::White } else { Player::Black };
     PlayerPiece { player, piece }
 }
