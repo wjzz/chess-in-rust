@@ -245,6 +245,70 @@ impl Position {
             .collect()
     }
 
+    pub fn is_king_in_check_fast(&self, player: Player) -> bool {
+        let king_coord = self.kings[player as usize];
+        let opp_piece_color = if player == Player::White { -1 } else { 1 };
+
+        let deltas = [
+            vec![],
+            vec![],
+            vec![],
+            vec![15, 17], // bishop
+            vec![16, 1], // rook
+            vec![1, 15, 16, 17], // queen
+        ];
+
+        for src in INDEXES88.iter() {
+            let field = self.board[*src];
+            if field != EMPTY && field * opp_piece_color > 0 {
+                let diff = king_coord as i32 - *src as i32;
+                let piece = field.abs();
+
+                match piece {
+                    W_PAWN => {
+                        let row_delta: i32 = 16 * opp_piece_color;
+                        if diff == row_delta + 1 || diff == row_delta - 1 {
+                            return true;
+                        }
+                    },
+                    W_KNIGHT => {
+                        if [ 31, 33, -31, -33, 18, -14, -18, 14].contains(&diff) {
+                            return true;
+                        }
+                    }
+
+                    W_KING => {
+                        if [ 16, 17, 1, -15, -16, -17, -1, 15].contains(&diff) {
+                            return true;
+                        }
+                    },
+                    W_BISHOP | W_ROOK | W_QUEEN => {
+
+                        for delta in deltas[piece as usize].iter() {
+                            if (*delta == 1 && diff.abs() < 8) || (*delta != 1 && diff % delta == 0) {
+                                let sign = if diff < 0 { -1 } else { 1};
+                                let step = delta * sign;
+
+                                let mut curr = *src as i32 + step;
+                                while curr & 0x88 == 0 && curr as usize != king_coord && self.board[curr as usize] == EMPTY {
+                                    curr += step;
+                                }
+
+                                if curr as usize == king_coord {
+                                    return true;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                    },
+                    _ => panic!("is_king_in_check_fast: wrong piece: {}", field),
+                }
+            }
+        }
+        return false;
+    }
+
     pub fn is_king_in_check(&self, player: Player) -> bool {
         let king_coord = self.kings[player as usize];
         for mv in self.moves_by(player.opposite()).iter() {
@@ -310,13 +374,13 @@ impl Position {
         let mut result = vec![];
         for mv in moves.iter() {
             if intmove_is_castle(*mv) {
-                if !self.is_king_in_check(self.to_move) && self.can_safely_castle(*mv) {
+                if !self.is_king_in_check_fast(self.to_move) && self.can_safely_castle(*mv) {
                     result.push(*mv);
                 }
             } else {
                 let to_move = self.to_move;
                 self.make_move(*mv).unwrap();
-                if !self.is_king_in_check(to_move) {
+                if !self.is_king_in_check_fast(to_move) {
                     result.push(*mv);
                 }
                 self.unmake_move(*mv).unwrap();

@@ -124,3 +124,10 @@ perf imm 8 = 84998979184 | correct: false | total time 25187.36s |  3375 knps | 
 wrong answer after 7 hours
 got       84_998_979_184
 should be 84_998_978_956
+
+**Add a smarter is-king-in-check checker**
+
+Using 4 threads.
+perf imm 5 =    4865609 | correct: true | total time 469.53ms | 10363 knps |  2591 knps (thread)
+perf imm 6 =  119060324 | correct: true | total time   12.20s |  9763 knps |  2441 knps (thread)
+perf imm 7 = 3195901860 | correct: true | total time  460.39s |  6942 knps |  1735 knps (thread) [<7 mins!!]

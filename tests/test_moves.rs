@@ -544,4 +544,71 @@ mod test_moves {
             assert_eq!(*value, moves.len());
         }
     }
+
+    #[test]
+    fn test_is_king_in_check_pawn() {
+        let fens = [
+            ("8/8/8/3k4/4p3/3K4/8/8 w - - 0 1", true),
+            ("8/8/8/3k4/4P3/3K4/8/8 b - - 0 1", true),
+            ("8/8/8/3k4/8/3KP3/8/8 b - - 0 1", false),
+        ];
+
+        for &(fen, result) in fens.iter() {
+            let pos = Position::from_fen(fen);
+            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+        }
+    }
+
+    #[test]
+    fn test_is_king_in_check_king() {
+        let fens = [
+            ("8/8/8/3k4/3K4/8/8/8 w - - 0 1", true),
+            ("8/8/8/3k4/3K4/8/8/8 b - - 0 1", true),
+        ];
+
+        for &(fen, result) in fens.iter() {
+            let pos = Position::from_fen(fen);
+            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+        }
+    }
+
+    #[test]
+    fn test_is_king_in_check_knight() {
+        let fens = [
+            ("8/8/8/3k4/5n2/8/4K3/8 w - - 0 1", true),
+            ("8/8/1N6/3k4/8/8/4K3/8 b - - 0 1", true),
+        ];
+
+        for &(fen, result) in fens.iter() {
+            let pos = Position::from_fen(fen);
+            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+        }
+    }
+
+    #[test]
+    fn test_is_king_in_check_rook() {
+        let fens = [
+            ("4r3/8/8/3k4/8/8/4K3/8 w - - 0 1", true),
+            ("4r3/8/8/4k3/8/8/4K3/8 w - - 0 1", false),
+        ];
+
+        for &(fen, result) in fens.iter() {
+            let pos = Position::from_fen(fen);
+            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+        }
+    }
+
+
+    #[test]
+    fn test_is_king_in_check_queen() {
+        let fens = [
+            ("rnbqkbnr/pppp1Qpp/8/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 4", true),
+        ];
+
+        for &(fen, result) in fens.iter() {
+            let pos = Position::from_fen(fen);
+            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+        }
+    }
+
 }

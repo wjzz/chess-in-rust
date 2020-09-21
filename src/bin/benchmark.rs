@@ -54,10 +54,12 @@ fn main() {
         // MoveSearcher::AlphaBeta(2),
         // MoveSearcher::AlphaBeta(3),
         MoveSearcher::AlphaBeta(4),
+        MoveSearcher::AlphaBeta(5),
         // MoveSearcher::PVS(1),
         // MoveSearcher::PVS(2),
         // MoveSearcher::PVS(3),
         MoveSearcher::PVS(4),
+        MoveSearcher::PVS(5),
     ];
 
     for fen in positions.iter() {
