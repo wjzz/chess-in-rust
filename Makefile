@@ -14,6 +14,9 @@ main:
 perft:
 	@cargo run --bin perft --release
 
+split:
+	@cargo run --bin split --release
+
 valgrind:
 	@cargo build --release --bin benchmark
 	@cargo build --release --bin rust-chess

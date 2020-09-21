@@ -292,6 +292,16 @@ impl Position {
             if attacked_fields.contains(&index) {
                 return false;
             }
+            // check opponent's pawns
+            let deltas = [15, 17];
+            let sign = if self.to_move == Player::White { 1 } else { -1 };
+            let opp_pawn = B_PAWN * sign;
+            for delta in deltas.iter() {
+                let dest = index as i32 + delta * sign;
+                if dest & 0x88 == 0 && self.board[dest as usize] == opp_pawn {
+                    return false;
+                }
+            }
         }
         return true;
     }

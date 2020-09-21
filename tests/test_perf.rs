@@ -27,6 +27,18 @@ mod test_moves {
         assert_eq!(20, moves.len());
     }
 
+
+    #[test]
+    fn perf_no_castling_queenside_pawn_attack() {
+        let fen = "r3k3/p1ppPpb1/bn2pnp1/4N2r/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQq - 0 2";
+
+        let mut pos = Position::from_fen(fen);
+        let moves = pos.legal_moves();
+        println!("perfm 1 = {:#?}", moves);
+
+        assert_eq!(37, moves.len());
+    }
+
     #[test]
     #[ignore]
     fn perf_imm_starting_1() {
