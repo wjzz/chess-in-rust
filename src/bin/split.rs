@@ -19,7 +19,7 @@ fn main() {
 
     for mv in pos.legal_moves() {
         let mut pos2 = pos.clone();
-        pos2.make_move(mv);
+        pos2.make_move(mv).unwrap();
         let result = if depth > 1 {
             Position::perft_mutable_par(depth-1, &pos2.to_fen(), 1)
         } else {

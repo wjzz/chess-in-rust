@@ -143,7 +143,7 @@ impl Position {
         }
 
         // check if move is castling
-        if piece == Piece::King && self.is_castling_move(mv) {
+        if intmove_is_castle(mv) {
             let (rook_src, rook_dest) = self.rook_position_castling(mv);
             let rook_piece = boardcell_encode(color, Piece::Rook);
             assert_eq!(rook_piece, self.board[coord2index(rook_src)]);
@@ -224,7 +224,7 @@ impl Position {
         };
 
         // check if move was castling and unmake the rook move
-        if piece == Piece::King && self.is_castling_move_color(mv, color) {
+        if intmove_is_castle(mv) {
             let (rook_src, rook_dest) = self.rook_position_castling_color(mv, color);
             let rook_piece = boardcell_encode(color, Piece::Rook);
             assert_eq!(rook_piece, self[rook_dest]);

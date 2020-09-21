@@ -222,7 +222,11 @@ pub fn intmove_encode_flags(
     return intmove;
 }
 
-pub const CASTLE_FLAG: usize = 1 << 24;
+pub const CASTLE_FLAG: usize = 1 << 33;
+
+pub fn intmove_add_castling(intmove: IntMove) -> IntMove {
+    intmove | CASTLE_FLAG
+}
 
 pub fn intmove_is_castle(intmove: IntMove) -> bool {
     (intmove & CASTLE_FLAG) != 0

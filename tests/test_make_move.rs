@@ -266,7 +266,8 @@ mod test_moves {
         assert!(pos.castle_rights.contains("Q"));
 
         let mv = "E1->G1";
-        pos.make_move(intmove_from_ascii(mv)).unwrap();
+
+        pos.make_move(intmove_add_castling(intmove_from_ascii(mv))).unwrap();
 
         let result_fen = "6k1/8/8/8/8/8/8/R4RK1 b - - 1 1";
         assert_eq!(pos.to_fen(), result_fen);
@@ -283,7 +284,9 @@ mod test_moves {
         assert!(pos.castle_rights.contains("Q"));
 
         let mv = "E1->C1";
-        pos.make_move(intmove_from_ascii(mv)).unwrap();
+        let mv = intmove_add_castling(intmove_from_ascii(mv));
+        pos.make_move(mv).unwrap();
+
 
         let result_fen = "6k1/8/8/8/8/8/8/2KR3R b - - 1 1";
         assert_eq!(pos.to_fen(), result_fen);

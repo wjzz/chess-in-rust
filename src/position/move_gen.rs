@@ -31,6 +31,25 @@ impl Position {
         }
     }
 
+
+    fn try_add_non_pawn_flag(
+        &self,
+        color: Player,
+        src: usize,
+        dest: i32,
+        all_moves: &mut Vec<IntMove>,
+        flag: usize,
+    ) {
+        if dest & 0x88 == 0 {
+            assert!(dest >= 0);
+            let dest_field = self.board[dest as usize];
+
+            if dest_field == EMPTY || boardcell_player(dest_field) != color {
+                all_moves.push(intmove_encode_flags(src, dest as usize, None, flag));
+            }
+        }
+    }
+
     fn try_add_non_pawn(
         &self,
         color: Player,
@@ -38,14 +57,7 @@ impl Position {
         dest: i32,
         all_moves: &mut Vec<IntMove>,
     ) {
-        if dest & 0x88 == 0 {
-            assert!(dest >= 0);
-            let dest_field = self.board[dest as usize];
-
-            if dest_field == EMPTY || boardcell_player(dest_field) != color {
-                all_moves.push(intmove_encode(src, dest as usize, None));
-            }
-        }
+        self.try_add_non_pawn_flag(color, src, dest, all_moves, 0);
     }
 
     fn try_add_pawn(
@@ -159,7 +171,8 @@ impl Position {
                         assert_eq!(self.board[rook_dest], boardcell_encode(color, Piece::Rook));
 
                         if self.board[f1] == EMPTY && self.board[f2] == EMPTY {
-                            self.try_add_non_pawn(color, src, f2 as i32, all_moves);
+                            self.try_add_non_pawn_flag(color, src, f2 as i32, all_moves, CASTLE_FLAG);
+                            // self.try_add_non_pawn(color, src, f2 as i32, all_moves);
                         }
                     }
 
@@ -174,7 +187,8 @@ impl Position {
 
                         if self.board[f1] == EMPTY && self.board[f2] == EMPTY && self.board[f3] == EMPTY {
                             // self.try_add_flag(src, f2 as i32, all_moves, CASTLE_FLAG);
-                            self.try_add_non_pawn(color, src, f2 as i32, all_moves);
+                            self.try_add_non_pawn_flag(color, src, f2 as i32, all_moves, CASTLE_FLAG);
+                            // self.try_add_non_pawn(color, src, f2 as i32, all_moves);
 
                         }
                     }
@@ -241,21 +255,6 @@ impl Position {
         return false;
     }
 
-    pub fn is_castling_move_color(&self, mv: IntMove, color: Player) -> bool {
-        let (src, dest, _promote_to) = intmove_destructure(mv);
-
-        let src = index2coord(src);
-        let dest = index2coord(dest);
-        match color {
-            Player::White => src == "E1" && (dest == "G1" || dest == "C1"),
-            Player::Black => src == "E8" && (dest == "G8" || dest == "C8"),
-        }
-    }
-
-    pub fn is_castling_move(&self, mv: IntMove) -> bool {
-        return self.is_castling_move_color(mv, self.to_move);
-    }
-
     fn fields_to_check_castling(&self, mv: IntMove) -> Vec<Coord> {
         let dest = index2coord(intmove_dest(mv));
         match (self.to_move, dest) {
@@ -310,10 +309,7 @@ impl Position {
         let moves = self.moves();
         let mut result = vec![];
         for mv in moves.iter() {
-            // TODO: add a IS_CASTLE_FLAG here
-            let src = intmove_src(*mv);
-            let piece = self.board[src].abs();
-            if piece == W_KING && self.is_castling_move(*mv) {
+            if intmove_is_castle(*mv) {
                 if !self.is_king_in_check(self.to_move) && self.can_safely_castle(*mv) {
                     result.push(*mv);
                 }
