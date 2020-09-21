@@ -20,3 +20,4 @@ search deeper to win.
 - Fixed a castling check bug: a pawn's diagonal attack is not degenerated.
 - Implemented a quicker `is_king_in_check` procedure that checks the position of the king and checks if it is acheivable for the current piece. This uses some nice direction uniqueness properties of the `0x88` repr. The `speedup gain is huge` - 66%, the program runs 3x quicker!!
 - Tried to play against stockfish lvl 3 again, but we get easily outplayed even if we get an early advantage.
+- Calculated perft lvl 8 for startpos!

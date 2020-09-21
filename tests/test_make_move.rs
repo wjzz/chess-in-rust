@@ -340,4 +340,16 @@ mod test_moves {
         pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
     }
+
+
+    #[test]
+    fn regression2() {
+        let fen = "rnbqk1nr/1ppp2pp/4pp2/8/1bBPPB2/pPN2N2/P1PQ1PPP/R3K2R w KQkq - 2 9";
+        let mut pos = Position::from_fen(fen);
+        let mv = "E1->G1";
+
+        pos.make_move(intmove_from_ascii(mv)).unwrap();
+        pos.unmake_move(intmove_from_ascii(mv)).unwrap();
+        assert_eq!(pos.to_fen(), fen);
+    }
 }

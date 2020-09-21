@@ -13,24 +13,25 @@ fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32) -> String {
     for mv_str in moves.iter() {
         let mv = Move::from_uci_ascii(mv_str);
         let mv = intmove_from_move(&mv);
-        eprint!("{} ", intmove_to_uci_ascii(mv));
+        // eprint!("{} ", intmove_to_uci_ascii(mv));
         pos.make_move(mv).unwrap();
     }
-    eprintln!();
+    // eprintln!();
 
     let time_left = if pos.to_move == Player::White { wtime } else { btime };
     let final_fen = pos.to_fen();
 
     eprintln!("FEN: {}", final_fen);
     let mv = if time_left > 60 * 1000 {
-        let (mv, val) = best_move_pvs(&mut pos, 5);
+        let mv = best_move_iterative_deepening(&mut pos, 4);
+        // let (mv, val) = best_move_pvs(&mut pos, 5);
         // let mv = best_move_negamax(&mut pos, 3);
         // let mv = choose_move(&pos);
-        eprintln!("MOVE: {} EVAL: {:.1}", intmove_to_uci_ascii(mv), val);
+        // eprintln!("MOVE: {} EVAL: {:.1}", intmove_to_uci_ascii(mv), val);
         mv
     } else {
         let mv = choose_move(&mut pos);
-        eprintln!("MOVE: {}", intmove_to_uci_ascii(mv));
+        // eprintln!("MOVE: {}", intmove_to_uci_ascii(mv));
         mv
     };
 
@@ -54,9 +55,9 @@ fn main() {
     loop {
         let line = read_line();
 
-        if line != "" {
-            eprintln!("<< {}", line);
-        }
+        // if line != "" {
+        //     eprintln!("<< {}", line);
+        // }
 
         if line == "isready" {
             println!("readyok");
@@ -89,7 +90,7 @@ fn main() {
                 }
             }
 
-            eprintln!("FEN IS = {}", fen);
+            // eprintln!("FEN IS = {}", fen);
 
             let line2 = read_line();
             let parts2: Vec<_> = line2.split_ascii_whitespace().collect();
@@ -108,7 +109,7 @@ fn main() {
             println!("bestmove {}", bot_move);
         } else {
             if line != "" {
-                eprintln!("Unknown command: {}", line);
+                // eprintln!("Unknown command: {}", line);
             }
         }
     }

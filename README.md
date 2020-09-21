@@ -35,8 +35,8 @@ PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 4    # king cant be left in check
 - [x] depth = 5    # missing en passant # around 2 secs
 - [x] depth = 6    # less than a minute
-- [x] depth = 7    # 29 mins [4 coes]
-- [ ] depth = 8
+- [x] depth = 7    # 29 mins [4 cores]
+- [x] depth = 8    # 3.5 hours!
 
 Later:
 - [x] Ox88 board

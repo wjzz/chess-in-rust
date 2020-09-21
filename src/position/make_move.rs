@@ -13,6 +13,7 @@ impl Position {
         // verify there is a piece to move at src
         let piece = match self.board[src] {
             EMPTY => {
+                println!("{}", self.to_ascii());
                 println!("FEN = {}", self.to_fen());
                 return Err(format!("Expected to find a piece at {}!", index2coord(src)));
             },
@@ -143,7 +144,7 @@ impl Position {
         }
 
         // check if move is castling
-        if intmove_is_castle(mv) {
+        if intmove_is_castle(mv) || (piece == Piece::King && (src as i32 - dest as i32).abs() == 2) {
             let (rook_src, rook_dest) = self.rook_position_castling(mv);
             let rook_piece = boardcell_encode(color, Piece::Rook);
             assert_eq!(rook_piece, self.board[coord2index(rook_src)]);
@@ -224,7 +225,7 @@ impl Position {
         };
 
         // check if move was castling and unmake the rook move
-        if intmove_is_castle(mv) {
+        if intmove_is_castle(mv) || (piece == Piece::King && (src as i32 - dest as i32).abs() == 2){
             let (rook_src, rook_dest) = self.rook_position_castling_color(mv, color);
             let rook_piece = boardcell_encode(color, Piece::Rook);
             assert_eq!(rook_piece, self[rook_dest]);

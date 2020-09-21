@@ -1,5 +1,7 @@
 use super::super::position::*;
 
+use std::time;
+
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
@@ -101,49 +103,37 @@ static mut ALPHA_BETA_BEST_MOVE: Option<IntMove> = None;
 static mut RESULT_VEC: Vec<f64> = vec![];
 static mut ORDERING: Vec<IntMove> = vec![];
 
-fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64 {
+// static mut PV: Vec<IntMove> = vec![];
+
+fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> (f64, Option<String>) {
     unsafe {
         VISITED_NODES += 1;
-        if level == 0 {
-            RESULT_VEC.clear();
-            if depth == 1 {
-                ORDERING.clear();
-            }
-        }
     }
 
     if pos.is_checkmate() {
-        return -10000.0;
+        return (-10000.0, None);
     } else if pos.is_stalemate() {
-        return 0.0;
+        return (0.0, None);
     }
     if depth == 0 {
-        return eval_position(&pos);
+        return (eval_position(&pos), None);
     }
 
     let mut alpha = alpha;
 
-    let mut moves = pos.legal_moves();
+    let moves = pos.legal_moves();
     let mut best = -10000000.0;
+    let mut pv = String::new();
 
-    unsafe {
-        if level == 0 && ORDERING.len() > 0 {
-            assert_eq!(moves.len(), ORDERING.len());
-            moves = ORDERING.clone();
-            ORDERING.clear();
-        }
-    }
     for &mv in moves.iter() {
         pos.make_move(mv).unwrap();
-        let val = -alphabeta_negamax(&mut *pos, level+1, depth - 1, -beta, -alpha);
+        let (val, best_reply) = alphabeta_negamax(&mut *pos, level+1, depth - 1, -beta, -alpha);
+        let val = -val;
         pos.unmake_move(mv).unwrap();
-
-        if level == 0 {
-            unsafe { RESULT_VEC.push(val); };
-        }
 
         if val > best {
             best = val;
+            pv = intmove_to_uci_ascii(mv) + " " + &best_reply.unwrap_or(String::from(""));
             if level == 0 {
                 unsafe {
                     ALPHA_BETA_BEST_MOVE = Some(mv);
@@ -156,29 +146,27 @@ fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, bet
             break;
         }
     }
-    if level == 0 {
-        unsafe {
-            let mut v = vec![];
-            for (i, res) in RESULT_VEC.iter().enumerate() {
-                v.push((*res, i));
-                // let mv = moves[i];
-                // println!("{} => {}", mv.to_usi_ascii(), res);
-
-            }
-            v.sort_by(|a, b| b.partial_cmp(a).unwrap());
-            for (_res, i) in v.iter() {
-                let mv = moves[*i];
-                ORDERING.push(mv);
-                // println!("{} => {}", mv.to_usi_ascii(), _res);
-            }
-        }
-    }
-    best
+    (best, Some(pv))
 }
 
-pub fn best_move_alphabeta_negamax(pos: &mut Position, depth: i32) -> IntMove {
+pub fn best_move_iterative_deepening(pos: &mut Position, depth: i32) -> IntMove {
+
     for d in 1..=depth {
-        alphabeta_negamax(&mut *pos, 0, d, -1_000_000.0, 1_000_000.0);
+        let start = std::time::Instant::now();
+        unsafe {
+            VISITED_NODES = 0;
+        }
+
+        let (val, pv) = alphabeta_negamax(&mut *pos, 0, d, -1_000_000.0, 1_000_000.0);
+
+        let cp = (100.0 * val) as i32;
+        let nodes = unsafe { VISITED_NODES };
+        // let pv: Vec<String> = unsafe { PV.iter().map(|mv| intmove_to_uci_ascii(*mv)).collect() };
+        // let pv = pv.join(" ");
+
+        let pv = pv.unwrap_or(String::from(""));
+        println!("info score cp {} depth {} nodes {} time {} pv {}", cp, d, nodes, start.elapsed().as_millis(), pv);
+        // 		info score cp 13  depth 1 nodes 13 time 15 pv f1b5
     }
     let best_move = unsafe {
         ALPHA_BETA_BEST_MOVE.unwrap()

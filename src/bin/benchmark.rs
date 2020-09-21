@@ -16,7 +16,7 @@ impl MoveSearcher {
                 best_move_negamax(pos, *depth),
 
             MoveSearcher::AlphaBeta(depth) =>
-                best_move_alphabeta_negamax(pos, *depth),
+                best_move_iterative_deepening(pos, *depth),
 
             MoveSearcher::PVS(depth) =>
                 best_move_pvs(pos, *depth).0,
