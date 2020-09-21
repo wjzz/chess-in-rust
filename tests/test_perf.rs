@@ -33,8 +33,7 @@ mod test_moves {
         let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
         let expected = [
-            20, 400, 8902,
-            // 197281,    // TODO: this is rather slow, but passes
+            20, 400, 8902, 197281,
         ];
 
         for (i, &value) in expected.iter().enumerate() {
@@ -52,7 +51,7 @@ mod test_moves {
     fn perf_imm_example_1() {
         let fen = "8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1";
 
-        let expected = [18, 290, 5044];
+        let expected = [18, 290, 5044, 89363];
 
         for (i, &value) in expected.iter().enumerate() {
             let i = i as u32;

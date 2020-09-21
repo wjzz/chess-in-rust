@@ -8,8 +8,11 @@ bot:
 bench:
 	@cargo run --bin benchmark --release
 
-perft:
+main:
 	@cargo run --bin rust-chess --release
+
+perft:
+	@cargo run --bin perft --release
 
 valgrind:
 	@cargo build --release --bin benchmark

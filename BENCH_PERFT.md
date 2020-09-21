@@ -117,5 +117,10 @@ perf imm 6 =  119060324 | correct: true | total time   44.32s |  2686 knps |   6
 **Add king location caching**
 
 Using 4 threads.
-perf imm 5 =    4865609 | correct: true | total time    1.33s |  3652 knps |   913 knps (thread)
-perf imm 6 =  119060324 | correct: true | total time   35.13s |  3390 knps |   847 knps (thread)
+perf imm 5 =    4865609  | correct: true  | total time     1.33s |  3652 knps |   913 knps (thread)
+perf imm 6 =  119060324  | correct: true  | total time    35.13s |  3390 knps |   847 knps (thread)
+perf imm 7 = 3195901860  | correct: true  | total time  1148.39s |  2783 knps |   696 knps (thread)
+perf imm 8 = 84998979184 | correct: false | total time 25187.36s |  3375 knps |   844 knps (thread)
+wrong answer after 7 hours
+got       84_998_979_184
+should be 84_998_978_956
