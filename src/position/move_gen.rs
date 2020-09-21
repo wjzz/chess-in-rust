@@ -310,7 +310,10 @@ impl Position {
         let moves = self.moves();
         let mut result = vec![];
         for mv in moves.iter() {
-            if self.is_castling_move(*mv) {
+            // TODO: add a IS_CASTLE_FLAG here
+            let src = intmove_src(*mv);
+            let piece = self.board[src].abs();
+            if piece == W_KING && self.is_castling_move(*mv) {
                 if !self.is_king_in_check(self.to_move) && self.can_safely_castle(*mv) {
                     result.push(*mv);
                 }

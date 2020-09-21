@@ -227,6 +227,17 @@ mod test_moves {
         }
     }
 
+   #[test]
+    fn moves_rook_regression() {
+        let fen = "8/8/3p4/KPpr4/5p1k/8/4P1P1/4R3 w - - 2 3";
+
+        let mut pos = Position::from_fen(fen);
+        let moves = pos.legal_moves();
+        println!("moves = {:#?}", moves);
+
+        assert_eq!(15, moves.len());
+    }
+
     #[test]
     fn moves_queen_corner() {
         let fens = [

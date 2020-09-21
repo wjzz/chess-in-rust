@@ -1,20 +1,17 @@
 use rust_chess::*;
 
-// 16,17c16,17
-// < d5d6: 79551
-// < d5e6: 97464
-// ---
-// > d5d6: 79604
-// > d5e6: 97470
-
-
-// r3k2r/p1ppqpb1/bn1Ppnp1/4N3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1
-// r3k2r/p1ppqpb1/bn2Pnp1/4N3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1
+// Test case 3. FEN '8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 1 1'
+//   perf imm 1 =         14 | correct: true | total time 247.56µs |    57 knps |    14 knps (thread)
+//   perf imm 2 =        191 | correct: true | total time 245.65µs |   778 knps |   194 knps (thread)
+//   perf imm 3 =       2812 | correct: true | total time   1.43ms |  1965 knps |   491 knps (thread)
+//   perf imm 4 =      43238 | correct: true | total time  12.51ms |  3455 knps |   864 knps (thread)
+//   perf imm 5 =     674574 | correct: false | total time 176.89ms |  3814 knps |   953 knps (thread)
+// Expected 674624 but got 674574. Diff = 50
+// Test case result = FAILED
 
 fn main() {
-    // let fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 1 1";
-    let fen = "r3k3/p1ppPpb1/bn2pnp1/4N2r/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQq - 0 2";
-    let value = 37;
+    let fen = "8/8/3p4/KPpr4/5p1k/8/4P1P1/4R3 w - - 2 3";
+    let value = 15;
     let depth = 1;
     let mut total = 0u64;
 
