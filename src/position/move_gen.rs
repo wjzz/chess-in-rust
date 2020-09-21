@@ -207,7 +207,7 @@ impl Position {
     pub fn moves_by(&self, color: Player) -> Vec<IntMove> {
         let mut all_moves = vec![];
 
-        for &index in &INDEXES88 {
+        for &index in INDEXES88.iter() {
             let player_piece = self.board[index];
             if player_piece != EMPTY {
                 if boardcell_player(player_piece) == color {
