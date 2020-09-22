@@ -17,7 +17,6 @@ impl Position {
         let half_moves_str = parts[4];
         let full_moves_str = parts[5];
 
-        let castling_rights = castling_str.to_string();
         let half_moves = half_moves_str.parse().unwrap();
         let full_moves = full_moves_str.parse().unwrap();
 
@@ -26,6 +25,21 @@ impl Position {
             "b" => Player::Black,
             _ => panic!("Wrong player in FEN {}", to_move_str),
         };
+
+        let mut castling_rights = [[false; 2]; 2]; //castling_str.to_string();
+        if castling_str != "-" {
+            for ch in castling_str.chars() {
+                let mut player = 0;
+                let mut side = KINGSIDE;
+                if ch.is_ascii_lowercase() {
+                    player = 1;
+                }
+                if ch.to_lowercase().to_string() == "q" {
+                    side = QUEENSIDE;
+                }
+                castling_rights[player][side] = true;
+            }
+        }
 
         let mut kings = [0; 2];
 
@@ -168,7 +182,7 @@ mod tests {
 
         let white_king = boardcell_encode(Player::White, Piece::King);
         assert_eq!(white_king, pos["H8"]);
-        assert_eq!("-", pos.castle_rights);
+        assert_eq!([[false;2]; 2], pos.castle_rights);
     }
 
     #[test]

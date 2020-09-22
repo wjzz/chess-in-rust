@@ -350,8 +350,8 @@ mod test_unmoves {
         let fen = "6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1";
         let mut pos = Position::from_fen(fen);
 
-        assert!(pos.castle_rights.contains("K"));
-        assert!(pos.castle_rights.contains("Q"));
+        assert!(pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(pos.castle_rights[WHITE][QUEENSIDE]);
 
         let mv = "A1->A2";
         pos.make_move(intmove_from_ascii(mv)).unwrap();
@@ -359,8 +359,8 @@ mod test_unmoves {
         let result_fen = "6k1/8/8/8/8/8/R7/4K2R b K - 1 1";
 
         assert_eq!(pos.to_fen(), result_fen);
-        assert!(pos.castle_rights.contains("K"));
-        assert!(!pos.castle_rights.contains("Q"));
+        assert!(pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(!pos.castle_rights[WHITE][QUEENSIDE]);
 
         pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
@@ -371,8 +371,8 @@ mod test_unmoves {
         let fen = "6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1";
         let mut pos = Position::from_fen(fen);
 
-        assert!(pos.castle_rights.contains("K"));
-        assert!(pos.castle_rights.contains("Q"));
+        assert!(pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(pos.castle_rights[WHITE][QUEENSIDE]);
 
         let mv = "H1->H2";
         pos.make_move(intmove_from_ascii(mv)).unwrap();
@@ -380,8 +380,8 @@ mod test_unmoves {
         let result_fen = "6k1/8/8/8/8/8/7R/R3K3 b Q - 1 1";
 
         assert_eq!(pos.to_fen(), result_fen);
-        assert!(!pos.castle_rights.contains("K"));
-        assert!(pos.castle_rights.contains("Q"));
+        assert!(!pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(pos.castle_rights[WHITE][QUEENSIDE]);
 
         pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
@@ -392,8 +392,8 @@ mod test_unmoves {
         let fen = "6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1";
         let mut pos = Position::from_fen(fen);
 
-        assert!(pos.castle_rights.contains("K"));
-        assert!(pos.castle_rights.contains("Q"));
+        assert!(pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(pos.castle_rights[WHITE][QUEENSIDE]);
 
         let mv = "E1->E2";
         pos.make_move(intmove_from_ascii(mv)).unwrap();
@@ -401,8 +401,8 @@ mod test_unmoves {
         let result_fen = "6k1/8/8/8/8/8/4K3/R6R b - - 1 1";
 
         assert_eq!(pos.to_fen(), result_fen);
-        assert!(!pos.castle_rights.contains("K"));
-        assert!(!pos.castle_rights.contains("Q"));
+        assert!(!pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(!pos.castle_rights[WHITE][QUEENSIDE]);
 
         pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
@@ -413,8 +413,8 @@ mod test_unmoves {
         let fen = "6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1";
         let mut pos = Position::from_fen(fen);
 
-        assert!(pos.castle_rights.contains("K"));
-        assert!(pos.castle_rights.contains("Q"));
+        assert!(pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(pos.castle_rights[WHITE][QUEENSIDE]);
 
         let mv = "E1->G1";
         let mv = intmove_add_castling(intmove_from_ascii(mv));
@@ -422,8 +422,8 @@ mod test_unmoves {
 
         let result_fen = "6k1/8/8/8/8/8/8/R4RK1 b - - 1 1";
         assert_eq!(pos.to_fen(), result_fen);
-        assert!(!pos.castle_rights.contains("K"));
-        assert!(!pos.castle_rights.contains("Q"));
+        assert!(!pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(!pos.castle_rights[WHITE][QUEENSIDE]);
 
         pos.unmake_move(mv).unwrap();
         assert_eq!(pos.to_fen(), fen);
@@ -434,8 +434,8 @@ mod test_unmoves {
         let fen = "6k1/8/8/8/8/8/8/R3K2R w KQ - 0 1";
         let mut pos = Position::from_fen(fen);
 
-        assert!(pos.castle_rights.contains("K"));
-        assert!(pos.castle_rights.contains("Q"));
+        assert!(pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(pos.castle_rights[WHITE][QUEENSIDE]);
 
         let mv = "E1->C1";
         let mv = intmove_add_castling(intmove_from_ascii(mv));
@@ -443,8 +443,8 @@ mod test_unmoves {
 
         let result_fen = "6k1/8/8/8/8/8/8/2KR3R b - - 1 1";
         assert_eq!(pos.to_fen(), result_fen);
-        assert!(!pos.castle_rights.contains("K"));
-        assert!(!pos.castle_rights.contains("Q"));
+        assert!(!pos.castle_rights[WHITE][KINGSIDE]);
+        assert!(!pos.castle_rights[WHITE][QUEENSIDE]);
 
         pos.unmake_move(mv).unwrap();
         assert_eq!(pos.to_fen(), fen);
@@ -455,16 +455,16 @@ mod test_unmoves {
         let fen = "rnbqk1nr/pppppp1p/6pb/8/8/1P6/PBPPPPPP/RN1QKBNR w KQkq - 2 3";
         let mut pos = Position::from_fen(fen);
 
-        assert!(pos.castle_rights.contains("k"));
-        assert!(pos.castle_rights.contains("q"));
+        assert!(pos.castle_rights[BLACK][KINGSIDE]);
+        assert!(pos.castle_rights[BLACK][QUEENSIDE]);
 
         let mv = "B2->H8";
         pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "rnbqk1nB/pppppp1p/6pb/8/8/1P6/P1PPPPPP/RN1QKBNR b KQq - 0 3";
         assert_eq!(pos.to_fen(), result_fen);
-        assert!(!pos.castle_rights.contains("k"));
-        assert!(pos.castle_rights.contains("q"));
+        assert!(!pos.castle_rights[BLACK][KINGSIDE]);
+        assert!(pos.castle_rights[BLACK][QUEENSIDE]);
 
         pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);
@@ -475,16 +475,16 @@ mod test_unmoves {
         let fen = "rn1qkbnr/p1pppppp/bp6/8/8/6P1/PPPPPPBP/RNBQK1NR w KQkq - 2 3";
         let mut pos = Position::from_fen(fen);
 
-        assert!(pos.castle_rights.contains("k"));
-        assert!(pos.castle_rights.contains("q"));
+        assert!(pos.castle_rights[BLACK][KINGSIDE]);
+        assert!(pos.castle_rights[BLACK][QUEENSIDE]);
 
         let mv = "G2->A8";
         pos.make_move(intmove_from_ascii(mv)).unwrap();
 
         let result_fen = "Bn1qkbnr/p1pppppp/bp6/8/8/6P1/PPPPPP1P/RNBQK1NR b KQk - 0 3";
         assert_eq!(pos.to_fen(), result_fen);
-        assert!(pos.castle_rights.contains("k"));
-        assert!(!pos.castle_rights.contains("q"));
+        assert!(pos.castle_rights[BLACK][KINGSIDE]);
+        assert!(!pos.castle_rights[BLACK][QUEENSIDE]);
 
         pos.unmake_move(intmove_from_ascii(mv)).unwrap();
         assert_eq!(pos.to_fen(), fen);

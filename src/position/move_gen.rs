@@ -150,19 +150,9 @@ impl Position {
                 let king_initial_coord = if color == Player::White { 4 } else { 116 };
 
                 if src == king_initial_coord {
-                    let ascii_k = PlayerPiece {
-                        piece: Piece::King,
-                        player: color,
-                    }
-                    .to_ascii();
-                    let ascii_q = PlayerPiece {
-                        piece: Piece::Queen,
-                        player: color,
-                    }
-                    .to_ascii();
 
                     // castling kingside
-                    if self.castle_rights.contains(&ascii_k) {
+                    if self.castle_rights[color as usize][KINGSIDE] {
                         let (rook_dest, f1, f2) = match color {
                             Player::White => (7, 5, 6),
                             Player::Black => (119, 117, 118),
@@ -177,7 +167,7 @@ impl Position {
                     }
 
                     // castling queenside
-                    if self.castle_rights.contains(&ascii_q) {
+                    if self.castle_rights[color as usize][QUEENSIDE] {
                         let (rook_dest, f1, f2, f3) = match color {
                             Player::White => (0, 1, 2, 3),
                             Player::Black => (112, 113, 114, 115),

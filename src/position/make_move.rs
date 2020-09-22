@@ -54,38 +54,16 @@ impl Position {
         self.castling_stack.push(self.castle_rights.clone());
         self.captures.push(self.board[dest]);
 
-        // TODO: check with castling rights
-
         if self.board[dest] != EMPTY {
             let dest = index2coord(dest);
+            let opp = opponent as usize;
 
-            let to_remove = if opponent == Player::White {
-                if dest == "A1" {
-                    "Q"
-                } else if dest == "H1" {
-                    "K"
-                } else {
-                    ""
-                }
-            } else {
-                if dest == "A8" {
-                    "q"
-                } else if dest == "H8" {
-                    "k"
-                } else {
-                    ""
-                }
-            };
-            let castle_rights_new = self
-                .castle_rights
-                .chars()
-                .filter(|c| !to_remove.contains(*c))
-                .collect();
-            self.castle_rights = if castle_rights_new != "" {
-                castle_rights_new
-            } else {
-                "-".to_string()
-            };
+            if (opp == WHITE && dest == "A1") || (opp == BLACK && dest == "A8") {
+                self.castle_rights[opp][QUEENSIDE] = false;
+            }
+            if (opp == WHITE && dest == "H1") || (opp == BLACK && dest == "H8") {
+                self.castle_rights[opp][KINGSIDE] = false;
+            }
         }
 
         let new_piece = match promote_to {
@@ -118,25 +96,21 @@ impl Position {
         if piece == Piece::King || piece == Piece::Rook {
             let src = index2coord(src);
 
-            let rights = match (color, piece) {
-                (Player::White, Piece::King) => "KQ",
-                (Player::Black, Piece::King) => "kq",
-                (Player::White, Piece::Rook) if src == "A1" => "Q",
-                (Player::White, Piece::Rook) if src == "H1" => "K",
-                (Player::Black, Piece::Rook) if src == "A8" => "q",
-                (Player::Black, Piece::Rook) if src == "H8" => "k",
-                _ => "",
-            };
-            let castle_rights_new = self
-                .castle_rights
-                .chars()
-                .filter(|c| !rights.contains(*c))
-                .collect();
-            self.castle_rights = if castle_rights_new != "" {
-                castle_rights_new
+            let col = color as usize;
+
+            if piece == Piece::King {
+                self.castle_rights[col][KINGSIDE] = false;
+                self.castle_rights[col][QUEENSIDE] = false;
             } else {
-                "-".to_string()
-            };
+                // rook
+
+                if (col == WHITE && src == "A1") || (col == BLACK && src == "A8") {
+                    self.castle_rights[col][QUEENSIDE] = false;
+                }
+                if (col == WHITE && src == "H1") || (col == BLACK && src == "H8") {
+                    self.castle_rights[col][KINGSIDE] = false;
+                }
+            }
         }
 
         // check if move is castling
@@ -144,6 +118,9 @@ impl Position {
             let (rook_src, rook_dest) = self.rook_position_castling(mv);
             let rook_piece = boardcell_encode(color, Piece::Rook);
             assert_eq!(rook_piece, self.board[coord2index(rook_src)]);
+
+            self.castle_rights[color as usize][KINGSIDE] = false;
+            self.castle_rights[color as usize][QUEENSIDE] = false;
 
             self.board[coord2index(rook_src)] = EMPTY;
             self.board[coord2index(rook_dest)] = rook_piece;
