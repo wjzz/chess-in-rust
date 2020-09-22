@@ -1,40 +1,13 @@
+#[path="eval.rs"]
+mod eval;
+
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 use super::super::position::*;
 
-pub static mut VISITED_NODES: u64 = 0;
-
 pub const CHECKMATE_EV: f64 = 10000.0;
-
-const MATERIAL_VAL: [f64; 13] = [
-     0.0 , // B_KING
-    -9.0, // B_QUEEN
-    -5.0, // B_ROOK
-    -3.5, // B_BISHOP
-    -3.0, // B_KNIGHT
-    -1.0, // B_PAWN
-    0.0, // EMPTY
-    1.0, // W_PAWN
-    3.0, // W_KNIGHT
-    3.5, // W_BISHOP
-    5.0, // W_ROOK
-    9.0, // W_QUEEN
-    0.0, // W_KING
-];
-
-fn eval_material(pos: &Position) -> f64 {
-    let mut ev = 0.0;
-    for i in INDEXES88.iter() {
-        ev += MATERIAL_VAL[(pos.board[*i] + 6) as usize];
-    }
-    if pos.to_move == Player::White { ev } else { -ev }
-}
-
-fn eval_position(pos: &Position) -> f64 {
-    return eval_material(&pos);
-}
-
+pub static mut VISITED_NODES: u64 = 0;
 static mut BEST_MOVE: Option<IntMove> = None;
 
 fn negamax(pos: &mut Position, level: i32, depth: i32) -> f64 {
@@ -53,7 +26,7 @@ fn negamax(pos: &mut Position, level: i32, depth: i32) -> f64 {
     }
 
     if depth == 0 {
-        return eval_position(&pos);
+        return pos.eval();
     }
 
     let mut best = -10000000.0;
@@ -126,7 +99,7 @@ fn alphabeta(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) 
     }
 
     if depth == 0 {
-        return (eval_position(&pos), None);
+        return (pos.eval(), None);
     }
 
     let mut alpha = alpha;
@@ -238,7 +211,7 @@ fn pvs(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64
     }
 
     if depth == 0 {
-        return eval_position(&pos);
+        return pos.eval();
     }
 
     let mut alpha = alpha;
@@ -279,7 +252,7 @@ fn pvs(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64
 
 
 pub fn best_move_pvs(pos: &mut Position, depth: i32) -> (IntMove, f64) {
-    let val = pvs(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
+    let val = pvs(&mut *pos, 0, depth, -CHECKMATE_EV, CHECKMATE_EV);
     let best_move = unsafe {
         BEST_MOVE.unwrap()
     };
