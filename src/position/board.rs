@@ -26,25 +26,6 @@ pub struct Position {
 }
 
 impl Position {
-    pub fn new() -> Self {
-        let board = vec![EMPTY; FIELDS88];
-        let to_move = Player::White;
-
-        Position {
-            to_move,
-            board,
-            castle_rights: String::from("KQkq"),
-            en_passant: None,
-            half_moves: 0,
-            full_moves: 1,
-            half_moves_stack: vec![],
-            captures: vec![],
-            ep_stack: vec![],
-            castling_stack: vec![],
-            kings: [0,0],
-        }
-    }
-
     pub fn create(
         board: Board,
         to_move: Player,
@@ -134,34 +115,6 @@ impl Index<&str> for Position {
             Some(coord) => {
                 let index = coord2index(coord);
                 return &self.board[index];
-            }
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn position_create() {
-        let pos = Position::new();
-
-        assert_eq!(pos.to_move, Player::White);
-        assert_eq!(pos.en_passant, None);
-
-        for &field in pos.fields() {
-            assert_eq!(field, EMPTY);
-        }
-    }
-
-    #[test]
-    fn check_indexing_new() {
-        let pos = Position::new();
-
-        for coord in COORDS.iter() {
-            if *coord != "X" {
-                assert_eq!(EMPTY, pos[coord]);
             }
         }
     }
