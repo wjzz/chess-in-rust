@@ -54,7 +54,7 @@ const POS: [[i32; 64]; 6] = [
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,  20,  20,   0,   0,   0,
-          0,   0,   0,   5,   5,   0,   0,   0,
+          0,   0,  10,   5,   5,   0,   0,   0,
           5,   5,   0, -10, -10,   0,   5,   5,
           0,   0,   0,   0,   0,   0,   0,   0,
     ],
@@ -63,11 +63,11 @@ const POS: [[i32; 64]; 6] = [
         -20,   0,   0,   0,   0,   0,   0, -20,
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,
+          0,   0,  60,  60,  60,  60,   0,   0,
           0,   0,   0,  45,  45,   0,   0,   0,
-          0,   0,   0,  45,  45,   0,   0,   0,
-          0,   0,  20,   0,   0,  20,   0,   0,
-          0,   0,   0,   0,   0,   0,   0,   0,
-        -20, -10,   0,   0,   0,   0, -10, -20,
+          0,   0,  15,   0,   0,  20,   0,   0,
+          0,   0,   0,  10,  10,   0,   0,   0,
+        -20, -10,   0,   0,   0,   0,  -10, -20,
     ],
     // bishop
     [
@@ -96,8 +96,8 @@ const POS: [[i32; 64]; 6] = [
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,
-          0,   0,   0,   5,   5,   0,   0,   0,
-          0,   0,   0,   5,   5,   0,   0,   0,
+          0,   0,   0,  25,  25,   0,   0,   0,
+          0,   0,   0,  25,  25,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,
           0,   0,   0,   0,   0,   0,   0,   0,
@@ -115,14 +115,22 @@ const POS: [[i32; 64]; 6] = [
     ],
 ];
 
+// TODO: this function could be optimized, but it would help to have piece lists by type
 fn eval_positioning(pos: &Position) -> i32 {
     let mut ev = 0;
     for &i in INDEXES88.iter() {
         let field = pos.board[i];
         if field != EMPTY {
             let i0x88 = if field > 0 { i } else { 119 - i };
-            let i88 = (i0x88 + (i0x88 & 7)) >> 1;
-            ev += (field / field.abs()) * POS[(field.abs()-1) as usize][i88];
+            let col = i0x88 & 7;
+            let row = i0x88 >> 4;
+            let i88 = (7-row)*8 + col;
+            let val = POS[(field.abs()-1) as usize][i88];
+            if field > 0 {
+                ev += val;
+            } else {
+                ev -= val;
+            }
         }
         // ev += MATERIAL_VAL[(pos.board[*i] + 6) as usize];
     }
@@ -137,7 +145,9 @@ fn eval_positioning(pos: &Position) -> i32 {
 
 impl Position {
     pub fn eval(&self) -> f64 {
+        // let eval_pos = 0.0; //0.01 * eval_positioning(&self) as f64;
         let eval_pos = 0.01 * eval_positioning(&self) as f64;
+
         // if eval_pos != 0.0 {
         //     println!("eval pos = {}", eval_pos);
         // }

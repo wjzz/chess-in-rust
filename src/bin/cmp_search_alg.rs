@@ -24,7 +24,7 @@ impl MoveSearcher {
                 alphabeta_top(pos, depth),
 
             AlphaBetaIter =>
-                alphabeta_iterative_deepening(pos, depth),
+                alphabeta_iterative_deepening(pos, depth, false),
 
             PVS =>
                 best_move_pvs(pos, depth),
@@ -47,6 +47,11 @@ impl MoveSearcher {
 
 fn main() {
     let positions = [
+        //
+        "rnbqk1n1/8/pbp1p3/4N1pQ/1PB4p/2N4P/2P2PPB/3rR1K1 b q - 1 24",
+        // engine's blunder
+        "rnbqk1n1/3r4/pbp1p3/4N1p1/1PB4p/2N4P/2P1QPPB/3RR1K1 b q - 0 23",
+
         // mate in 3
         "2rk2r1/3p2rr/8/1Q3Q2/6B1/8/3Q4/K7 w - - 0 1",
         // scholar's mate
@@ -101,5 +106,6 @@ fn main() {
             }
             println!();
         }
+        // break;
     }
 }

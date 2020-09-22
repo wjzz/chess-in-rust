@@ -142,7 +142,7 @@ pub fn alphabeta_top(pos: &mut Position, depth: i32) -> (IntMove, f64) {
     return (best_move, val);
 }
 
-pub fn alphabeta_iterative_deepening(pos: &mut Position, depth: i32) -> (IntMove, f64) {
+pub fn alphabeta_iterative_deepening(pos: &mut Position, depth: i32, is_bot: bool) -> (IntMove, f64) {
     let mut best_val = 0.0;
     let mut total_nodes = 0u64;
 
@@ -157,17 +157,17 @@ pub fn alphabeta_iterative_deepening(pos: &mut Position, depth: i32) -> (IntMove
         let (val, pv) = alphabeta(&mut *pos, 0, d, -CHECKMATE_EV, CHECKMATE_EV);
         best_val = val;
 
-        let cp = (100.0 * val) as i32;
         let nodes = unsafe { VISITED_NODES };
         total_nodes += nodes;
-        // let pv: Vec<String> = unsafe { PV.iter().map(|mv| intmove_to_uci_ascii(*mv)).collect() };
-        // let pv = pv.join(" ");
 
-        let pv = pv.unwrap_or(String::from(""));
-        // println!("info score cp {} depth {} nodes {} time {} pv {}", cp, d, nodes, start.elapsed().as_millis(), pv);
+        if is_bot {
+            let cp = (100.0 * val) as i32;
+            let pv = pv.unwrap_or(String::from(""));
+            println!("info score cp {} depth {} nodes {} time {} pv {}", cp, d, nodes, start.elapsed().as_millis(), pv);
+            // 		info score cp 13  depth 1 nodes 13 time 15 pv f1b5
+        }
 
-        // 		info score cp 13  depth 1 nodes 13 time 15 pv f1b5
-
+        // no chance of finding a better move
         if val == CHECKMATE_EV {
             break;
         }

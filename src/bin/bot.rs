@@ -23,7 +23,7 @@ fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32) -> String {
 
     eprintln!("FEN: {}", final_fen);
     let mv = if time_left > 60 * 1000 {
-        let (mv, _) = alphabeta_iterative_deepening(&mut pos, 4);
+        let (mv, _) = alphabeta_iterative_deepening(&mut pos, 5, true);
         // let (mv, val) = best_move_pvs(&mut pos, 5);
         // let mv = best_move_negamax(&mut pos, 3);
         // let mv = choose_move(&pos);
