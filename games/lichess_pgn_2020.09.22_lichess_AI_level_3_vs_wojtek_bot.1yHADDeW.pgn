@@ -1,0 +1,20 @@
+[Event "Casual Rapid game"]
+[Site "https://lichess.org/1yHADDeW"]
+[Date "2020.09.22"]
+[White "lichess AI level 3"]
+[Black "wojtek_bot"]
+[Result "1/2-1/2"]
+[UTCDate "2020.09.22"]
+[UTCTime "08:05:43"]
+[WhiteElo "?"]
+[BlackElo "1513"]
+[BlackTitle "BOT"]
+[Variant "Standard"]
+[TimeControl "600+10"]
+[ECO "A00"]
+[Opening "Van't Kruijs Opening"]
+[Termination "Normal"]
+
+1. e3 e5 2. Nc3 Nf6 3. Nf3 c6 4. d4 e4 5. Ng5 Qa5 6. f4 exf3 7. Nxf3 d6 8. Bd2 Bg4 9. h3 Bxf3 10. gxf3 Nfd7 11. Rg1 Be7 12. Bd3 Qb4 13. Rg4 Kf8 14. Qc1 Qa5 15. Ne2 Qh5 16. Nf4 Qh6 17. Bf5 Nf6 18. e4 g5 19. Rg1 gxf4 20. Bxf4 Qh5 21. Ke2 Na6 22. c3 h6 23. Qe3 Rd8 24. Raf1 Re8 25. c4 Nb4 26. Qa3 d5 27. cxd5 Nbxd5 28. Bd6 Qxf5 29. Kd2 Qxh3 30. exd5 cxd5 31. Rd1 a6 32. Rdf1 a5 33. Rc1 b6 34. Rc7 Ne4+ 35. fxe4 Qxa3 36. Bxa3 Bxa3 37. bxa3 Rxe4 38. Rc8+ Re8 39. Rcc1 Rg8 40. Rxg8+ Kxg8 41. a4 Re4 42. Kd3 Rf4 43. Rc6 Rf2 44. Ke3 Rxa2 45. Rd6 Ra3+ 46. Ke2 Ra2+ 47. Kf3 Ra3+ 48. Kf4 Rxa4 49. Rxb6 Rxd4+ 50. Ke5 Rd3 51. Rxh6 a4 52. Rh4 a3 53. Rh2 Kg7 54. Kd6 Rd4 55. Kc5 Rd3 56. Kb4 Kg8 57. Kc5 f6 58. Rc2 d4 59. Kb4 Kh7 60. Re2 Kg8 61. Rc2 Kh7 62. Re2 Kg8 63. Rf2 Kg7 64. Rh2 Kg8 65. Re2 Kf8 66. Kc4 Rd1 67. Rc2 d3 68. Ra2 Rc1+ 69. Kd4 Rc8 70. Rxa3 d2 71. Rf3 d1=Q+ 72. Ke4 Qe2+ 73. Kf4 Qe5+ 74. Kg4 Qg5+ 75. Kh3 Kg7 76. Rg3 Rh8+ 77. Kg2 Qxg3+ 78. Kxg3 Kf8 79. Kf4 Rh5 80. Kf3 Rh2 81. Ke4 Kg8 82. Kd4 Rh3 83. Ke4 Rh5 84. Ke3 Rh2 85. Kd3 Rg2 86. Kd4 Rg3 87. Kd5 Rg2 88. Kd4 Rg3 89. Kc5 Rg4 90. Kc6 Rg5 91. Kb6 Rg6 92. Ka6 Rg7 93. Ka5 Rh7 94. Ka6 Rh8 95. Kb5 Rh7 96. Ka6 Rh8 97. Kb5 Rh7 98. Ka6 1/2-1/2
+
+
