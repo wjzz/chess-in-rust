@@ -11,7 +11,8 @@ impl Position {
         let opponent = color.opposite();
 
         // verify there is a piece to move at src
-        let piece = match self.board[src] {
+        let boardpiece = self.board[src];
+        let piece = match boardpiece {
             EMPTY => {
                 println!("{}", self.to_ascii());
                 println!("FEN = {}", self.to_fen());
@@ -38,22 +39,17 @@ impl Position {
             self.kings[color as usize] = dest;
         }
 
-        // let en_passant_flag = if piece == Piece::Pawn {
-        //     // initial pawn move
-        //     if (dest_row - src_row).abs() == 2 && src_col == dest_col {
-        //         let ep_row = (src_row + dest_row) / 2;
-        //         Some(rowcol2index(ep_row, src_col))
-        //     } else {
-        //         None
-        //     }
-        // } else {
-        //     None
-        // };
-        let en_passant_flag = if piece == Piece::Pawn && (dest.max(src) - dest.min(src)) == 32 {
-            Some((dest + src) / 2)
-        } else {
-            None
-        };
+        // set the en_passant_flag only if there is a pawn that could actually take it
+        let mut en_passant_flag = None;
+        if piece == Piece::Pawn && dest.max(src) - dest.min(src) == 32 {
+            for delta in [-1, 1].iter() {
+                let pawn_field = dest as i32 + delta;
+                if (pawn_field & 0x88) == 0 && self.board[pawn_field as usize] == -boardpiece {
+                    en_passant_flag = Some((dest + src) / 2);
+                    break;
+                }
+            }
+        }
 
         self.castling_stack.push(self.castle_rights.clone());
         self.captures.push(self.board[dest]);

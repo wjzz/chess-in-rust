@@ -37,6 +37,7 @@ PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 6    # less than a minute
 - [x] depth = 7    # 29 mins [4 cores]
 - [x] depth = 8    # 3.5 hours!
+- [ ] depth = 9
 
 Later:
 - [x] Ox88 board
