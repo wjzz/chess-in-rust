@@ -28,3 +28,5 @@ search deeper to win.
 - Remove the old `is_king_in_check` and replace it by `is_king_in_check_fast`
 - The engine can't mate a naked king with rook and pawn :-)
 - Changed the representation of the castling rights to prepare for hashing, got a nice 33% speedup for free!
+- Implemented zobrist hashing
+- Implemented sequential PERFT with a simple transposition table

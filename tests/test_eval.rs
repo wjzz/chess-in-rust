@@ -53,6 +53,11 @@ mod test_moves {
                 "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                 "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1"
             ),
+
+            ( // ep rights
+                "rnbqkbnr/p1ppp1pp/5p2/1pP5/8/8/PP1PPPPP/RNBQKBNR w KQkq b6 0 3",
+                "rnbqkbnr/p1ppp1pp/5p2/1pP5/8/8/PP1PPPPP/RNBQKBNR w KQkq - 0 3"
+            ),
         ];
 
         for (fen1, fen2) in pairs.iter() {

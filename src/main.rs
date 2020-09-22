@@ -12,12 +12,12 @@ fn parse_args(args: Vec<String>) -> u32 {
 }
 
 fn main() {
-    let n_threads = parse_args(env::args().collect());
-    println!(
-        "Using {} thread{}.",
-        n_threads,
-        if n_threads > 1 { "s" } else { "" }
-    );
+//     let n_threads = parse_args(env::args().collect());
+//     println!(
+//         "Using {} thread{}.",
+//         n_threads,
+//         if n_threads > 1 { "s" } else { "" }
+//     );
 
     let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -35,7 +35,8 @@ fn main() {
     for (depth, &value) in expected.iter().enumerate() {
         let depth = depth as u32 + 1;
         let start = time::Instant::now();
-        let result = Position::perft_mutable_par(depth, fen, n_threads);
+        let result = Position::perft_mutable_tt_top(depth, fen);
+        // let result = Position::perft_mutable_par(depth, fen, n_threads);
         let elapsed = start.elapsed();
         let time_str = format!("{:.2?}", elapsed);
         let nps = result as f64 / elapsed.as_secs_f64() / 1000.0;
@@ -46,7 +47,8 @@ fn main() {
             value == result,
             time_str,
             nps,
-            nps / n_threads as f64
+            nps
+            // nps / n_threads as f64
         );
     }
 }

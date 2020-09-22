@@ -106,7 +106,7 @@ impl Position {
 
             h ^= Position::en_passant_to_hash(en_passant);
 
-            println!("hash = {:10x}", h);
+            // println!("hash = {:10x}", h);
 
             h
         }

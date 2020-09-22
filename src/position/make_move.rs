@@ -199,9 +199,10 @@ impl Position {
             self.hash ^= HASH_TO_MOVE[color as usize];
             self.hash ^= HASH_TO_MOVE[1 - (color as usize)];
 
-            self.hash ^= Position::en_passant_to_hash(self.en_passant);
+            self.hash ^= Position::en_passant_to_hash(prev_en_passant_flag);
             self.hash ^= Position::en_passant_to_hash(en_passant_flag);
         }
+
 
         Ok(())
     }

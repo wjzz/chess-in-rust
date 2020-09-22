@@ -1,6 +1,9 @@
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+use std::collections::HashMap;
+// use std::collections::BTreeMap;
+
 #[path = "move_gen.rs"]
 pub mod move_gen;
 
@@ -170,5 +173,52 @@ impl Position {
 
         let x = *mtx.lock().unwrap();
         x
+    }
+}
+
+impl Position {
+    fn perft_mutable_tt(depth: u32, level: u64, pos: &mut Position, tt: &mut HashMap<u64, u64>) -> u64 {
+        // lvl 0 == startpos
+        // lvl 1 == w makes move #1
+        // lvl 2 == b makes move #1
+        // lbl 3 == w makes move #2 - first chance for transposition
+        if level >= 3 && depth > 1 {
+            if let Some(val) = tt.get(&(level + pos.hash)) {
+                return *val;
+            }
+        }
+
+        if depth == 0 {
+            return 1;
+        }
+
+        let moves = pos.legal_moves();
+        let mut result = 0;
+
+        if depth == 1 {
+            return moves.len() as u64;
+        }
+
+        for &mv in moves.iter() {
+            pos.make_move(mv).unwrap();
+            result += Position::perft_mutable_tt(depth - 1, level + 1, pos, tt);
+            pos.unmake_move(mv).unwrap();
+        }
+
+        if level >= 3 && depth > 1 {
+            tt.insert(level+pos.hash, result);
+        }
+
+        result
+    }
+
+    pub fn perft_mutable_tt_top(depth: u32, fen: &str) -> u64 {
+        let mut pos = Position::from_fen(fen);
+
+        let mut tt = HashMap::new();
+
+        let value = Position::perft_mutable_tt(depth, 0, &mut pos, &mut tt);
+        println!("tt size = {}", tt.len());
+        value
     }
 }
