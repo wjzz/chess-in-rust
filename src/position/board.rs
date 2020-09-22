@@ -1,22 +1,56 @@
+#[path = "basic_types.rs"]
+mod basic_types;
+
 use std::ops::Index;
 use std::slice;
 
-#[path = "basic_types.rs"]
-mod basic_types;
+use rand::thread_rng;
 
 pub use basic_types::*;
 
 pub type Field = Option<PlayerPiece>;
-// pub type Board = Vec<Field>;
 pub type Board = Vec<BoardCell>;
-
-pub type CastleRights = [[bool;2];2];
 
 pub const WHITE: usize = 0;
 pub const BLACK: usize = 1;
 
+pub type CastleRights = [[bool;2];2];
 pub const KINGSIDE: usize = 0;
 pub const QUEENSIDE: usize = 1;
+
+pub static mut HASH_INITIALIZED: bool = false;
+pub static mut HASH_BOARD: [[u64; 128]; 13] = [[0; 128]; 13];
+pub static mut HASH_TO_MOVE: [u64; 2] = [0; 2];
+pub static mut HASH_CASTLING: [[u64; 2]; 2] = [[0; 2]; 2];
+pub static mut HASH_EN_PASSANT: [u64; 128] = [0; 128];
+
+pub fn initialize_hash() {
+    use rand::RngCore;
+
+    let mut rng = thread_rng();
+
+    unsafe {
+        for piece in 0..13 {
+            for i in 0..128 {
+                HASH_BOARD[piece][i] = rng.next_u64();
+            }
+        }
+
+        for pl in 0..2 {
+            HASH_TO_MOVE[pl] = rng.next_u64();
+            for side in 0..2 {
+                HASH_CASTLING[pl][side] = rng.next_u64();
+            }
+        }
+
+        for i in 0..128 {
+            HASH_EN_PASSANT[i] = rng.next_u64();
+        }
+
+        HASH_INITIALIZED = true;
+        println!("Hashing tables generated!");
+    }
+}
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Position {
@@ -32,33 +66,48 @@ pub struct Position {
     pub castling_stack: Vec<CastleRights>,
     pub kings: [usize; 2],
     pub hash: u64,
+    pub hash_stack: Vec<u64>,
 }
 
-pub static mut HASH_INITIALIZED: bool = false;
-pub static mut HASH_BOARD: [[u64; 128]; 13] = [[0; 128]; 13];
-pub static mut HASH_TO_MOVE: [u64; 2] = [0; 2];
-pub static mut HASH_EN_PASSANT: [u64; 128] = [0; 128];
-
 impl Position {
+    pub fn en_passant_to_hash(en_passant: Option<usize>) -> u64 {
+        unsafe {
+            match en_passant {
+                None => HASH_EN_PASSANT[0],
+                Some(ep_field) => HASH_EN_PASSANT[ep_field],
+            }
+        }
+    }
+
     fn initial_hash(board: &Board, to_move: Player, castle_rights: &CastleRights, en_passant: Option<usize>) -> u64 {
         unsafe {
             if !HASH_INITIALIZED {
-                panic!("HASH NOT INITIALIZED");
+                println!("HASH NOT INITIALIZED");
+                initialize_hash();
             }
+
             let mut h = 0;
+
             for &i in INDEXES88.iter() {
                 if board[i] != EMPTY {
-                    h ^= HASH_BOARD[i][(board[i] + 6) as usize];
+                    h ^= HASH_BOARD[(board[i] + 6) as usize][i];
                 }
             }
+
             h ^= HASH_TO_MOVE[to_move as usize];
 
-            // TODO: change castling rights into a more efficient repr
-
-            match en_passant {
-                None => h ^= HASH_EN_PASSANT[0],
-                Some(ep_field) => h ^= HASH_EN_PASSANT[ep_field],
+            for &player in [WHITE, BLACK].iter() {
+                for &direction in [KINGSIDE, QUEENSIDE].iter() {
+                    if castle_rights[player][direction] {
+                        h ^= HASH_CASTLING[player][direction];
+                    }
+                }
             }
+
+            h ^= Position::en_passant_to_hash(en_passant);
+
+            println!("hash = {:10x}", h);
+
             h
         }
     }
@@ -72,7 +121,7 @@ impl Position {
         full_moves: u32,
         kings: [usize; 2]
     ) -> Position {
-        let hash = 0; //Position::initial_hash(&board, to_move, &castle_rights, en_passant);
+        let hash = Position::initial_hash(&board, to_move, &castle_rights, en_passant);
         Position {
             board,
             to_move,
@@ -86,6 +135,7 @@ impl Position {
             castling_stack: vec![],
             kings,
             hash,
+            hash_stack: vec![],
         }
     }
 

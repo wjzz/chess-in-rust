@@ -35,6 +35,14 @@ impl Position {
             return Err(format!("Can't capture own piece at {}", dest));
         }
 
+        // update the undo stack
+        self.hash_stack.push(self.hash);
+        self.castling_stack.push(self.castle_rights.clone());
+        self.captures.push(self.board[dest]);
+        self.ep_stack.push(self.en_passant);
+        let prev_en_passant_flag = self.en_passant;
+
+        // update king locations
         if piece == Piece::King {
             self.kings[color as usize] = dest;
         }
@@ -51,17 +59,28 @@ impl Position {
             }
         }
 
-        self.castling_stack.push(self.castle_rights.clone());
-        self.captures.push(self.board[dest]);
-
         if self.board[dest] != EMPTY {
+            unsafe {
+                self.hash ^= HASH_BOARD[(self.board[dest] + 6) as usize][dest];
+            }
+
             let dest = index2coord(dest);
             let opp = opponent as usize;
 
             if (opp == WHITE && dest == "A1") || (opp == BLACK && dest == "A8") {
+                if self.castle_rights[opp][QUEENSIDE] {
+                    unsafe {
+                        self.hash ^= HASH_CASTLING[opp][QUEENSIDE];
+                    }
+                }
                 self.castle_rights[opp][QUEENSIDE] = false;
             }
             if (opp == WHITE && dest == "H1") || (opp == BLACK && dest == "H8") {
+                if self.castle_rights[opp][KINGSIDE] {
+                    unsafe {
+                        self.hash ^= HASH_CASTLING[opp][KINGSIDE];
+                    }
+                }
                 self.castle_rights[opp][KINGSIDE] = false;
             }
         }
@@ -71,17 +90,21 @@ impl Position {
             Some(piece) => piece,
         };
 
-
-        self.ep_stack.push(self.en_passant);
-        let prev_en_passant_flag = self.en_passant;
-
         // if we take en passant, we have to clear another square
         if piece == Piece::Pawn && prev_en_passant_flag.is_some() {
             let ep_dest = prev_en_passant_flag.unwrap();
             if dest == ep_dest {
                 let clear_row = index2rowcol(src).row;
                 let clear_col = index2rowcol(dest).col;
-                self.board[rowcol2index(clear_row, clear_col)] = EMPTY;
+
+                let opp_pawn_index = rowcol2index(clear_row, clear_col);
+                let opp_pawn = self.board[opp_pawn_index];
+
+                self.board[opp_pawn_index] = EMPTY;
+
+                unsafe {
+                    self.hash ^= HASH_BOARD[(opp_pawn + 6) as usize][opp_pawn_index];
+                }
             }
         }
 
@@ -99,15 +122,34 @@ impl Position {
             let col = color as usize;
 
             if piece == Piece::King {
+                unsafe {
+                    if self.castle_rights[col][KINGSIDE] {
+                        self.hash ^= HASH_CASTLING[col][KINGSIDE];
+                    }
+                    if self.castle_rights[col][QUEENSIDE] {
+                        self.hash ^= HASH_CASTLING[col][QUEENSIDE];
+                    }
+                }
+
                 self.castle_rights[col][KINGSIDE] = false;
                 self.castle_rights[col][QUEENSIDE] = false;
             } else {
                 // rook
 
                 if (col == WHITE && src == "A1") || (col == BLACK && src == "A8") {
+                    unsafe {
+                        if self.castle_rights[col][QUEENSIDE] {
+                            self.hash ^= HASH_CASTLING[col][QUEENSIDE];
+                        }
+                    }
                     self.castle_rights[col][QUEENSIDE] = false;
                 }
                 if (col == WHITE && src == "H1") || (col == BLACK && src == "H8") {
+                    unsafe {
+                        if self.castle_rights[col][KINGSIDE] {
+                            self.hash ^= HASH_CASTLING[col][KINGSIDE];
+                        }
+                    }
                     self.castle_rights[col][KINGSIDE] = false;
                 }
             }
@@ -115,25 +157,50 @@ impl Position {
 
         // check if move is castling
         if intmove_is_castle(mv) || (piece == Piece::King && (src as i32 - dest as i32).abs() == 2) {
-            let (rook_src, rook_dest) = self.rook_position_castling(mv);
+            // TODO: remove the coords here
+            let (rook_src_coord, rook_dest_coord) = self.rook_position_castling(mv);
+
+            let rook_src = coord2index(rook_src_coord);
+            let rook_dest = coord2index(rook_dest_coord);
+
             let rook_piece = boardcell_encode(color, Piece::Rook);
-            assert_eq!(rook_piece, self.board[coord2index(rook_src)]);
+            assert_eq!(rook_piece, self.board[rook_src]);
 
             self.castle_rights[color as usize][KINGSIDE] = false;
             self.castle_rights[color as usize][QUEENSIDE] = false;
 
-            self.board[coord2index(rook_src)] = EMPTY;
-            self.board[coord2index(rook_dest)] = rook_piece;
+            self.board[rook_src] = EMPTY;
+            self.board[rook_dest] = rook_piece;
+
+            unsafe {
+                self.hash ^= HASH_CASTLING[color as usize][KINGSIDE];
+                self.hash ^= HASH_CASTLING[color as usize][QUEENSIDE];
+
+                self.hash ^= HASH_BOARD[(rook_piece + 6) as usize][rook_src];
+                self.hash ^= HASH_BOARD[(rook_piece + 6) as usize][rook_dest];
+            }
         }
 
         // make the actual changes
+        let new_boardpiece = boardcell_encode(color, new_piece);
         self.board[src] = EMPTY;
-        self.board[dest] = boardcell_encode(color, new_piece);
+        self.board[dest] = new_boardpiece;
         self.to_move = color.opposite();
         self.en_passant = en_passant_flag;
 
         if color == Player::Black {
             self.full_moves += 1;
+        }
+
+        unsafe {
+            self.hash ^= HASH_BOARD[(boardpiece + 6) as usize][src];
+            self.hash ^= HASH_BOARD[(new_boardpiece + 6) as usize][dest];
+
+            self.hash ^= HASH_TO_MOVE[color as usize];
+            self.hash ^= HASH_TO_MOVE[1 - (color as usize)];
+
+            self.hash ^= Position::en_passant_to_hash(self.en_passant);
+            self.hash ^= Position::en_passant_to_hash(en_passant_flag);
         }
 
         Ok(())
@@ -166,7 +233,6 @@ impl Position {
             }
             player_piece => boardcell_piece(player_piece),
         };
-
 
         if piece == Piece::King {
             self.kings[color as usize] = src;
@@ -230,6 +296,8 @@ impl Position {
         if color == Player::Black {
             self.full_moves -= 1;
         }
+
+        self.hash = self.hash_stack.pop().unwrap();
 
         self.half_moves = self.half_moves_stack.pop().unwrap();
 
