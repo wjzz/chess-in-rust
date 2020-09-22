@@ -1,7 +1,5 @@
 use super::super::position::*;
 
-use std::time;
-
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
@@ -31,7 +29,9 @@ fn eval_position(pos: &Position) -> f64 {
     result
 }
 
-fn negamax(pos: &mut Position, depth: i32) -> f64 {
+static mut BEST_MOVE: Option<IntMove> = None;
+
+fn negamax(pos: &mut Position, level: i32, depth: i32) -> f64 {
     unsafe {
         VISITED_NODES += 1;
     }
@@ -48,39 +48,35 @@ fn negamax(pos: &mut Position, depth: i32) -> f64 {
     let moves = pos.legal_moves();
     let mut best = -10000000.0;
     for &mv in moves.iter() {
-        // let mut pos2 = pos.clone();
-        // pos2.make_move(mv).unwrap();
-        // let val = -negamax(&pos2, depth - 1);
         pos.make_move(mv).unwrap();
-        let val = -negamax(&mut *pos, depth - 1);
+        let val = -negamax(&mut *pos, level+1, depth - 1);
         pos.unmake_move(mv).unwrap();
 
         if val > best {
             best = val;
+
+            if level == 0 {
+                unsafe {
+                    BEST_MOVE = Some(mv);
+                }
+            }
+
         }
     }
     best
 }
 
-pub fn best_move_negamax(pos: &mut Position, depth: i32) -> IntMove {
-    let moves = pos.legal_moves();
-    let mut best = 0.0;
-    let mut best_index = 0;
-    for (index, mv) in moves.iter().enumerate() {
-        unsafe {
-            VISITED_NODES += 1;
-        }
-        pos.make_move(*mv).unwrap();
-        let val = -negamax(&mut *pos, depth - 1);
-        pos.unmake_move(*mv).unwrap();
+pub fn negamax_top(pos: &mut Position, depth: i32) -> (IntMove, f64) {
+    unsafe { BEST_MOVE = None; }
 
-        if val > best || index == 0 {
-            best = val;
-            best_index = index;
-        }
-    }
-    moves[best_index]
+    let val = negamax(&mut *pos, 0, depth);
+
+    let best_move = unsafe {
+        BEST_MOVE.unwrap()
+    };
+    return (best_move, val);
 }
+
 
 // function negamax(node, depth, α, β, color) is
 //     if depth = 0 or node is a terminal node then
@@ -99,13 +95,12 @@ pub fn best_move_negamax(pos: &mut Position, depth: i32) -> IntMove {
 // (* Initial call for Player A's root node *)
 // negamax(rootNode, depth, −∞, +∞, 1)
 
-static mut ALPHA_BETA_BEST_MOVE: Option<IntMove> = None;
-static mut RESULT_VEC: Vec<f64> = vec![];
-static mut ORDERING: Vec<IntMove> = vec![];
+// static mut RESULT_VEC: Vec<f64> = vec![];
+// static mut ORDERING: Vec<IntMove> = vec![];
 
 // static mut PV: Vec<IntMove> = vec![];
 
-fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> (f64, Option<String>) {
+fn alphabeta(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> (f64, Option<String>) {
     unsafe {
         VISITED_NODES += 1;
     }
@@ -127,7 +122,7 @@ fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, bet
 
     for &mv in moves.iter() {
         pos.make_move(mv).unwrap();
-        let (val, best_reply) = alphabeta_negamax(&mut *pos, level+1, depth - 1, -beta, -alpha);
+        let (val, best_reply) = alphabeta(&mut *pos, level+1, depth - 1, -beta, -alpha);
         let val = -val;
         pos.unmake_move(mv).unwrap();
 
@@ -136,7 +131,7 @@ fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, bet
             pv = intmove_to_uci_ascii(mv) + " " + &best_reply.unwrap_or(String::from(""));
             if level == 0 {
                 unsafe {
-                    ALPHA_BETA_BEST_MOVE = Some(mv);
+                    BEST_MOVE = Some(mv);
                 }
             }
         }
@@ -149,15 +144,28 @@ fn alphabeta_negamax(pos: &mut Position, level: i32, depth: i32, alpha: f64, bet
     (best, Some(pv))
 }
 
+pub fn alphabeta_top(pos: &mut Position, depth: i32) -> (IntMove, f64) {
+    unsafe { BEST_MOVE = None; }
+
+    let (val, pv) = alphabeta(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
+
+    let best_move = unsafe {
+        BEST_MOVE.unwrap()
+    };
+    return (best_move, val);
+}
+
 pub fn best_move_iterative_deepening(pos: &mut Position, depth: i32) -> IntMove {
 
     for d in 1..=depth {
         let start = std::time::Instant::now();
         unsafe {
+            // TODO: we may want to use this info later for move ordering
+            BEST_MOVE = None;
             VISITED_NODES = 0;
         }
 
-        let (val, pv) = alphabeta_negamax(&mut *pos, 0, d, -1_000_000.0, 1_000_000.0);
+        let (val, pv) = alphabeta(&mut *pos, 0, d, -1_000_000.0, 1_000_000.0);
 
         let cp = (100.0 * val) as i32;
         let nodes = unsafe { VISITED_NODES };
@@ -169,7 +177,7 @@ pub fn best_move_iterative_deepening(pos: &mut Position, depth: i32) -> IntMove 
         // 		info score cp 13  depth 1 nodes 13 time 15 pv f1b5
     }
     let best_move = unsafe {
-        ALPHA_BETA_BEST_MOVE.unwrap()
+        BEST_MOVE.unwrap()
     };
     return best_move;
 }
@@ -229,7 +237,7 @@ fn pvs(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64
         if val > alpha {
             if level == 0 {
                 unsafe {
-                    ALPHA_BETA_BEST_MOVE = Some(mv);
+                    BEST_MOVE = Some(mv);
                 }
             }
         }
@@ -246,7 +254,7 @@ fn pvs(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64
 pub fn best_move_pvs(pos: &mut Position, depth: i32) -> (IntMove, f64) {
     let val = pvs(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
     let best_move = unsafe {
-        ALPHA_BETA_BEST_MOVE.unwrap()
+        BEST_MOVE.unwrap()
     };
     return (best_move, val);
 }
