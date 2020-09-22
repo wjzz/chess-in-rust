@@ -286,25 +286,27 @@ PVS d = 4            | c6d5 |      40431 |    2.41s | 17 knps
 **Add a smarter is-king-in-check checker**
 
 Benchmarking position rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-Negamax d = 3        | b1a3 |       9342 | 142.50ms | 66 knps
-Negamax d = 4        | b1a3 |     206623 |    3.33s | 62 knps
-AlphaBeta d = 4      | h2h4 |       3036 |  50.14ms | 61 knps
 AlphaBeta d = 5      | b2b3 |      44399 | 704.70ms | 63 knps
-PVS d = 4            | b1a3 |       2302 |  37.47ms | 61 knps
 PVS d = 5            | b2b3 |      41172 | 649.12ms | 63 knps
 
 Benchmarking position rnbqk1nr/3p1ppp/1p1P4/p3p3/PbB5/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 1
-Negamax d = 3        | d8h4 |      33890 | 897.31ms | 38 knps
-Negamax d = 4        | f7f6 |    1478005 |   29.57s | 50 knps
-AlphaBeta d = 4      | g8f6 |     207589 |    4.12s | 50 knps
 AlphaBeta d = 5      | d8f6 |    1053922 |   28.35s | 37 knps
-PVS d = 4            | f7f6 |     170614 |    3.27s | 52 knps
 PVS d = 5            | d8f6 |     454963 |   12.96s | 35 knps
 
 Benchmarking position rnbqk1nr/3p1ppp/1pp1p3/p2P4/PbB1P3/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 11
-Negamax d = 3        | c6d5 |      42460 |    1.04s | 41 knps
-Negamax d = 4        | c6d5 |    1681549 |   37.38s | 45 knps
-AlphaBeta d = 4      | e6d5 |      24686 | 595.59ms | 41 knps
 AlphaBeta d = 5      | c6d5 |     975253 |   26.83s | 36 knps
-PVS d = 4            | c6d5 |      40451 | 913.13ms | 44 knps
 PVS d = 5            | c6d5 |     500694 |   13.75s | 36 knps
+
+**Remove double move generation in searchers**
+
+Benchmarking position rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+AlphaBeta d = 5      | b2b3 |      44344 | 345.71ms | 128 knps
+PVS d = 5            | b2b3 |      41172 | 315.19ms | 131 knps
+
+Benchmarking position rnbqk1nr/3p1ppp/1p1P4/p3p3/PbB5/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 1
+AlphaBeta d = 5      | d8f6 |    1129284 |   14.32s | 79 knps
+PVS d = 5            | d8f6 |     454963 |    5.76s | 79 knps
+
+Benchmarking position rnbqk1nr/3p1ppp/1pp1p3/p2P4/PbB1P3/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 11
+AlphaBeta d = 5      | c6d5 |     537380 |    6.94s | 77 knps
+PVS d = 5            | c6d5 |     500694 |    6.62s | 76 knps

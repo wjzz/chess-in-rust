@@ -1,32 +1,38 @@
-use super::super::position::*;
-
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-pub static mut VISITED_NODES: i32 = 0;
+use super::super::position::*;
 
-fn eval_piece(piece: Piece) -> f64 {
-    match piece {
-        Piece::Pawn => 1.0,
-        Piece::Knight => 3.0,
-        Piece::Bishop => 3.5,
-        Piece::Rook => 5.0,
-        Piece::Queen => 9.0,
-        Piece::King => 0.0,
+pub static mut VISITED_NODES: u64 = 0;
+
+pub const CHECKMATE_EV: f64 = 10000.0;
+
+const MATERIAL_VAL: [f64; 13] = [
+     0.0 , // B_KING
+    -9.0, // B_QUEEN
+    -5.0, // B_ROOK
+    -3.5, // B_BISHOP
+    -3.0, // B_KNIGHT
+    -1.0, // B_PAWN
+    0.0, // EMPTY
+    1.0, // W_PAWN
+    3.0, // W_KNIGHT
+    3.5, // W_BISHOP
+    5.0, // W_ROOK
+    9.0, // W_QUEEN
+    0.0, // W_KING
+];
+
+fn eval_material(pos: &Position) -> f64 {
+    let mut ev = 0.0;
+    for i in INDEXES88.iter() {
+        ev += MATERIAL_VAL[(pos.board[*i] + 6) as usize];
     }
+    if pos.to_move == Player::White { ev } else { -ev }
 }
 
 fn eval_position(pos: &Position) -> f64 {
-    let mut result = 0.0;
-    for &field in pos.board.iter() {
-        if field != EMPTY {
-            let (player, piece) = boardcell_destruct(field);
-            let val = eval_piece(piece);
-            let sign = if pos.to_move == player { 1.0 } else { -1.0 };
-            result += val * sign;
-        }
-    }
-    result
+    return eval_material(&pos);
 }
 
 static mut BEST_MOVE: Option<IntMove> = None;
@@ -36,16 +42,20 @@ fn negamax(pos: &mut Position, level: i32, depth: i32) -> f64 {
         VISITED_NODES += 1;
     }
 
-    if pos.is_checkmate() {
-        return -10000.0;
-    } else if pos.is_stalemate() {
-        return 0.0;
+    let moves = pos.legal_moves();
+
+    if moves.len() == 0 {
+        if pos.is_king_in_check(pos.to_move) {
+            return -CHECKMATE_EV;
+        } else {
+            return 0.0;
+        }
     }
+
     if depth == 0 {
         return eval_position(&pos);
     }
 
-    let moves = pos.legal_moves();
     let mut best = -10000000.0;
     for &mv in moves.iter() {
         pos.make_move(mv).unwrap();
@@ -105,18 +115,22 @@ fn alphabeta(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) 
         VISITED_NODES += 1;
     }
 
-    if pos.is_checkmate() {
-        return (-10000.0, None);
-    } else if pos.is_stalemate() {
-        return (0.0, None);
+    let moves = pos.legal_moves();
+
+    if moves.len() == 0 {
+        if pos.is_king_in_check(pos.to_move) {
+            return (-CHECKMATE_EV, None);
+        } else {
+            return (0.0, None);
+        }
     }
+
     if depth == 0 {
         return (eval_position(&pos), None);
     }
 
     let mut alpha = alpha;
 
-    let moves = pos.legal_moves();
     let mut best = -10000000.0;
     let mut pv = String::new();
 
@@ -147,7 +161,7 @@ fn alphabeta(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) 
 pub fn alphabeta_top(pos: &mut Position, depth: i32) -> (IntMove, f64) {
     unsafe { BEST_MOVE = None; }
 
-    let (val, pv) = alphabeta(&mut *pos, 0, depth, -1_000_000.0, 1_000_000.0);
+    let (val, _pv) = alphabeta(&mut *pos, 0, depth, -CHECKMATE_EV, CHECKMATE_EV);
 
     let best_move = unsafe {
         BEST_MOVE.unwrap()
@@ -155,7 +169,9 @@ pub fn alphabeta_top(pos: &mut Position, depth: i32) -> (IntMove, f64) {
     return (best_move, val);
 }
 
-pub fn best_move_iterative_deepening(pos: &mut Position, depth: i32) -> IntMove {
+pub fn alphabeta_iterative_deepening(pos: &mut Position, depth: i32) -> (IntMove, f64) {
+    let mut best_val = 0.0;
+    let mut total_nodes = 0u64;
 
     for d in 1..=depth {
         let start = std::time::Instant::now();
@@ -165,21 +181,29 @@ pub fn best_move_iterative_deepening(pos: &mut Position, depth: i32) -> IntMove 
             VISITED_NODES = 0;
         }
 
-        let (val, pv) = alphabeta(&mut *pos, 0, d, -1_000_000.0, 1_000_000.0);
+        let (val, pv) = alphabeta(&mut *pos, 0, d, -CHECKMATE_EV, CHECKMATE_EV);
+        best_val = val;
 
         let cp = (100.0 * val) as i32;
         let nodes = unsafe { VISITED_NODES };
+        total_nodes += nodes;
         // let pv: Vec<String> = unsafe { PV.iter().map(|mv| intmove_to_uci_ascii(*mv)).collect() };
         // let pv = pv.join(" ");
 
         let pv = pv.unwrap_or(String::from(""));
-        println!("info score cp {} depth {} nodes {} time {} pv {}", cp, d, nodes, start.elapsed().as_millis(), pv);
+        // println!("info score cp {} depth {} nodes {} time {} pv {}", cp, d, nodes, start.elapsed().as_millis(), pv);
+
         // 		info score cp 13  depth 1 nodes 13 time 15 pv f1b5
+
+        if val == CHECKMATE_EV {
+            break;
+        }
     }
+    unsafe { VISITED_NODES = total_nodes; }
     let best_move = unsafe {
         BEST_MOVE.unwrap()
     };
-    return best_move;
+    return (best_move, best_val);
 }
 
 // function pvs(node, depth, α, β, color) is
@@ -203,18 +227,21 @@ fn pvs(pos: &mut Position, level: i32, depth: i32, alpha: f64, beta: f64) -> f64
         VISITED_NODES += 1;
     }
 
-    if pos.is_checkmate() {
-        return -10000.0;
-    } else if pos.is_stalemate() {
-        return 0.0;
+    let moves = pos.legal_moves();
+
+    if moves.len() == 0 {
+        if pos.is_king_in_check(pos.to_move) {
+            return -CHECKMATE_EV;
+        } else {
+            return 0.0;
+        }
     }
+
     if depth == 0 {
         return eval_position(&pos);
     }
 
     let mut alpha = alpha;
-
-    let moves = pos.legal_moves();
 
     // TODO: add ORDERING
     let mut first_node = true;

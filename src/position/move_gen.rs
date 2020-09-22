@@ -245,7 +245,7 @@ impl Position {
             .collect()
     }
 
-    pub fn is_king_in_check_fast(&self, player: Player) -> bool {
+    pub fn is_king_in_check(&self, player: Player) -> bool {
         let king_coord = self.kings[player as usize];
         let opp_piece_color = if player == Player::White { -1 } else { 1 };
 
@@ -309,15 +309,15 @@ impl Position {
         return false;
     }
 
-    pub fn is_king_in_check(&self, player: Player) -> bool {
-        let king_coord = self.kings[player as usize];
-        for mv in self.moves_by(player.opposite()).iter() {
-            if intmove_dest(*mv) == king_coord {
-                return true;
-            }
-        }
-        return false;
-    }
+    // pub fn is_king_in_check(&self, player: Player) -> bool {
+    //     let king_coord = self.kings[player as usize];
+    //     for mv in self.moves_by(player.opposite()).iter() {
+    //         if intmove_dest(*mv) == king_coord {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     fn fields_to_check_castling(&self, mv: IntMove) -> Vec<Coord> {
         let dest = index2coord(intmove_dest(mv));
@@ -374,13 +374,13 @@ impl Position {
         let mut result = vec![];
         for mv in moves.iter() {
             if intmove_is_castle(*mv) {
-                if !self.is_king_in_check_fast(self.to_move) && self.can_safely_castle(*mv) {
+                if !self.is_king_in_check(self.to_move) && self.can_safely_castle(*mv) {
                     result.push(*mv);
                 }
             } else {
                 let to_move = self.to_move;
                 self.make_move(*mv).unwrap();
-                if !self.is_king_in_check_fast(to_move) {
+                if !self.is_king_in_check(to_move) {
                     result.push(*mv);
                 }
                 self.unmake_move(*mv).unwrap();

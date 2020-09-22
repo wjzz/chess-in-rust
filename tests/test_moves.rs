@@ -555,7 +555,7 @@ mod test_moves {
 
         for &(fen, result) in fens.iter() {
             let pos = Position::from_fen(fen);
-            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+            assert_eq!(result, pos.is_king_in_check(pos.to_move));
         }
     }
 
@@ -568,7 +568,7 @@ mod test_moves {
 
         for &(fen, result) in fens.iter() {
             let pos = Position::from_fen(fen);
-            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+            assert_eq!(result, pos.is_king_in_check(pos.to_move));
         }
     }
 
@@ -581,7 +581,7 @@ mod test_moves {
 
         for &(fen, result) in fens.iter() {
             let pos = Position::from_fen(fen);
-            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+            assert_eq!(result, pos.is_king_in_check(pos.to_move));
         }
     }
 
@@ -594,7 +594,7 @@ mod test_moves {
 
         for &(fen, result) in fens.iter() {
             let pos = Position::from_fen(fen);
-            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+            assert_eq!(result, pos.is_king_in_check(pos.to_move));
         }
     }
 
@@ -607,7 +607,7 @@ mod test_moves {
 
         for &(fen, result) in fens.iter() {
             let pos = Position::from_fen(fen);
-            assert_eq!(result, pos.is_king_in_check_fast(pos.to_move));
+            assert_eq!(result, pos.is_king_in_check(pos.to_move));
         }
     }
 

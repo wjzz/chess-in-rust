@@ -13,10 +13,10 @@ impl MoveSearcher {
     pub fn bestmove(self: &Self, pos: &mut Position) -> IntMove {
         match self {
             MoveSearcher::Negamax(depth) =>
-                alphabeta_top(pos, *depth).0,
+                negamax_top(pos, *depth).0,
 
             MoveSearcher::AlphaBeta(depth) =>
-                best_move_iterative_deepening(pos, *depth),
+                alphabeta_iterative_deepening(pos, *depth).0,
 
             MoveSearcher::PVS(depth) =>
                 best_move_pvs(pos, *depth).0,

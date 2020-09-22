@@ -8,6 +8,9 @@ bot:
 bench:
 	@cargo run --bin benchmark --release
 
+cmp:
+	@cargo run --bin cmp_search_alg --release
+
 main:
 	@cargo run --bin rust-chess --release
 

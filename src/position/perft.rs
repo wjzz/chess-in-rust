@@ -138,7 +138,7 @@ impl Position {
                 while i < moves.len() {
                     let mv = moves[i];
 
-                    let start = std::time::Instant::now();
+                    // let start = std::time::Instant::now();
 
                     let mut pos2 = pos.clone();
                     pos2.make_move(mv).unwrap();

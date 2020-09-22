@@ -147,4 +147,7 @@ fn main() {
     }
     let result_str = if all_good { Colour::Green.bold().paint("TEST SUITE SUCCEED") } else { Colour::Red.bold().paint("TEST SUITE FAILED") };
     println!("{}", result_str);
+    if !all_good {
+        std::process::exit(1);
+    }
 }

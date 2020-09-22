@@ -7,6 +7,7 @@ use rust_chess::*;
 enum MoveSearcher {
     Negamax,
     AlphaBeta,
+    AlphaBetaIter,
     PVS,
 }
 
@@ -22,6 +23,9 @@ impl MoveSearcher {
             AlphaBeta =>
                 alphabeta_top(pos, depth),
 
+            AlphaBetaIter =>
+                alphabeta_iterative_deepening(pos, depth),
+
             PVS =>
                 best_move_pvs(pos, depth),
         }
@@ -33,6 +37,8 @@ impl MoveSearcher {
                 format!("Negamax"),
             AlphaBeta =>
                 format!("AlphaBeta"),
+            AlphaBetaIter =>
+                format!("AlphaBeta ItD"),
             PVS =>
                format!("PVS"),
         }
@@ -41,8 +47,6 @@ impl MoveSearcher {
 
 fn main() {
     let positions = [
-        // random dynamic pos from chessbase blog
-        "r1b2r2/pp4k1/1bpp1q1p/5ppQ/2B2NN1/2P5/P5PP/R1B1R2K b - - 0 22",
         // mate in 3
         "2rk2r1/3p2rr/8/1Q3Q2/6B1/8/3Q4/K7 w - - 0 1",
         // scholar's mate
@@ -52,6 +56,8 @@ fn main() {
 
         // starting
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        // random dynamic pos from chessbase blog
+        "r1b2r2/pp4k1/1bpp1q1p/5ppQ/2B2NN1/2P5/P5PP/R1B1R2K b - - 0 22",
         // dynamic position, black in trouble
         "rnbqk1nr/3p1ppp/1p1P4/p3p3/PbB5/2N2Q2/1PPBNPPP/2KRR3 b kq - 0 1",
         // start of middle game
@@ -59,9 +65,10 @@ fn main() {
         ];
 
     let searchers = [
-        Negamax,
-        AlphaBeta,
+        // Negamax,
         PVS,
+        AlphaBeta,
+        AlphaBetaIter,
     ];
 
     for (i, fen) in positions.iter().enumerate() {
@@ -88,7 +95,7 @@ fn main() {
                 let nodes_per_sec = visited_nodes_safe as f64 / elapsed.as_secs_f64() / 1000.0;
                 let elapsed_str = format!("{:.2?}", elapsed);
                 println!(
-                    "{:10} d={} | {} | {:.1} | {:10} | {:>8} | {:.0} knps",
+                    "{:15} d={} | {} | {:.1} | {:10} | {:>8} | {:.0} knps",
                     searcher.name(), depth, move_ascii, ev, visited_nodes_safe, elapsed_str, nodes_per_sec
                 );
             }
