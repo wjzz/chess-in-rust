@@ -19,7 +19,7 @@ Priority TODOs:
 - [x] implement faster board indexing, don't use `Coord`s everywhere
 - [ ] `draw by insufficent material` checking
 - [ ] draw by repetition
-- [ ] position hash
+- [x] position hash
 - [ ] king in check flag
 
 Bot TODOs:
