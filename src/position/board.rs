@@ -121,6 +121,7 @@ impl Position {
         full_moves: u32,
         kings: [usize; 2]
     ) -> Position {
+        assert_eq!(FIELDS88, board.len());
         let hash = Position::initial_hash(&board, to_move, &castle_rights, en_passant);
         Position {
             board,

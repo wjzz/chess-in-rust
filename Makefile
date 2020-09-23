@@ -11,6 +11,9 @@ bench:
 cmp:
 	@cargo run --bin cmp_search_alg --release
 
+end:
+	@cargo run --bin endgame --release
+
 main:
 	@cargo run --bin rust-chess --release
 
