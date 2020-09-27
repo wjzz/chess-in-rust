@@ -30,3 +30,12 @@ search deeper to win.
 - Changed the representation of the castling rights to prepare for hashing, got a nice 33% speedup for free!
 - Implemented zobrist hashing
 - Implemented sequential PERFT with a simple transposition table
+
+# 2020-09-23
+
+- Started working on endgame tables. For 3 pieces it's fine, but it's very bad to do it directly for 4 pieces. I managed to solve k+q vs k and k+r vs k. k+p vs k needs some care - we can't put the pawn anywhere (promotion and pawns don't start on the bottom)
+
+# 2020-09-27
+
+- Implement a quick and dirty `go infinite`
+- Try to add the endgame table to the bot. K+Q vs K is now a nice win, but K+R still needs to be added.

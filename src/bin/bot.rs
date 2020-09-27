@@ -1,7 +1,7 @@
 use rust_chess::move_search::*;
 use rust_chess::position::*;
 
-fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32) -> String {
+fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32, table: &TABLE) -> String {
     let fen = if fen == "startpos" {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     } else {
@@ -16,6 +16,11 @@ fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32) -> String {
         // eprint!("{} ", intmove_to_uci_ascii(mv));
         pos.make_move(mv).unwrap();
     }
+
+    if let Some(&(res, depth, mv)) = table.get(&pos.hash) {
+        println!("Found position in the endgame database. After {} moves the result is {}", depth, res);
+        return intmove_to_uci_ascii(mv);
+    }
     // eprintln!();
 
     let time_left = if pos.to_move == Player::White { wtime } else { btime };
@@ -24,11 +29,11 @@ fn play_move(fen: &str, moves: &[&str], wtime: i32, btime: i32) -> String {
     eprintln!("FEN: {}", final_fen);
     let mv = if time_left > 60 * 1000 {
         let (mv, _) = alphabeta_iterative_deepening(&mut pos, 5, true);
-        // let (mv, val) = best_move_pvs(&mut pos, 5);
-        // let mv = best_move_negamax(&mut pos, 3);
-        // let mv = choose_move(&pos);
-        // eprintln!("MOVE: {} EVAL: {:.1}", intmove_to_uci_ascii(mv), val);
         mv
+    } else if wtime == 0 && btime == 0 {
+        alphabeta_iterative_deepening_infinite(&mut pos, true);
+        panic!("This is infinite!")
+        // infinite
     } else {
         let mv = choose_move(&mut pos);
         // eprintln!("MOVE: {}", intmove_to_uci_ascii(mv));
@@ -52,6 +57,10 @@ fn main() {
     println!("id name rust-chess");
     println!("id author Wojciech Jedynak");
     println!("usiok");
+
+    let mut table = endgame::initialize_table();
+    endgame::generate_endgame_table(&mut table);
+
     loop {
         let line = read_line();
 
@@ -101,11 +110,15 @@ fn main() {
                 let btime: i32 = parts2[4].parse().unwrap();
                 (wtime, btime)
             } else {
-                assert_eq!(parts2[1], "movetime");
-                let time: i32 = parts2[2].parse().unwrap();
-                (time, time)
+                if parts2[1] == "movetime" {
+                    let time: i32 = parts2[2].parse().unwrap();
+                    (time, time)
+                } else {
+                    assert_eq!(parts2[1], "infinite");
+                    (0, 0)
+                }
             };
-            let bot_move = play_move(&fen, moves, wtime, btime);
+            let bot_move = play_move(&fen, moves, wtime, btime, &table);
             println!("bestmove {}", bot_move);
         } else {
             if line != "" {

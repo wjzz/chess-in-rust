@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use rust_chess::position::*;
+use super::super::position::*;
 
 pub type RESULT = i32;
 const WIN_W: RESULT = 1;
@@ -72,50 +72,7 @@ pub fn make_position_kq_vs_q(k1: usize, k2: usize, q: usize, pl: Player) -> Opti
     }
 }
 
-
-pub fn make_position_kq_vs_p(k1: usize, k2: usize, q: usize, pl: Player) -> Option<Position> {
-    let mut board = vec![0; FIELDS88];
-    let castle_rights = [[false; 2]; 2];
-
-    board[k1] = W_KING;
-    board[k2] = B_KING;
-    board[q] = W_PAWN;
-
-    let pos = Position::create(board, pl, None, castle_rights, 0, 0, [k1, k2]);
-    if !pos.is_king_in_check(pl.opposite()) {
-        Some(pos)
-    } else {
-        None
-    }
-}
-
-// pub fn generate_knb_vs_k_only() -> Vec<Position>{
-//     let mut positions = vec![];
-
-//     for &(k1, k2, n) in generate_index_triples().iter() {
-//         for &b in INDEXES88.iter() {
-//             if k1 != b && k2 != b && n != b {
-//                 for &pl in PLAYERS.iter() {
-//                     let mut board = vec![0; FIELDS88];
-//                     let castle_rights = [[false; 2]; 2];
-
-//                     board[k1] = W_KING;
-//                     board[k2] = B_KING;
-//                     board[n] = W_KNIGHT;
-//                     board[b] = W_BISHOP;
-
-//                     let pos = Position::create(board, pl, None, castle_rights, 0, 0, [k1, k2]);
-//                     if !pos.is_king_in_check(pl.opposite()) {
-//                         positions.push(pos);
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     positions
-// }
-
-pub fn analyze(table: &mut TABLE, sel: i32) {
+pub fn analyze(table: &mut TABLE) {
     let mut analyzed = 0;
     let mut max_count = 0;
 
@@ -137,12 +94,8 @@ pub fn analyze(table: &mut TABLE, sel: i32) {
                     for &q in INDEXES88.iter() {
                         if k1 != q && k2 != q {
                             for &pl in PLAYERS.iter() {
-                                let spos = if sel == 0 {
-                                    make_position_kq_vs_q(k1, k2, q, pl)
-                                } else {
-                                    make_position_kq_vs_p(k1, k2, q, pl)
-                                };
-                                if let Some(mut pos) =  spos {
+                                let spos = make_position_kq_vs_q(k1, k2, q, pl);
+                                if let Some(mut pos) = spos {
                                     if iteration == 0 {
                                         done.push(false);
                                     }
@@ -229,38 +182,12 @@ pub fn analyze(table: &mut TABLE, sel: i32) {
     println!("  Black wins: {:6}", stats[(1 + WIN_B) as usize]);
 }
 
-pub fn main() {
-    let mut table = HashMap::new();
-    generate_kings_only(&mut table);
-    analyze(&mut table, 0);
-    analyze(&mut table, 1);
+pub fn initialize_table() -> TABLE {
+    HashMap::new()
+}
 
-
-    println!("READY:");
-
-    // loop {
-    //     let mut buf = String::new();
-    //     std::io::stdin().read_line(&mut buf).unwrap();
-    //     buf.trim_end();
-
-    //     println!("GOT: {}", buf);
-
-    //     let pos = Position::from_fen(&buf);
-    //     let (val, count, mv) = table.get(&pos.hash).unwrap();
-
-    //     let ss = match (*val, count) {
-    //         (-1, count) => format!("Black wins in {}", count),
-    //         (0, count) => format!("It's a draw in {}", count),
-    //         (1, count) => format!("White wins in {}", count),
-    //         _ => String::from("Error"),
-    //     };
-
-    //     let mv_str = if *count != 0 {
-    //         intmove_to_uci_ascii(*mv)
-    //     } else {
-    //         "nothing (game already over)".to_string()
-    //     };
-
-    //     println!("Result = {} by playing {}", ss, mv_str);
-    // }
+pub fn generate_endgame_table(table: &mut TABLE) {
+    // let mut table = HashMap::new();
+    generate_kings_only(table);
+    analyze(table);
 }

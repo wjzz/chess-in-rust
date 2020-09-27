@@ -27,6 +27,10 @@ Bot TODOs:
 - [x] alpha-beta
 - [x] opening book (using python's driver and a book found somewhere)
 - [ ] ending table
+- - [x] k vs k
+- - [x] k vs k + q
+- - [x] k vs k + r
+
 
 PERFT [clone instead of unmove]: (bugs found)
 - [x] depth = 1

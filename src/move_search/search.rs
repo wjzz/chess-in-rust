@@ -179,6 +179,32 @@ pub fn alphabeta_iterative_deepening(pos: &mut Position, depth: i32, is_bot: boo
     return (best_move, best_val);
 }
 
+pub fn alphabeta_iterative_deepening_infinite(pos: &mut Position, is_bot: bool) {
+    let mut d = 1;
+
+    loop {
+        let start = std::time::Instant::now();
+        unsafe {
+            BEST_MOVE = None;
+            VISITED_NODES = 0;
+        }
+
+        let (val, pv) = alphabeta(&mut *pos, 0, d, -CHECKMATE_EV, CHECKMATE_EV);
+
+        let nodes = unsafe { VISITED_NODES };
+
+        if is_bot {
+            let cp = (100.0 * val) as i32;
+            let pv = pv.unwrap_or(String::from(""));
+            println!("info score cp {} depth {} nodes {} time {} pv {}", cp, d, nodes, start.elapsed().as_millis(), pv);
+            // 		info score cp 13  depth 1 nodes 13 time 15 pv f1b5
+        }
+
+        d += 1;
+    }
+}
+
+
 // function pvs(node, depth, α, β, color) is
 //     if depth = 0 or node is a terminal node then
 //         return color × the heuristic value of node
